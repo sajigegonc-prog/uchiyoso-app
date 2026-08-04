@@ -14,7 +14,8 @@ function ClearOnDone({ inputRef }) {
   return null
 }
 
-export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, addNpcAction, deleteNpcAction }) {
+export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, addNpcAction, deleteNpcAction, frogAction, oocMessages, oocSendAction }) {
+  const [oocOpen, setOocOpen] = useState(false) {
   const inputRef = useRef(null)
   const [open, setOpen] = useState(false)
   const [speaker, setSpeaker] = useState({ type: 'oc', id: myOcs[0]?.id, name: myOcs[0]?.name })
