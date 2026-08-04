@@ -3,9 +3,9 @@ import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
 import { sendMessage } from './actions'
 import { addNpc, deleteNpc } from './npcActions'
+import { sendOocMessage, openFrogCard } from './oocActions'
 import { lightBackLinkStyle } from '../../ocs/styles'
 import MessageForm from './MessageForm'
-import { sendOocMessage, openFrogCard } from './oocActions'
 export default async function ChatRoomPage({ params }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -98,6 +98,9 @@ export default async function ChatRoomPage({ params }) {
           myUserId={user.id}
           addNpcAction={addNpc}
           deleteNpcAction={deleteNpc}
+          frogAction={openFrogCard}
+          oocMessages={oocMessages || []}
+          oocSendAction={sendOocMessage}
         />
       ) : (
         <p style={{ fontSize: 12, color: '#8b7355', textAlign: 'center', padding: 16, flexShrink: 0 }}>あなたはこの部屋のメンバーではありません。</p>
