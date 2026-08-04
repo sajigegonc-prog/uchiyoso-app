@@ -15,15 +15,19 @@ function ClearOnDone({ inputRef }) {
 }
 
 export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, addNpcAction, deleteNpcAction, frogAction, oocMessages, oocSendAction }) {
-  const [oocOpen, setOocOpen] = useState(false) {
   const inputRef = useRef(null)
   const [open, setOpen] = useState(false)
+  const [oocOpen, setOocOpen] = useState(false)
   const [speaker, setSpeaker] = useState({ type: 'oc', id: myOcs[0]?.id, name: myOcs[0]?.name })
 
   const avatarInitial = (speaker.name || '?').charAt(0)
 
   return (
     <div style={{ position: 'relative', background: '#fff', borderTop: '2px solid #8b6a4a' }}>
+      {oocOpen && (
+        <OocPanel roomId={roomId} myUserId={myUserId} messages={oocMessages} sendAction={oocSendAction} onClose={() => setOocOpen(false)} />
+      )}
+
       {open && (
         <div style={{
           position: 'absolute', bottom: '100%', left: 0, right: 0,
@@ -131,6 +135,18 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
           }}
         >
           送信
+        </button>
+        <FrogChocolateButton roomId={roomId} action={frogAction} />
+        <button
+          type="button"
+          onClick={() => setOocOpen(true)}
+          style={{
+            flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
+            border: '2px solid #8b6a4a', background: '#fbf5e9', fontSize: 15, cursor: 'pointer',
+          }}
+          aria-label="中の人チャットを開く"
+        >
+          👤
         </button>
         <ClearOnDone inputRef={inputRef} />
       </form>
