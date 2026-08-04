@@ -44,7 +44,7 @@ export default async function ChatRoomPage({ params }) {
     .order('created_at', { ascending: true })
   const { data: messages } = await supabase
     .from('messages')
-    .select('id, content, created_at, sender_oc_id, sender_npc_id, ocs(name, icon_url), chat_room_npcs(name)')
+    .select('id, content, created_at, sender_oc_id, sender_npc_id, is_system, ocs(name, icon_url), chat_room_npcs(name)')
     .eq('room_id', roomId)
     .order('created_at', { ascending: true })
   const { data: oocMessages } = await supabase
@@ -93,6 +93,13 @@ export default async function ChatRoomPage({ params }) {
           <p style={{ fontSize: 12.5, color: '#8b7355', textAlign: 'center', marginTop: 20 }}>まだメッセージがありません。</p>
         )}
         {messages && messages.map((msg) => {
+          if (msg.is_system) {
+            return (
+              <div key={msg.id} style={{ textAlign: 'center', fontSize: 11.5, color: '#8b7355' }}>
+                {msg.content}
+              </div>
+            )
+          }
           const mine = msg.sender_oc_id === room.primary_oc_id
           const speakerName = msg.ocs?.name || msg.chat_room_npcs?.name
           const speakerIcon = msg.ocs?.icon_url || null
