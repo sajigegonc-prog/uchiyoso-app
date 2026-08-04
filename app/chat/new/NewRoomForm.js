@@ -63,8 +63,16 @@ export default function NewRoomForm({ action, ocs, friends }) {
         </div>
       </div>
 
-      {/* Step 2: 自分の別OC or フレンド招待 */}
+      {/* Step 2: 場所・時間帯、自分の別OC or フレンド招待 */}
       <div style={secStyle(step === 2)}>
+        <div style={{ marginBottom: 14 }}>
+          <label style={lightFieldLabelStyle}>場所(任意)</label>
+          <input name="location" placeholder="例:図書室3階" style={lightInputStyle} />
+        </div>
+        <div style={{ marginBottom: 14 }}>
+          <label style={lightFieldLabelStyle}>時間帯(任意)</label>
+          <input name="time_period" placeholder="例:放課後、夜" style={lightInputStyle} />
+        </div>
         {selfPlay ? (
           <div style={{ marginBottom: 14 }}>
             <label style={lightFieldLabelStyle}>一緒に参加させるOC</label>
