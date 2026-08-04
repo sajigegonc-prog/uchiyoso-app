@@ -21,6 +21,12 @@ export async function sendMessage(formData) {
     const newLocation = locationMatch[1].trim()
     await supabase.from('chat_rooms').update({ location: newLocation }).eq('id', roomId)
     await supabase.from('room_setting_logs').insert({ room_id: roomId, field: 'location', value: newLocation, changed_by: user.id })
+    await supabase.from('room_ooc_messages').insert({
+      room_id: roomId,
+      user_id: user.id,
+      content: `📍 場所が変更されました → ${newLocation}`,
+      is_system: true,
+    })
     revalidatePath(`/chat/${roomId}`)
     return
   }
@@ -28,6 +34,12 @@ export async function sendMessage(formData) {
     const newTime = timeMatch[1].trim()
     await supabase.from('chat_rooms').update({ time_period: newTime }).eq('id', roomId)
     await supabase.from('room_setting_logs').insert({ room_id: roomId, field: 'time_period', value: newTime, changed_by: user.id })
+    await supabase.from('room_ooc_messages').insert({
+      room_id: roomId,
+      user_id: user.id,
+      content: `🕐 時間帯が変更されました → ${newTime}`,
+      is_system: true,
+    })
     revalidatePath(`/chat/${roomId}`)
     return
   }
