@@ -10,19 +10,10 @@ export async function createRoom(formData) {
   const ocId = formData.get('oc_id')?.toString()
   const name = formData.get('name')?.toString().trim()
   const location = formData.get('location')?.toString().trim()
-  const situation = formData.get('situation')?.toString().trim()
   const selfPlay = formData.get('self_play')?.toString() === 'on'
   const friendId = formData.get('friend_id')?.toString()
   const extraOcIds = formData.getAll('extra_oc_ids').map((v) => v.toString()).filter(Boolean)
   if (!ocId) redirect('/chat/new')
-  const { data: room, error } = await supabase
-    .from('chat_rooms')
-    .insert({
-      name: name || null,
-      location: location || null,
-      situation: situation || null,
-      created_by: user.id,
-    })
     .select('id')
     .single()
   if (error || !room) redirect('/chat/new')
