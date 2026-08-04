@@ -9,8 +9,7 @@ export const metadata = {
 
 export default async function RootLayout({ children }) {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const user = session?.user
+  const { data: { user } } = await supabase.auth.getUser()
 
   let notifications = { chat: false, owl: false, matching: false }
   if (user) {
@@ -24,6 +23,10 @@ export default async function RootLayout({ children }) {
           *, *::before, *::after { box-sizing: border-box; }
           html, body { max-width: 100%; overflow-x: hidden; overscroll-behavior-x: none; }
           input, select, textarea { max-width: 100%; width: 100%; }
+          .chat-room-height {
+            height: calc(100vh - 60px);
+            height: calc(100dvh - 60px);
+          }
         `}</style>
       </head>
       <body style={{ margin: 0, fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f3e9d8' }}>
