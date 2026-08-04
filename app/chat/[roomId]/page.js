@@ -5,6 +5,7 @@ import { sendMessage } from './actions'
 import { addNpc, deleteNpc } from './npcActions'
 import { sendOocMessage, openFrogCard } from './oocActions'
 import { lightBackLinkStyle } from '../../ocs/styles'
+import Avatar from '@/components/Avatar'
 import MessageForm from './MessageForm'
 export default async function ChatRoomPage({ params }) {
   const supabase = await createClient()
@@ -40,7 +41,7 @@ export default async function ChatRoomPage({ params }) {
     .order('created_at', { ascending: true })
   const { data: messages } = await supabase
     .from('messages')
-    .select('id, content, created_at, sender_oc_id, sender_npc_id, ocs(name), chat_room_npcs(name)')
+    .select('id, content, created_at, sender_oc_id, sender_npc_id, ocs(name, icon_url), chat_room_npcs(name)')
     .eq('room_id', roomId)
     .order('created_at', { ascending: true })
   const { data: oocMessages } = await supabase
@@ -75,15 +76,24 @@ export default async function ChatRoomPage({ params }) {
         {messages && messages.map((msg) => {
           const mine = msg.sender_oc_id === room.primary_oc_id
           const speakerName = msg.ocs?.name || msg.chat_room_npcs?.name
+          const speakerIcon = msg.ocs?.icon_url || null
           return (
-            <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start' }}>
-              <div style={{ fontSize: 10.5, color: '#8b7355', marginBottom: 2 }}>{speakerName}</div>
-              <div style={{
-                maxWidth: '75%', padding: '9px 13px', borderRadius: 3, fontSize: 14, lineHeight: 1.5,
-                background: mine ? '#8b5a2b' : '#fff', color: mine ? '#f3e9d8' : '#241a10',
-                border: mine ? '2px solid #3d2717' : '2px solid #d8c7ac',
-              }}>
-                {msg.content}
+            <div key={msg.id} style={{
+              display: 'flex', gap: 6, alignItems: 'flex-end',
+              flexDirection: mine ? 'row-reverse' : 'row',
+            }}>
+              <Avatar name={speakerName} iconUrl={speakerIcon} size={28} />
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', maxWidth: '75%' }}>
+                {!mine && (
+                  <div style={{ fontSize: 10.5, color: '#8b7355', marginBottom: 2 }}>{speakerName}</div>
+                )}
+                <div style={{
+                  padding: '9px 13px', borderRadius: 3, fontSize: 14, lineHeight: 1.5,
+                  background: mine ? '#8b5a2b' : '#fff', color: mine ? '#f3e9d8' : '#241a10',
+                  border: mine ? '2px solid #3d2717' : '2px solid #d8c7ac',
+                }}>
+                  {msg.content}
+                </div>
               </div>
             </div>
           )
