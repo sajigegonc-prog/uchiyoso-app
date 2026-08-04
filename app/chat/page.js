@@ -12,16 +12,36 @@ export default async function ChatListPage() {
 
   const { data: memberships } = await supabase
     .from('chat_room_members')
-    .select('room_id, left_at, chat_rooms(id, name, location, deleted_at)')
+    .select('room_id, left_at, chat_rooms(id, deleted_at)')
     .eq('user_id', user.id)
     .is('left_at', null)
-  const roomsMap = new Map()
+  const roomIds = []
   for (const m of memberships || []) {
-    if (m.chat_rooms && !m.chat_rooms.deleted_at) roomsMap.set(m.chat_rooms.id, m.chat_rooms)
+    if (m.chat_rooms && !m.chat_rooms.deleted_at) roomIds.push(m.chat_rooms.id)
   }
-  const rooms = Array.from(roomsMap.values())
 
-  const roomIds = rooms.map((r) => r.id)
+  const { data: allMembers } = roomIds.length > 0
+    ? await supabase
+      .from('chat_room_members')
+      .select('room_id, user_id, ocs(name, icon_url)')
+      .in('room_id', roomIds)
+      .is('left_at', null)
+    : { data: [] }
+
+  const membersByRoom = new Map()
+  for (const m of allMembers || []) {
+    if (!membersByRoom.has(m.room_id)) membersByRoom.set(m.room_id, [])
+    membersByRoom.get(m.room_id).push(m)
+  }
+
+  const rooms = roomIds.map((id) => {
+    const allInRoom = membersByRoom.get(id) || []
+    const others = allInRoom.filter((m) => m.user_id !== user.id)
+    const displayMembers = others.length > 0 ? others : allInRoom
+    const title = allInRoom.map((m) => m.ocs?.name).filter(Boolean).join('、')
+    return { id, title, displayMembers }
+  })
+
   const lastMessages = {}
   if (roomIds.length > 0) {
     const { data: msgs } = await supabase
@@ -83,10 +103,28 @@ export default async function ChatListPage() {
               textDecoration: 'none',
             }}
           >
-            <Avatar name={room.name || '部屋'} size={52} />
+            {room.displayMembers.length === 1 ? (
+              <Avatar name={room.displayMembers[0].ocs?.name} iconUrl={room.displayMembers[0].ocs?.icon_url} size={52} />
+            ) : (
+              <div style={{ position: 'relative', width: 52, height: 52, flexShrink: 0 }}>
+                {room.displayMembers.slice(0, 3).map((m, i) => (
+                  <div
+                    key={m.user_id + i}
+                    style={{
+                      position: 'absolute',
+                      top: i === 0 ? 0 : i === 1 ? 14 : 14,
+                      left: i === 0 ? 0 : i === 1 ? 20 : 0,
+                      border: '2px solid #f3e9d8', borderRadius: '50%',
+                    }}
+                  >
+                    <Avatar name={m.ocs?.name} iconUrl={m.ocs?.icon_url} size={30} />
+                  </div>
+                ))}
+              </div>
+            )}
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 15, fontWeight: 700, color: '#241a10' }}>
-                {room.name || '名前未設定の部屋'}
+                {room.title || '名前未設定'}
               </div>
               <div style={{
                 fontSize: 12.5, color: '#8b7355', marginTop: 2,
