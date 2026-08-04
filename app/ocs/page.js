@@ -5,6 +5,7 @@ import { lightBackLinkStyle } from './styles'
 import { addAvoidedPartner } from './actions'
 import AvoidedPartnerTag from './AvoidedPartnerTag'
 import SubmitButton from '@/components/SubmitButton'
+import Avatar from '@/components/Avatar'
 
 export default async function OCsPage() {
   const supabase = await createClient()
