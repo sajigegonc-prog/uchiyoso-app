@@ -23,7 +23,10 @@ export async function createRoom(formData) {
     })
     .select('id')
     .single()
-  if (error || !room) redirect('/chat/new')
+  if (error || !room) {
+    console.error('部屋作成エラー:', error)
+    redirect('/chat/new')
+  }
   await supabase.from('chat_room_members').insert({
     room_id: room.id,
     oc_id: ocId,
