@@ -6,6 +6,9 @@ export async function createRoom(formData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
+  const { data: whoamiResult } = await supabase.rpc('whoami')
+  console.log('JS側のuser.id:', user.id)
+  console.log('Postgres側のauth.uid():', whoamiResult)
   const ocId = formData.get('oc_id')?.toString()
   const selfPlay = formData.get('self_play')?.toString() === 'on'
   const friendId = formData.get('friend_id')?.toString()
