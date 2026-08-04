@@ -23,7 +23,7 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
   const avatarInitial = (speaker.name || '?').charAt(0)
 
   return (
-    <div style={{ position: 'relative', background: '#fff', borderTop: '2px solid #8b6a4a' }}>
+    <div style={{ position: 'relative', background: '#fff', borderTop: '2px solid #8b6a4a', flexShrink: 0 }}>
       {oocOpen && (
         <OocPanel roomId={roomId} myUserId={myUserId} messages={oocMessages} sendAction={oocSendAction} onClose={() => setOocOpen(false)} />
       )}
