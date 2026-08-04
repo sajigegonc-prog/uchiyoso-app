@@ -47,6 +47,7 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
             }
             return (
               <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start' }}>
+                <div style={{ fontSize: 10.5, color: '#8b7355', marginBottom: 2 }}>{msg.senderName}</div>
                 <div style={{
                   maxWidth: '75%', padding: '9px 13px', borderRadius: 3, fontSize: 14, lineHeight: 1.5,
                   background: mine ? '#5c3a21' : '#fff', color: mine ? '#f3e9d8' : '#241a10',
