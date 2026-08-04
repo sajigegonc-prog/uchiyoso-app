@@ -5,6 +5,7 @@ import { sendMessage } from './actions'
 import { addNpc, deleteNpc } from './npcActions'
 import { lightBackLinkStyle } from '../../ocs/styles'
 import MessageForm from './MessageForm'
+import { sendOocMessage, openFrogCard } from './oocActions'
 export default async function ChatRoomPage({ params }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -40,6 +41,11 @@ export default async function ChatRoomPage({ params }) {
   const { data: messages } = await supabase
     .from('messages')
     .select('id, content, created_at, sender_oc_id, sender_npc_id, ocs(name), chat_room_npcs(name)')
+    .eq('room_id', roomId)
+    .order('created_at', { ascending: true })
+  const { data: oocMessages } = await supabase
+    .from('room_ooc_messages')
+    .select('id, content, is_system, created_at, user_id')
     .eq('room_id', roomId)
     .order('created_at', { ascending: true })
   const myOcs = (members || [])
