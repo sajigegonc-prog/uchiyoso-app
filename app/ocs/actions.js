@@ -25,3 +25,29 @@ export async function addOC(formData) {
   }
   redirect('/home')
 }
+export async function addAvoidedPartner(formData) {
+  const supabase = await createClient()
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user
+  if (!user) redirect('/')
+  const name = formData.get('character_name')?.toString().trim()
+  if (name) {
+    await supabase.from('avoided_partners').insert({
+      user_id: user.id,
+      character_name: name,
+    })
+  }
+  revalidatePath('/ocs')
+}
+
+export async function removeAvoidedPartner(formData) {
+  const supabase = await createClient()
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user
+  if (!user) redirect('/')
+  const id = formData.get('id')?.toString()
+  if (id) {
+    await supabase.from('avoided_partners').delete().eq('id', id).eq('user_id', user.id)
+  }
+  revalidatePath('/ocs')
+}
