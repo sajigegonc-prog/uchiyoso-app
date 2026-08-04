@@ -4,9 +4,11 @@ import Link from 'next/link'
 import { sendMessage } from './actions'
 import { addNpc, deleteNpc } from './npcActions'
 import { sendOocMessage, openFrogCard } from './oocActions'
+import { requestDeleteRoom, acknowledgeDeletion } from './deleteActions'
 import { lightBackLinkStyle } from '../../ocs/styles'
 import Avatar from '@/components/Avatar'
 import MessageForm from './MessageForm'
+import DeletionNotice from './DeletionNotice'
 export default async function ChatRoomPage({ params }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -14,7 +16,7 @@ export default async function ChatRoomPage({ params }) {
   const { roomId } = params
   const { data: room } = await supabase
     .from('chat_rooms')
-    .select('id, location, time_period, primary_oc_id')
+    .select('id, location, time_period, primary_oc_id, pending_deletion_by, deleted_at')
     .eq('id', roomId)
     .maybeSingle()
   if (!room) {
@@ -32,7 +34,7 @@ export default async function ChatRoomPage({ params }) {
     .eq('user_id', user.id)
   const { data: members } = await supabase
     .from('chat_room_members')
-    .select('user_id, oc_id, ocs(name)')
+    .select('user_id, oc_id, ocs(name), left_at')
     .eq('room_id', roomId)
   const { data: npcs } = await supabase
     .from('chat_room_npcs')
@@ -54,13 +56,31 @@ export default async function ChatRoomPage({ params }) {
     .map((m) => ({ id: m.oc_id, name: m.ocs?.name }))
   const myNpcs = (npcs || []).filter((n) => n.created_by === user.id).map((n) => n.id)
   const memberNames = (members || []).map((m) => m.ocs?.name).filter(Boolean)
+  const activeMemberCount = (members || []).filter((m) => !m.left_at).length
+  const isGroup = activeMemberCount > 2
+  const myMembership = (members || []).find((m) => m.user_id === user.id)
+  const showDeletionNotice = room.pending_deletion_by && room.pending_deletion_by !== user.id && !myMembership?.left_at
   return (
     <div style={{
       fontFamily: "'BIZ UDPGothic', sans-serif", background: '#eee1cb',
       height: 'calc(100vh - 60px)', display: 'flex', flexDirection: 'column', overflow: 'hidden',
     }}>
+      {showDeletionNotice && (
+        <DeletionNotice roomId={room.id} action={acknowledgeDeletion} />
+      )}
       <div style={{ background: '#241a10', color: '#f3e9d8', padding: '14px 20px', flexShrink: 0 }}>
-        <Link href="/chat" style={{ fontSize: 12, color: '#c9a876', textDecoration: 'none' }}>← 一覧に戻る</Link>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <Link href="/chat" style={{ fontSize: 12, color: '#c9a876', textDecoration: 'none' }}>← 一覧に戻る</Link>
+          <form action={requestDeleteRoom}>
+            <input type="hidden" name="room_id" value={room.id} />
+            <button
+              type="submit"
+              style={{ fontSize: 11, color: '#c9a876', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+            >
+              {isGroup ? 'この部屋を退出' : 'このルームを削除'}
+            </button>
+          </form>
+        </div>
         <div style={{ fontSize: 15, fontWeight: 700, marginTop: 6 }}>{memberNames.join('、')}</div>
         {(room.location || room.time_period) && (
           <div style={{ fontSize: 11.5, opacity: 0.75, marginTop: 4, display: 'flex', gap: 10 }}>
