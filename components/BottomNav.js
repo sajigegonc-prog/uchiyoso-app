@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 const NAV_ITEMS = [
   { href: '/home', label: 'ホーム', icon: '🏠', match: (p) => p === '/home', badgeKey: null },
   { href: '/chat', label: 'おしゃべり', icon: '💬', match: (p) => p.startsWith('/chat'), badgeKey: 'chat' },
-  { href: '/home', label: 'OC', icon: '📖', match: () => false, badgeKey: null },
+  { href: '/ocs', label: 'OC', icon: '📖', match: (p) => p.startsWith('/ocs'), badgeKey: null },
   { href: '/friends', label: '友達', icon: '🤝', match: (p) => p.startsWith('/friends'), badgeKey: null },
   { href: '/owl', label: 'ふくろう便', icon: '🦉', match: (p) => p.startsWith('/owl'), badgeKey: 'owl' },
 ]
