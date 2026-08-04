@@ -23,6 +23,11 @@ export default async function ChatRoomPage({ params }) {
       </div>
     )
   }
+  await supabase
+    .from('chat_room_members')
+    .update({ last_read_at: new Date().toISOString() })
+    .eq('room_id', roomId)
+    .eq('user_id', user.id)
   const { data: members } = await supabase
     .from('chat_room_members')
     .select('user_id, oc_id, ocs(name)')
