@@ -61,9 +61,9 @@ export default async function ChatRoomPage({ params }) {
   const myMembership = (members || []).find((m) => m.user_id === user.id)
   const showDeletionNotice = room.pending_deletion_by && room.pending_deletion_by !== user.id && !myMembership?.left_at
   return (
-    <div style={{
+    <div className="chat-room-height" style={{
       fontFamily: "'BIZ UDPGothic', sans-serif", background: '#eee1cb',
-      height: 'calc(100vh - 60px)', display: 'flex', flexDirection: 'column', overflow: 'hidden',
+      display: 'flex', flexDirection: 'column', overflow: 'hidden',
     }}>
       {showDeletionNotice && (
         <DeletionNotice roomId={room.id} action={acknowledgeDeletion} />
