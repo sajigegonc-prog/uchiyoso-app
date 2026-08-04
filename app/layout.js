@@ -1,3 +1,5 @@
+import BottomNav from '@/components/BottomNav'
+
 export const metadata = {
   title: 'うちよそ',
   description: 'うちの子と、よその子と。すれ違いから始まる、二次創作チャット。',
@@ -14,6 +16,7 @@ export default function RootLayout({ children }) {
       </head>
       <body style={{ margin: 0, fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f3e9d8' }}>
         {children}
+        <BottomNav />
       </body>
     </html>
   )
