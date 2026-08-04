@@ -24,25 +24,34 @@ export async function openFrogCard(formData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
   const roomId = formData.get('room_id')?.toString()
-  if (!roomId) return
+  if (!roomId) return { error: '部屋情報が取得できませんでした。' }
 
-  const { count } = await supabase
+  const { count, error: countError } = await supabase
     .from('frog_cards')
     .select('id', { count: 'exact', head: true })
-  const randomOffset = Math.floor(Math.random() * (count || 1))
-  const { data: cards } = await supabase
+
+  if (countError || !count) {
+    return { error: 'カードデータが見つかりませんでした。' }
+  }
+
+  const randomOffset = Math.floor(Math.random() * count)
+  const { data: cards, error: cardError } = await supabase
     .from('frog_cards')
     .select('name, description')
     .range(randomOffset, randomOffset)
 
   const card = cards?.[0]
-  if (card) {
-    await supabase.from('room_ooc_messages').insert({
-      room_id: roomId,
-      user_id: user.id,
-      content: `🐸 蛙チョコを開けました → ${card.name}\n${card.description}`,
-      is_system: true,
-    })
+  if (cardError || !card) {
+    return { error: 'カードの取得に失敗しました。' }
   }
+
+  await supabase.from('room_ooc_messages').insert({
+    room_id: roomId,
+    user_id: user.id,
+    content: `🐸 蛙チョコを開けました → ${card.name}\n${card.description}`,
+    is_system: true,
+  })
   revalidatePath(`/chat/${roomId}`)
+
+  return { card }
 }
