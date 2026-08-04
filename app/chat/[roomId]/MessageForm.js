@@ -122,6 +122,10 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
           ref={inputRef}
           name="content"
           placeholder={`${speaker.name || ''}として発言`}
+          onFocus={() => {
+            setTimeout(() => window.scrollTo(0, 0), 50)
+            setTimeout(() => window.scrollTo(0, 0), 300)
+          }}
           style={{
             flex: 1, border: '2px solid #8b6a4a', borderRadius: 3, padding: '10px 12px', fontSize: 16,
             fontFamily: "'BIZ UDPGothic', sans-serif", background: '#fbf5e9', color: '#241a10',
