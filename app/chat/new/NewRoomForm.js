@@ -53,10 +53,6 @@ export default function NewRoomForm({ action, ocs, friends }) {
           <label style={lightFieldLabelStyle}>場所</label>
           <input name="location" placeholder="例:図書室3階" style={lightInputStyle} />
         </div>
-        <div style={{ marginBottom: 14 }}>
-          <label style={lightFieldLabelStyle}>シチュエーション</label>
-          <textarea name="situation" placeholder="自由にどうぞ" style={{ ...lightInputStyle, minHeight: 70, resize: 'none' }} />
-        </div>
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#5c3a21', fontWeight: 700 }}>
           <input
             type="checkbox"
