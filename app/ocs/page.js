@@ -15,7 +15,7 @@ export default async function OCsPage() {
 
   const { data: ocs } = await supabase
     .from('ocs')
-    .select('id, name, oc_type, house')
+    .select('id, name, oc_type, house, icon_url')
     .eq('user_id', user.id)
     .order('created_at', { ascending: true })
 
