@@ -11,7 +11,7 @@ export default async function NewChatPage() {
   if (!user) redirect('/')
   const { data: ocs } = await supabase
     .from('ocs')
-    .select('id, name')
+    .select('id, name, icon_url')
     .eq('user_id', user.id)
     .order('created_at', { ascending: true })
   const { data: friends } = await supabase.rpc('list_my_friends')
