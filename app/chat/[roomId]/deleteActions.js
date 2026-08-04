@@ -3,6 +3,15 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
 
+async function fullyDeleteRoom(supabase, roomId) {
+  await supabase.from('messages').delete().eq('room_id', roomId)
+  await supabase.from('chat_room_npcs').delete().eq('room_id', roomId)
+  await supabase.from('room_ooc_messages').delete().eq('room_id', roomId)
+  await supabase.from('chat_room_invitations').delete().eq('room_id', roomId)
+  await supabase.from('chat_room_members').delete().eq('room_id', roomId)
+  await supabase.from('chat_rooms').delete().eq('id', roomId)
+}
+
 export async function requestDeleteRoom(formData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -22,28 +31,40 @@ export async function requestDeleteRoom(formData) {
     .eq('room_id', roomId)
     .is('left_at', null)
 
-  const isGroup = (activeMembers?.length || 0) > 2
+  const uniqueUserIds = new Set((activeMembers || []).map((m) => m.user_id))
 
-  await supabase
-    .from('chat_room_members')
-    .update({ left_at: new Date().toISOString() })
-    .eq('room_id', roomId)
-    .eq('user_id', user.id)
+  if (uniqueUserIds.size <= 1) {
+    // うちの子同士(自分1人だけの部屋) → 相互確認不要、即削除
+    await fullyDeleteRoom(supabase, roomId)
+  } else if (uniqueUserIds.size === 2) {
+    // 1:1(2人の別ユーザー) → 相互確認方式
+    await supabase
+      .from('chat_room_members')
+      .update({ left_at: new Date().toISOString() })
+      .eq('room_id', roomId)
+      .eq('user_id', user.id)
 
-  if (isGroup) {
+    if (room?.pending_deletion_by && room.pending_deletion_by !== user.id) {
+      await fullyDeleteRoom(supabase, roomId)
+    } else {
+      await supabase.from('chat_rooms').update({ pending_deletion_by: user.id }).eq('id', roomId)
+    }
+  } else {
+    // グループ(3人以上) → 自分だけ退出、最後の1人になったら削除
+    await supabase
+      .from('chat_room_members')
+      .update({ left_at: new Date().toISOString() })
+      .eq('room_id', roomId)
+      .eq('user_id', user.id)
+
     const { data: remaining } = await supabase
       .from('chat_room_members')
       .select('user_id')
       .eq('room_id', roomId)
       .is('left_at', null)
-    if (!remaining || remaining.length === 0) {
-      await supabase.from('chat_rooms').update({ deleted_at: new Date().toISOString() }).eq('id', roomId)
-    }
-  } else {
-    if (room?.pending_deletion_by && room.pending_deletion_by !== user.id) {
-      await supabase.from('chat_rooms').update({ deleted_at: new Date().toISOString() }).eq('id', roomId)
-    } else {
-      await supabase.from('chat_rooms').update({ pending_deletion_by: user.id }).eq('id', roomId)
+    const remainingUniqueUsers = new Set((remaining || []).map((m) => m.user_id))
+    if (remainingUniqueUsers.size === 0) {
+      await fullyDeleteRoom(supabase, roomId)
     }
   }
 
@@ -58,13 +79,7 @@ export async function acknowledgeDeletion(formData) {
   const roomId = formData.get('room_id')?.toString()
   if (!roomId) redirect('/chat')
 
-  await supabase
-    .from('chat_room_members')
-    .update({ left_at: new Date().toISOString() })
-    .eq('room_id', roomId)
-    .eq('user_id', user.id)
-
-  await supabase.from('chat_rooms').update({ deleted_at: new Date().toISOString() }).eq('id', roomId)
+  await fullyDeleteRoom(supabase, roomId)
 
   revalidatePath('/chat')
   redirect('/chat')
