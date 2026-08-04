@@ -8,22 +8,10 @@ export async function createRoom(formData) {
   const user = session?.user
   if (!user) redirect('/')
   const ocId = formData.get('oc_id')?.toString()
-  const name = formData.get('name')?.toString().trim()
-  const location = formData.get('location')?.toString().trim()
   const selfPlay = formData.get('self_play')?.toString() === 'on'
   const friendId = formData.get('friend_id')?.toString()
   const extraOcIds = formData.getAll('extra_oc_ids').map((v) => v.toString()).filter(Boolean)
   if (!ocId) redirect('/chat/new')
-  const { data: room, error } = await supabase
-    .from('chat_rooms')
-    .insert({
-      name: name || null,
-      location: location || null,
-      created_by: user.id,
-    })
-    .select('id')
-    .single()
-  console.log('送信するuser.id:', user.id)
   const { data: room, error } = await supabase
     .from('chat_rooms')
     .insert({
@@ -33,9 +21,7 @@ export async function createRoom(formData) {
     .single()
   if (error || !room) {
     console.error('部屋作成エラー:', error)
-    console.error('user.id:', user.id)
-  }
-  if (error || !room) redirect('/chat/new')
+    redirect('/chat/new')
   }
   await supabase.from('chat_room_members').insert({
     room_id: room.id,
