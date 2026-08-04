@@ -96,7 +96,7 @@ export default async function OCsPage() {
           ))}
         </div>
       )}
-      <p style={{ fontSize: 11, color: '#8b7355', marginTop: 10 }}>各位配慮用です。</p>
+      <p style={{ fontSize: 11, color: '#8b7355', marginTop: 10 }}>各一配慮用です。</p>
     </div>
   )
 }
