@@ -9,6 +9,7 @@ import { lightBackLinkStyle } from '../../ocs/styles'
 import Avatar from '@/components/Avatar'
 import MessageForm from './MessageForm'
 import DeletionNotice from './DeletionNotice'
+import DeleteRoomButton from './DeleteRoomButton'
 export default async function ChatRoomPage({ params }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -62,7 +63,7 @@ export default async function ChatRoomPage({ params }) {
   const isGroup = uniqueUserCount > 2
   const myMembership = (members || []).find((m) => m.user_id === user.id)
   const showDeletionNotice = !isSelfRoom && room.pending_deletion_by && room.pending_deletion_by !== user.id && !myMembership?.left_at
-  const deleteButtonLabel = isSelfRoom ? 'このルームを削除' : isGroup ? 'この部屋を退出' : 'このルームを削除'
+  const deleteButtonLabel = isGroup ? 'この部屋を退出' : 'このルームを削除'
   return (
     <div className="chat-room-height" style={{
       fontFamily: "'BIZ UDPGothic', sans-serif", background: '#eee1cb',
@@ -74,15 +75,7 @@ export default async function ChatRoomPage({ params }) {
       <div style={{ background: '#241a10', color: '#f3e9d8', padding: '14px 20px', flexShrink: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <Link href="/chat" style={{ fontSize: 12, color: '#c9a876', textDecoration: 'none' }}>← 一覧に戻る</Link>
-          <form action={requestDeleteRoom}>
-            <input type="hidden" name="room_id" value={room.id} />
-            <button
-              type="submit"
-              style={{ fontSize: 11, color: '#c9a876', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
-            >
-              {deleteButtonLabel}
-            </button>
-          </form>
+          <DeleteRoomButton roomId={room.id} label={deleteButtonLabel} action={requestDeleteRoom} />
         </div>
         <div style={{ fontSize: 15, fontWeight: 700, marginTop: 6 }}>{memberNames.join('、')}</div>
         {(room.location || room.time_period) && (
