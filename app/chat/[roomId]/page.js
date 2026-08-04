@@ -47,11 +47,21 @@ export default async function ChatRoomPage({ params }) {
     .select('id, content, created_at, sender_oc_id, sender_npc_id, is_system, ocs(name, icon_url), chat_room_npcs(name)')
     .eq('room_id', roomId)
     .order('created_at', { ascending: true })
-  const { data: oocMessages } = await supabase
+  const { data: oocMessagesRaw } = await supabase
     .from('room_ooc_messages')
     .select('id, content, is_system, created_at, user_id')
     .eq('room_id', roomId)
     .order('created_at', { ascending: true })
+
+  const oocUserIds = [...new Set((oocMessagesRaw || []).map((m) => m.user_id))]
+  const { data: oocProfiles } = oocUserIds.length > 0
+    ? await supabase.from('profiles').select('id, display_name').in('id', oocUserIds)
+    : { data: [] }
+  const oocNameMap = new Map((oocProfiles || []).map((p) => [p.id, p.display_name]))
+  const oocMessages = (oocMessagesRaw || []).map((m) => ({
+    ...m,
+    senderName: oocNameMap.get(m.user_id) || '名前未設定',
+  }))
   const myOcs = (members || [])
     .filter((m) => m.user_id === user.id)
     .map((m) => ({ id: m.oc_id, name: m.ocs?.name }))
