@@ -85,7 +85,7 @@ export default async function ChatRoomPage({ params }) {
           </div>
         )}
       </div>
-      <div style={{ flex: 1, overflowY: 'auto', padding: '18px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '18px 16px 74px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {(!messages || messages.length === 0) && (
           <p style={{ fontSize: 12.5, color: '#8b7355', textAlign: 'center', marginTop: 20 }}>まだメッセージがありません。</p>
         )}
