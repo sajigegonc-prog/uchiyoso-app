@@ -19,7 +19,7 @@ export default async function NewOCPage() {
       padding: '28px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center',
     }}>
       <div style={{ width: '100%', maxWidth: 360 }}>
-        <Link href="/home" style={lightBackLinkStyle}>← ホームに戻る</Link>
+        <Link href="/ocs" style={lightBackLinkStyle}>← OC一覧に戻る</Link>
         <h1 style={{ fontSize: 18, color: '#241a10', fontWeight: 700, marginTop: 14 }}>
           新しいOCを登録
         </h1>
