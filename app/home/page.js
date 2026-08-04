@@ -22,6 +22,7 @@ export default async function HomePage() {
     .select('id, name, oc_type, house')
     .eq('user_id', user.id)
     .order('created_at', { ascending: true })
+  const notifications = await getNotifications(supabase, user.id)
   return (
     <div style={{
       fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f3e9d8', minHeight: '100vh',
