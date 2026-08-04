@@ -12,7 +12,7 @@ function ClearOnDone({ inputRef }) {
   return null
 }
 
-export default function OocPanel({ roomId, myUserId, messages, sendAction }) {
+export default function OocPanel({ roomId, myUserId, messages, sendAction, onClose }) {
   const inputRef = useRef(null)
   const now = new Date()
   const timeLabel = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
@@ -24,7 +24,10 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction }) {
     }}>
       <div style={{ background: '#3d2d1c', color: '#f3e9d8', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
         <span style={{ fontSize: 14, fontWeight: 700 }}>中の人チャット</span>
-        <span style={{ fontSize: 12, opacity: 0.7 }}>現在時刻 {timeLabel}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 12, opacity: 0.7 }}>現在時刻 {timeLabel}</span>
+          <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', color: '#f3e9d8', fontSize: 18, cursor: 'pointer' }}>×</button>
+        </div>
       </div>
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {(!messages || messages.length === 0) && (
