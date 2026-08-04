@@ -26,6 +26,7 @@ export async function addOC(formData) {
     if (data) redirect(`/ocs/${data.id}`)
   }
   redirect('/ocs')
+}
 export async function addAvoidedPartner(formData) {
   const supabase = await createClient()
   const { data: { session } } = await supabase.auth.getSession()
