@@ -56,10 +56,13 @@ export default async function ChatRoomPage({ params }) {
     .map((m) => ({ id: m.oc_id, name: m.ocs?.name }))
   const myNpcs = (npcs || []).filter((n) => n.created_by === user.id).map((n) => n.id)
   const memberNames = (members || []).map((m) => m.ocs?.name).filter(Boolean)
-  const activeMemberCount = (members || []).filter((m) => !m.left_at).length
-  const isGroup = activeMemberCount > 2
+  const activeMembers = (members || []).filter((m) => !m.left_at)
+  const uniqueUserCount = new Set(activeMembers.map((m) => m.user_id)).size
+  const isSelfRoom = uniqueUserCount <= 1
+  const isGroup = uniqueUserCount > 2
   const myMembership = (members || []).find((m) => m.user_id === user.id)
-  const showDeletionNotice = room.pending_deletion_by && room.pending_deletion_by !== user.id && !myMembership?.left_at
+  const showDeletionNotice = !isSelfRoom && room.pending_deletion_by && room.pending_deletion_by !== user.id && !myMembership?.left_at
+  const deleteButtonLabel = isSelfRoom ? 'このルームを削除' : isGroup ? 'この部屋を退出' : 'このルームを削除'
   return (
     <div className="chat-room-height" style={{
       fontFamily: "'BIZ UDPGothic', sans-serif", background: '#eee1cb',
@@ -77,7 +80,7 @@ export default async function ChatRoomPage({ params }) {
               type="submit"
               style={{ fontSize: 11, color: '#c9a876', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
             >
-              {isGroup ? 'この部屋を退出' : 'このルームを削除'}
+              {deleteButtonLabel}
             </button>
           </form>
         </div>
