@@ -1,11 +1,11 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
+import Link from 'next/link'
 import { getNotifications } from '@/lib/notifications'
 
 export default async function HomePage() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const user = session?.user
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     redirect('/')
   }
@@ -18,6 +18,11 @@ export default async function HomePage() {
     redirect('/onboarding/name')
   }
   const notifications = await getNotifications(supabase, user.id)
+
+  const noticeStyle = {
+    display: 'block', background: '#fbf5e9', border: '2px solid #8b6a4a', borderRadius: 3,
+    padding: 10, fontSize: 12.5, color: '#5c3a21', textDecoration: 'none',
+  }
 
   return (
     <div style={{
@@ -32,19 +37,19 @@ export default async function HomePage() {
       {(notifications.chat || notifications.owl || notifications.matching) && (
         <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
           {notifications.chat && (
-            <div style={{ background: '#fbf5e9', border: '2px solid #8b6a4a', borderRadius: 3, padding: 10, fontSize: 12.5, color: '#5c3a21' }}>
+            <Link href="/chat" style={noticeStyle}>
               💬 あなたに話しかけた人がいるようです
-            </div>
+            </Link>
           )}
           {notifications.owl && (
-            <div style={{ background: '#fbf5e9', border: '2px solid #8b6a4a', borderRadius: 3, padding: 10, fontSize: 12.5, color: '#5c3a21' }}>
+            <Link href="/owl" style={noticeStyle}>
               🦉 あなたの部屋にフクロウが来ています
-            </div>
+            </Link>
           )}
           {notifications.matching && (
-            <div style={{ background: '#fbf5e9', border: '2px solid #8b6a4a', borderRadius: 3, padding: 10, fontSize: 12.5, color: '#5c3a21' }}>
+            <Link href="/chat" style={noticeStyle}>
               👋 あなたと偶然すれ違った方がいるようです
-            </div>
+            </Link>
           )}
         </div>
       )}
