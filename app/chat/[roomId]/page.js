@@ -12,7 +12,7 @@ export default async function ChatRoomPage({ params }) {
   const { roomId } = params
   const { data: room } = await supabase
     .from('chat_rooms')
-    .select('id, location, time_period')
+    .select('id, location, time_period, primary_oc_id')
     .eq('id', roomId)
     .maybeSingle()
   if (!room) {
@@ -67,7 +67,7 @@ export default async function ChatRoomPage({ params }) {
           <p style={{ fontSize: 12.5, color: '#8b7355', textAlign: 'center', marginTop: 20 }}>まだメッセージがありません。</p>
         )}
         {messages && messages.map((msg) => {
-          const mine = myOcs.some((oc) => oc.id === msg.sender_oc_id) || myNpcs.includes(msg.sender_npc_id)
+          const mine = msg.sender_oc_id === room.primary_oc_id
           const speakerName = msg.ocs?.name || msg.chat_room_npcs?.name
           return (
             <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start' }}>
