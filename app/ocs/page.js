@@ -40,18 +40,23 @@ export default async function OCsPage() {
       {ocs && ocs.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 14 }}>
           {ocs.map((oc) => (
-            <div
+            <Link
               key={oc.id}
+              href={`/ocs/${oc.id}`}
               style={{
+                display: 'flex', alignItems: 'center', gap: 12,
                 background: '#fbf5e9', border: '2px solid #8b6a4a', borderRadius: 3,
-                padding: 14, boxShadow: '3px 3px 0 rgba(61,39,23,.15)',
+                padding: 14, boxShadow: '3px 3px 0 rgba(61,39,23,.15)', textDecoration: 'none',
               }}
             >
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#241a10' }}>{oc.name}</div>
-              <div style={{ fontSize: 12, color: '#8b7355', marginTop: 2 }}>
-                {oc.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{oc.house ? ` ・ ${oc.house}` : ''}
+              <Avatar name={oc.name} iconUrl={oc.icon_url} size={44} />
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#241a10' }}>{oc.name}</div>
+                <div style={{ fontSize: 12, color: '#8b7355', marginTop: 2 }}>
+                  {oc.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{oc.house ? ` ・ ${oc.house}` : ''}
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}
