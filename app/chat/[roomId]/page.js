@@ -84,6 +84,9 @@ export default async function ChatRoomPage({ params }) {
             {room.time_period && <span>🕐 {room.time_period}</span>}
           </div>
         )}
+        <p style={{ fontSize: 10, opacity: 0.55, marginTop: 4 }}>
+          変更は「/場所 ○○」「/時間帯 ○○」と発言すると反映されます
+        </p>
       </div>
       <div style={{ flex: 1, overflowY: 'auto', padding: '18px 16px 74px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {(!messages || messages.length === 0) && (
