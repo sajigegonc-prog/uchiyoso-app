@@ -14,7 +14,7 @@ export async function addOC(formData) {
   const birthDate = formData.get('birth_date')?.toString()
   const description = formData.get('description')?.toString().trim()
   if (name) {
-    await supabase.from('ocs').insert({
+    const { data } = await supabase.from('ocs').insert({
       user_id: user.id,
       name,
       oc_type: ocType,
@@ -22,10 +22,10 @@ export async function addOC(formData) {
       house: house || null,
       birth_date: birthDate || null,
       description: description || null,
-    })
+    }).select('id').single()
+    if (data) redirect(`/ocs/${data.id}`)
   }
-  redirect('/home')
-}
+  redirect('/ocs')
 export async function addAvoidedPartner(formData) {
   const supabase = await createClient()
   const { data: { session } } = await supabase.auth.getSession()
