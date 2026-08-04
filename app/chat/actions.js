@@ -6,10 +6,9 @@ export async function createRoom(formData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
-  const { data: whoamiResult } = await supabase.rpc('whoami')
-  console.log('JS側のuser.id:', user.id)
-  console.log('Postgres側のauth.uid():', whoamiResult)
   const ocId = formData.get('oc_id')?.toString()
+  const location = formData.get('location')?.toString().trim()
+  const timePeriod = formData.get('time_period')?.toString().trim()
   const selfPlay = formData.get('self_play')?.toString() === 'on'
   const friendId = formData.get('friend_id')?.toString()
   const extraOcIds = formData.getAll('extra_oc_ids').map((v) => v.toString()).filter(Boolean)
@@ -59,8 +58,6 @@ export async function respondToChatInvitation(formData) {
   const invitationId = formData.get('invitation_id')?.toString()
   const decision = formData.get('decision')?.toString()
   const ocId = formData.get('oc_id')?.toString()
-  const location = formData.get('location')?.toString().trim()
-  const timePeriod = formData.get('time_period')?.toString().trim()
   const roomId = formData.get('room_id')?.toString()
   if (decision === 'accepted' && ocId && roomId) {
     await supabase.from('chat_room_members').insert({
