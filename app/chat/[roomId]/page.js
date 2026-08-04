@@ -7,13 +7,12 @@ import { lightBackLinkStyle } from '../../ocs/styles'
 import MessageForm from './MessageForm'
 export default async function ChatRoomPage({ params }) {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const user = session?.user
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
   const { roomId } = params
   const { data: room } = await supabase
     .from('chat_rooms')
-    .select('id, name, location, situation')
+    .select('id, location, time_period')
     .eq('id', roomId)
     .maybeSingle()
   if (!room) {
@@ -49,14 +48,21 @@ export default async function ChatRoomPage({ params }) {
   const myNpcs = (npcs || []).filter((n) => n.created_by === user.id).map((n) => n.id)
   const memberNames = (members || []).map((m) => m.ocs?.name).filter(Boolean)
   return (
-    <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#eee1cb', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ background: '#241a10', color: '#f3e9d8', padding: '14px 20px' }}>
+    <div style={{
+      fontFamily: "'BIZ UDPGothic', sans-serif", background: '#eee1cb',
+      height: 'calc(100vh - 60px)', display: 'flex', flexDirection: 'column', overflow: 'hidden',
+    }}>
+      <div style={{ background: '#241a10', color: '#f3e9d8', padding: '14px 20px', flexShrink: 0 }}>
         <Link href="/chat" style={{ fontSize: 12, color: '#c9a876', textDecoration: 'none' }}>← 一覧に戻る</Link>
-        <div style={{ fontSize: 15, fontWeight: 700, marginTop: 6 }}>{room.name || '名前未設定の部屋'}</div>
-        <div style={{ fontSize: 11.5, opacity: 0.7, marginTop: 2 }}>{memberNames.join(' × ')}</div>
-        {room.location && <div style={{ fontSize: 11.5, opacity: 0.75, marginTop: 4 }}>📍 {room.location}</div>}
+        <div style={{ fontSize: 15, fontWeight: 700, marginTop: 6 }}>{memberNames.join('、')}</div>
+        {(room.location || room.time_period) && (
+          <div style={{ fontSize: 11.5, opacity: 0.75, marginTop: 4, display: 'flex', gap: 10 }}>
+            {room.location && <span>📍 {room.location}</span>}
+            {room.time_period && <span>🕐 {room.time_period}</span>}
+          </div>
+        )}
       </div>
-      <div style={{ flex: 1, padding: '18px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '18px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {(!messages || messages.length === 0) && (
           <p style={{ fontSize: 12.5, color: '#8b7355', textAlign: 'center', marginTop: 20 }}>まだメッセージがありません。</p>
         )}
@@ -88,7 +94,7 @@ export default async function ChatRoomPage({ params }) {
           deleteNpcAction={deleteNpc}
         />
       ) : (
-        <p style={{ fontSize: 12, color: '#8b7355', textAlign: 'center', padding: 16 }}>あなたはこの部屋のメンバーではありません。</p>
+        <p style={{ fontSize: 12, color: '#8b7355', textAlign: 'center', padding: 16, flexShrink: 0 }}>あなたはこの部屋のメンバーではありません。</p>
       )}
     </div>
   )
