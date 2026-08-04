@@ -7,17 +7,17 @@ import { respondToChatInvitation } from './actions'
 
 export default async function ChatListPage() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const user = session?.user
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
 
   const { data: memberships } = await supabase
     .from('chat_room_members')
-    .select('room_id, chat_rooms(id, name, location)')
+    .select('room_id, left_at, chat_rooms(id, name, location, deleted_at)')
     .eq('user_id', user.id)
+    .is('left_at', null)
   const roomsMap = new Map()
   for (const m of memberships || []) {
-    if (m.chat_rooms) roomsMap.set(m.chat_rooms.id, m.chat_rooms)
+    if (m.chat_rooms && !m.chat_rooms.deleted_at) roomsMap.set(m.chat_rooms.id, m.chat_rooms)
   }
   const rooms = Array.from(roomsMap.values())
 
