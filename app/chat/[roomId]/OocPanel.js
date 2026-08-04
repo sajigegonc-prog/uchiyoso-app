@@ -64,6 +64,10 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
           ref={inputRef}
           name="content"
           placeholder="中の人として発言"
+          onFocus={() => {
+            setTimeout(() => window.scrollTo(0, 0), 50)
+            setTimeout(() => window.scrollTo(0, 0), 300)
+          }}
           style={{ flex: 1, border: '2px solid #8b6a4a', borderRadius: 3, padding: '10px 12px', fontSize: 16, background: '#fbf5e9', color: '#241a10' }}
         />
         <button type="submit" style={{ border: 'none', borderRadius: 3, background: '#8b5a2b', color: '#f3e9d8', fontWeight: 700, fontSize: 13, padding: '0 16px' }}>
