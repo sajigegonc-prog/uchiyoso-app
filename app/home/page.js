@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { getNotifications } from '@/lib/notifications'
 import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
 export default async function HomePage() {
@@ -29,6 +30,25 @@ export default async function HomePage() {
       <h1 style={{ fontSize: 18, color: '#3d2717', fontWeight: 700, borderBottom: '3px solid #8b5a2b', paddingBottom: 8, display: 'inline-block' }}>
         ホーム
       </h1>
+          {(notifications.chat || notifications.owl || notifications.matching) && (
+        <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {notifications.chat && (
+            <div style={{ background: '#fbf5e9', border: '2px solid #8b6a4a', borderRadius: 3, padding: 10, fontSize: 12.5, color: '#5c3a21' }}>
+              💬 あなたに話しかけた人がいるようです
+            </div>
+          )}
+          {notifications.owl && (
+            <div style={{ background: '#fbf5e9', border: '2px solid #8b6a4a', borderRadius: 3, padding: 10, fontSize: 12.5, color: '#5c3a21' }}>
+              🦉 あなたの部屋にフクロウが来ています
+            </div>
+          )}
+          {notifications.matching && (
+            <div style={{ background: '#fbf5e9', border: '2px solid #8b6a4a', borderRadius: 3, padding: 10, fontSize: 12.5, color: '#5c3a21' }}>
+              👋 あなたと偶然すれ違った方がいるようです
+            </div>
+          )}
+        </div>
+      )}
       <p style={{ fontSize: 14, color: '#5c3a21', marginTop: 10 }}>ようこそ、{profile?.display_name || user.email} さん</p>
       <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
         <Link href="/friends" style={{ fontSize: 12.5, color: '#8b5a2b', fontWeight: 700, textDecoration: 'none', border: '2px solid #8b6a4a', borderRadius: 3, padding: '8px 14px', background: '#fbf5e9' }}>
