@@ -4,18 +4,13 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
 export async function createRoom(formData) {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const user = session?.user
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
   const ocId = formData.get('oc_id')?.toString()
-  console.log('受け取ったocId:', ocId)
   const selfPlay = formData.get('self_play')?.toString() === 'on'
   const friendId = formData.get('friend_id')?.toString()
   const extraOcIds = formData.getAll('extra_oc_ids').map((v) => v.toString()).filter(Boolean)
-  if (!ocId) {
-    console.error('ocIdが空のためリダイレクト')
-    redirect('/chat/new')
-  }
+  if (!ocId) redirect('/chat/new')
   const { data: room, error } = await supabase
     .from('chat_rooms')
     .insert({
@@ -53,8 +48,7 @@ export async function createRoom(formData) {
 }
 export async function respondToChatInvitation(formData) {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const user = session?.user
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
   const invitationId = formData.get('invitation_id')?.toString()
   const decision = formData.get('decision')?.toString()
