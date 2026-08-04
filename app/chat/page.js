@@ -12,18 +12,22 @@ export default async function ChatListPage() {
 
   const { data: memberships } = await supabase
     .from('chat_room_members')
-    .select('room_id, left_at, chat_rooms(id, deleted_at)')
+    .select('room_id, left_at, chat_rooms(id, deleted_at, primary_oc_id)')
     .eq('user_id', user.id)
     .is('left_at', null)
   const roomIds = []
+  const primaryOcByRoom = new Map()
   for (const m of memberships || []) {
-    if (m.chat_rooms && !m.chat_rooms.deleted_at) roomIds.push(m.chat_rooms.id)
+    if (m.chat_rooms && !m.chat_rooms.deleted_at) {
+      roomIds.push(m.chat_rooms.id)
+      primaryOcByRoom.set(m.chat_rooms.id, m.chat_rooms.primary_oc_id)
+    }
   }
 
   const { data: allMembers } = roomIds.length > 0
     ? await supabase
       .from('chat_room_members')
-      .select('room_id, user_id, ocs(name, icon_url)')
+      .select('room_id, user_id, oc_id, ocs(name, icon_url)')
       .in('room_id', roomIds)
       .is('left_at', null)
     : { data: [] }
@@ -36,8 +40,9 @@ export default async function ChatListPage() {
 
   const rooms = roomIds.map((id) => {
     const allInRoom = membersByRoom.get(id) || []
-    const others = allInRoom.filter((m) => m.user_id !== user.id)
-    const displayMembers = others.length > 0 ? others : allInRoom
+    const primaryOcId = primaryOcByRoom.get(id)
+    const otherOcs = allInRoom.filter((m) => m.oc_id !== primaryOcId)
+    const displayMembers = otherOcs.length > 0 ? otherOcs : allInRoom
     const title = allInRoom.map((m) => m.ocs?.name).filter(Boolean).join('、')
     return { id, title, displayMembers }
   })
@@ -109,10 +114,10 @@ export default async function ChatListPage() {
               <div style={{ position: 'relative', width: 52, height: 52, flexShrink: 0 }}>
                 {room.displayMembers.slice(0, 3).map((m, i) => (
                   <div
-                    key={m.user_id + i}
+                    key={m.user_id + '_' + m.oc_id}
                     style={{
                       position: 'absolute',
-                      top: i === 0 ? 0 : i === 1 ? 14 : 14,
+                      top: i === 0 ? 0 : 14,
                       left: i === 0 ? 0 : i === 1 ? 20 : 0,
                       border: '2px solid #f3e9d8', borderRadius: '50%',
                     }}
