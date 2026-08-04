@@ -18,6 +18,9 @@ export async function createRoom(formData) {
     .from('chat_rooms')
     .insert({
       created_by: user.id,
+      location: location || null,
+      time_period: timePeriod || null,
+      primary_oc_id: ocId,
     })
     .select('id')
     .single()
@@ -56,6 +59,8 @@ export async function respondToChatInvitation(formData) {
   const invitationId = formData.get('invitation_id')?.toString()
   const decision = formData.get('decision')?.toString()
   const ocId = formData.get('oc_id')?.toString()
+  const location = formData.get('location')?.toString().trim()
+  const timePeriod = formData.get('time_period')?.toString().trim()
   const roomId = formData.get('room_id')?.toString()
   if (decision === 'accepted' && ocId && roomId) {
     await supabase.from('chat_room_members').insert({
