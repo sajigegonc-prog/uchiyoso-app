@@ -179,7 +179,7 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
         </button>
         {extrasOpen && (
           <>
-            <FrogChocolateButton roomId={roomId} action={frogAction} />
+            <FrogChocolateButton roomId={roomId} action={frogAction} speakerName={speaker.name} />
             <button
               type="button"
               onClick={() => setOocOpen(true)}
