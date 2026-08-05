@@ -36,3 +36,20 @@ export async function respondToFriendRequest(formData) {
   }
   revalidatePath('/friends')
 }
+
+export async function unfriendUser(formData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/')
+  const otherId = formData.get('other_id')?.toString()
+  const token = formData.get('token')?.toString()
+  if (otherId) {
+    await supabase
+      .from('friendships')
+      .delete()
+      .or(`and(requester_id.eq.${user.id},addressee_id.eq.${otherId}),and(requester_id.eq.${otherId},addressee_id.eq.${user.id})`)
+  }
+  revalidatePath('/friends')
+  if (token) redirect(`/friends/add/${token}`)
+  redirect('/friends')
+}
