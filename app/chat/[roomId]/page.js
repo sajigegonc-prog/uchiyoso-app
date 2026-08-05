@@ -5,8 +5,6 @@ import { sendMessage } from './actions'
 import { addNpc, deleteNpc } from './npcActions'
 import { sendOocMessage, openFrogCard } from './oocActions'
 import { requestDeleteRoom, acknowledgeDeletion } from './deleteActions'
-import { lightBackLinkStyle } from '../../ocs/styles'
-import Avatar from '@/components/Avatar'
 import MessageForm from './MessageForm'
 import DeletionNotice from './DeletionNotice'
 import DeleteRoomButton from './DeleteRoomButton'
@@ -22,9 +20,9 @@ export default async function ChatRoomPage({ params }) {
     .maybeSingle()
   if (!room) {
     return (
-      <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f3e9d8', minHeight: '100vh', padding: '28px 20px' }}>
-        <Link href="/chat" style={lightBackLinkStyle}>← チャット一覧に戻る</Link>
-        <p style={{ fontSize: 13, color: '#8b7355', marginTop: 20 }}>この部屋は見つからないか、参加していません。</p>
+      <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px' }}>
+        <Link href="/chat" style={{ fontSize: 12, color: '#6b6250', textDecoration: 'none' }}>← 一覧に戻る</Link>
+        <p style={{ fontSize: 13, color: '#8a8168', marginTop: 20, fontStyle: 'italic' }}>この部屋は見つからないか、参加していません。</p>
       </div>
     )
   }
@@ -72,40 +70,42 @@ export default async function ChatRoomPage({ params }) {
   const isGroup = uniqueUserCount > 2
   const myMembership = (members || []).find((m) => m.user_id === user.id)
   const showDeletionNotice = !isSelfRoom && room.pending_deletion_by && room.pending_deletion_by !== user.id && !myMembership?.left_at
-  const deleteButtonLabel = isGroup ? 'この部屋を退出' : 'このルームを削除'
+  const deleteButtonLabel = isGroup ? '退出' : '削除'
   return (
     <div className="chat-room-height" style={{
-      fontFamily: "'BIZ UDPGothic', sans-serif", background: '#eee1cb',
+      fontFamily: "'BIZ UDPGothic', sans-serif", background: '#efe8d8',
       display: 'flex', flexDirection: 'column', overflow: 'hidden',
     }}>
       {showDeletionNotice && (
         <DeletionNotice roomId={room.id} action={acknowledgeDeletion} />
       )}
-      <div style={{ background: '#241a10', color: '#f3e9d8', padding: '14px 20px', flexShrink: 0 }}>
+      <div style={{ background: '#f4eee0', padding: '14px 18px', flexShrink: 0, borderBottom: '4px double #211d17' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <Link href="/chat" style={{ fontSize: 12, color: '#c9a876', textDecoration: 'none' }}>← 一覧に戻る</Link>
+          <Link href="/chat" style={{ fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>← 一覧に戻る</Link>
           <DeleteRoomButton roomId={room.id} label={deleteButtonLabel} action={requestDeleteRoom} />
         </div>
-        <div style={{ fontSize: 15, fontWeight: 700, marginTop: 6 }}>{memberNames.join('、')}</div>
+        <div style={{ fontSize: 17, fontWeight: 700, marginTop: 8, color: '#211d17', fontFamily: 'Georgia, serif' }}>
+          {memberNames.join('、')}
+        </div>
         {(room.location || room.time_period) && (
-          <div style={{ fontSize: 11.5, opacity: 0.75, marginTop: 4, display: 'flex', gap: 10 }}>
-            {room.location && <span>📍 {room.location}</span>}
-            {room.time_period && <span>🕐 {room.time_period}</span>}
+          <div style={{ fontSize: 11, opacity: .85, marginTop: 5, display: 'flex', gap: 12, color: '#6b6250', fontStyle: 'italic' }}>
+            {room.location && <span>場所: {room.location}</span>}
+            {room.time_period && <span>時間帯: {room.time_period}</span>}
           </div>
         )}
-        <p style={{ fontSize: 10, opacity: 0.55, marginTop: 4 }}>
+        <p style={{ fontSize: 9.5, opacity: .7, marginTop: 5, color: '#8a8168' }}>
           変更は「/場所 ○○」「/時間帯 ○○」と発言すると反映されます
         </p>
       </div>
-      <div style={{ flex: 1, overflowY: 'auto', padding: '18px 16px 74px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 16px 74px', display: 'flex', flexDirection: 'column', gap: 12 }}>
         {(!messages || messages.length === 0) && (
-          <p style={{ fontSize: 12.5, color: '#8b7355', textAlign: 'center', marginTop: 20 }}>まだメッセージがありません。</p>
+          <p style={{ fontSize: 12.5, color: '#8a8168', textAlign: 'center', marginTop: 20, fontStyle: 'italic' }}>まだメッセージがありません。</p>
         )}
         {messages && messages.map((msg) => {
           if (msg.is_system) {
             return (
-              <div key={msg.id} style={{ textAlign: 'center', fontSize: 11.5, color: '#8b7355' }}>
-                {msg.content}
+              <div key={msg.id} style={{ textAlign: 'center', fontSize: 11, color: '#8a8168', fontStyle: 'italic' }}>
+                — {msg.content} —
               </div>
             )
           }
@@ -114,18 +114,27 @@ export default async function ChatRoomPage({ params }) {
           const speakerIcon = msg.ocs?.icon_url || null
           return (
             <div key={msg.id} style={{
-              display: 'flex', gap: 6, alignItems: 'flex-end',
+              display: 'flex', gap: 8, alignItems: 'flex-end',
               flexDirection: mine ? 'row-reverse' : 'row',
             }}>
-              <Avatar name={speakerName} iconUrl={speakerIcon} size={28} />
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', maxWidth: '75%' }}>
+              <div style={{
+                width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
+                background: '#211d17', border: '1px solid #211d17',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#f4eee0', fontWeight: 700, fontSize: 12, fontFamily: 'Georgia, serif',
+              }}>
+                {speakerIcon ? (
+                  <img src={speakerIcon} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (speakerName || '?').charAt(0)}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', maxWidth: '72%' }}>
                 {!mine && (
-                  <div style={{ fontSize: 10.5, color: '#8b7355', marginBottom: 2 }}>{speakerName}</div>
+                  <div style={{ fontSize: 10.5, color: '#6b6250', marginBottom: 3, fontStyle: 'italic' }}>{speakerName}</div>
                 )}
                 <div style={{
-                  padding: '9px 13px', borderRadius: 3, fontSize: 14, lineHeight: 1.5,
-                  background: mine ? '#8b5a2b' : '#fff', color: mine ? '#f3e9d8' : '#241a10',
-                  border: mine ? '2px solid #3d2717' : '2px solid #d8c7ac',
+                  padding: '9px 13px', fontSize: 14, lineHeight: 1.6,
+                  background: mine ? '#211d17' : '#fff', color: mine ? '#f4eee0' : '#211d17',
+                  border: '1px solid #211d17',
                 }}>
                   {msg.content}
                 </div>
@@ -148,7 +157,7 @@ export default async function ChatRoomPage({ params }) {
           oocSendAction={sendOocMessage}
         />
       ) : (
-        <p style={{ fontSize: 12, color: '#8b7355', textAlign: 'center', padding: 16, flexShrink: 0 }}>あなたはこの部屋のメンバーではありません。</p>
+        <p style={{ fontSize: 12, color: '#8a8168', textAlign: 'center', padding: 16, flexShrink: 0, fontStyle: 'italic' }}>あなたはこの部屋のメンバーではありません。</p>
       )}
     </div>
   )
