@@ -19,7 +19,7 @@ function ClearOnDone({ inputRef, onClear }) {
 const LINE_HEIGHT = 20
 const MAX_LINES = 5
 
-export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, addNpcAction, deleteNpcAction, frogAction, oocMessages, oocSendAction }) {
+export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, addNpcAction, deleteNpcAction, frogAction, oocMessages, oocSendAction, hasUnreadOoc }) {
   const inputRef = useRef(null)
   const [open, setOpen] = useState(false)
   const [oocOpen, setOocOpen] = useState(false)
@@ -181,17 +181,23 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
           <>
             <FrogChocolateButton roomId={roomId} action={frogAction} speakerName={speaker.name} />
             <button
-              type="button"
-              onClick={() => setOocOpen(true)}
-              style={{
-                flexShrink: 0, padding: '0 8px', height: 36,
-                border: '1px solid #211d17', background: '#f4eee0', color: '#211d17',
-                fontSize: 9.5, cursor: 'pointer', letterSpacing: '.02em', lineHeight: 1.15,
-                marginBottom: 2,
-              }}
-            >
-              中の人<br />チャットへ
-            </button>
+          type="button"
+          onClick={() => setOocOpen(true)}
+          style={{
+            position: 'relative', flexShrink: 0, padding: '0 10px', height: 38, borderRadius: 0,
+            border: '1px solid #211d17', background: '#f4eee0', color: '#211d17',
+            fontSize: 10.5, cursor: 'pointer', letterSpacing: '.03em', lineHeight: 1.2, marginBottom: 2,
+          }}
+        >
+          中の人<br />チャットへ
+          {hasUnreadOoc && (
+            <span style={{
+              position: 'absolute', top: -3, right: -3,
+              width: 8, height: 8, borderRadius: '50%',
+              background: '#8a2418', border: '1px solid #f4eee0',
+            }} />
+          )}
+        </button>
           </>
         )}
         <ClearOnDone inputRef={inputRef} onClear={autoResize} />
