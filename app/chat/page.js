@@ -4,6 +4,7 @@ import Link from 'next/link'
 import InvitationRow from './InvitationRow'
 import { respondToChatInvitation } from './actions'
 import AutoRefresh from '@/components/AutoRefresh'
+import Image from 'next/image'
 
 export default async function ChatListPage() {
   const supabase = await createClient()
@@ -201,9 +202,10 @@ export default async function ChatListPage() {
                   background: '#211d17', border: '1px solid #211d17',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   color: '#f4eee0', fontWeight: 700, fontSize: 16, fontFamily: 'Georgia, serif',
+                  position: 'relative',
                 }}>
                   {room.displayMembers[0].ocs?.icon_url ? (
-                    <img src={room.displayMembers[0].ocs.icon_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <Image src={room.displayMembers[0].ocs.icon_url} alt="" fill sizes="48px" style={{ objectFit: 'cover' }} />
                   ) : room.displayMembers[0].ocs?.name?.charAt(0)}
                 </div>
               ) : (
@@ -222,7 +224,7 @@ export default async function ChatListPage() {
                       }}
                     >
                       {m.ocs?.icon_url ? (
-                        <img src={m.ocs.icon_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <Image src={m.ocs.icon_url} alt="" fill sizes="30px" style={{ objectFit: 'cover' }} />
                       ) : m.ocs?.name?.charAt(0)}
                     </div>
                   ))}
