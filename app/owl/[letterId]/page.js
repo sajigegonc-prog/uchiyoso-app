@@ -33,11 +33,10 @@ export default async function LetterDetailPage({ params }) {
   const myOcId = direction === 'received' ? letter.recipient_oc_id : letter.sender_oc_id
   const myOcName = myOcNameMap.get(myOcId)
 
-  if (direction === 'received' && !letter.read_at) {
-    await supabase.from('owl_letters').update({ read_at: new Date().toISOString() }).eq('id', letter.id)
-  }
+  import MarkReadOnMount from './MarkReadOnMount'
 
   return (
+    <MarkReadOnMount letterId={letter.id} alreadyDone={direction !== 'received' || !!letter.read_at} />
     <div style={{
       fontFamily: "'BIZ UDPGothic', sans-serif", minHeight: '100vh',
       background: 'radial-gradient(circle at 20% 15%, rgba(139,90,43,.16), transparent 40%), radial-gradient(circle at 80% 85%, rgba(92,58,33,.22), transparent 45%), #241a10',
