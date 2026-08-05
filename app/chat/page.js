@@ -12,13 +12,14 @@ export default async function ChatListPage() {
 
   const { data: memberships } = await supabase
     .from('chat_room_members')
-    .select('room_id, oc_id, left_at, last_read_at, chat_rooms(id, deleted_at, primary_oc_id)')
+    .select('room_id, oc_id, left_at, last_read_at, ooc_last_read_at, chat_rooms(id, deleted_at, primary_oc_id)')
     .eq('user_id', user.id)
     .is('left_at', null)
   const roomIdSet = new Set()
   const roomIds = []
   const primaryOcByRoom = new Map()
   const lastReadByRoom = new Map()
+  const oocLastReadByRoom = new Map()
   const myOcIdsInRoom = new Map()
   for (const m of memberships || []) {
     if (m.chat_rooms && !m.chat_rooms.deleted_at) {
@@ -30,6 +31,10 @@ export default async function ChatListPage() {
       const existing = lastReadByRoom.get(m.room_id)
       if (!existing || (m.last_read_at && m.last_read_at > existing)) {
         lastReadByRoom.set(m.room_id, m.last_read_at)
+      }
+      const existingOoc = oocLastReadByRoom.get(m.room_id)
+      if (!existingOoc || (m.ooc_last_read_at && m.ooc_last_read_at > existingOoc)) {
+        oocLastReadByRoom.set(m.room_id, m.ooc_last_read_at)
       }
       if (!myOcIdsInRoom.has(m.room_id)) myOcIdsInRoom.set(m.room_id, new Set())
       myOcIdsInRoom.get(m.room_id).add(m.oc_id)
@@ -67,8 +72,11 @@ export default async function ChatListPage() {
     for (const m of msgs || []) {
       if (!seenForPreview.has(m.room_id) && !m.is_system) {
         lastMessages[m.room_id] = m.content
-        lastActivityByRoom.set(m.room_id, m.created_at)
         seenForPreview.add(m.room_id)
+      }
+      const existingActivity = lastActivityByRoom.get(m.room_id)
+      if (!existingActivity || m.created_at > existingActivity) {
+        lastActivityByRoom.set(m.room_id, m.created_at)
       }
       if (!unreadByRoom.has(m.room_id) && !m.is_system) {
         if (selfOnlyRooms.has(m.room_id)) {
@@ -88,13 +96,41 @@ export default async function ChatListPage() {
     }
   }
 
+  const unreadOocByRoom = new Map()
+  if (roomIds.length > 0) {
+    const { data: oocMsgs } = await supabase
+      .from('room_ooc_messages')
+      .select('room_id, user_id, created_at')
+      .in('room_id', roomIds)
+      .order('created_at', { ascending: false })
+    const seenOoc = new Set()
+    for (const m of oocMsgs || []) {
+      if (seenOoc.has(m.room_id)) continue
+      seenOoc.add(m.room_id)
+      const existingActivity = lastActivityByRoom.get(m.room_id)
+      if (!existingActivity || m.created_at > existingActivity) {
+        lastActivityByRoom.set(m.room_id, m.created_at)
+      }
+      if (selfOnlyRooms.has(m.room_id)) continue
+      if (m.user_id === user.id) continue
+      const lastRead = oocLastReadByRoom.get(m.room_id)
+      if (!lastRead || new Date(m.created_at) > new Date(lastRead)) {
+        unreadOocByRoom.set(m.room_id, true)
+      }
+    }
+  }
+
   const rooms = roomIds.map((id) => {
     const allInRoom = membersByRoom.get(id) || []
     const primaryOcId = primaryOcByRoom.get(id)
     const otherOcs = allInRoom.filter((m) => m.oc_id !== primaryOcId)
     const displayMembers = otherOcs.length > 0 ? otherOcs : allInRoom
     const title = allInRoom.map((m) => m.ocs?.name).filter(Boolean).join('、')
-    return { id, title, displayMembers, unread: unreadByRoom.get(id) || false }
+    return {
+      id, title, displayMembers,
+      unread: unreadByRoom.get(id) || false,
+      unreadOoc: unreadOocByRoom.get(id) || false,
+    }
   })
 
   rooms.sort((a, b) => {
@@ -110,7 +146,7 @@ export default async function ChatListPage() {
       fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh',
       padding: '24px 20px 110px',
     }}>
-      <AutoRefresh intervalMs={5000} />
+      <AutoRefresh intervalMs={4000} />
       <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
         <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO GAZETTE</div>
         <div style={{ fontSize: 26, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>
@@ -192,7 +228,7 @@ export default async function ChatListPage() {
                   ))}
                 </div>
               )}
-              {room.unread && (
+              {(room.unread || room.unreadOoc) && (
                 <span style={{
                   position: 'absolute', top: -2, right: -2,
                   width: 11, height: 11, borderRadius: '50%',
@@ -201,8 +237,13 @@ export default async function ChatListPage() {
               )}
             </div>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: '#211d17', fontFamily: 'Georgia, serif' }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: '#211d17', fontFamily: 'Georgia, serif', display: 'flex', alignItems: 'center', gap: 6 }}>
                 {room.title || '名前未設定'}
+                {room.unreadOoc && (
+                  <span style={{ fontSize: 9, color: '#4a5580', border: '1px solid #4a5580', padding: '1px 6px', fontFamily: "'BIZ UDPGothic', sans-serif", fontWeight: 700 }}>
+                    中の人
+                  </span>
+                )}
               </div>
               <div style={{
                 fontSize: 12, color: room.unread ? '#211d17' : '#8a8168', fontStyle: 'italic', marginTop: 3,
