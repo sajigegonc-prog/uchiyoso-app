@@ -34,7 +34,6 @@ export default async function NewChatPage({ searchParams }) {
         </p>
       ) : (
         <NewRoomForm
-          action={createRoom}
           ocs={ocs}
           friendOcs={friendOcs || []}
           initialFriendOcId={initialFriendOcId}
