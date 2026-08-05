@@ -1,57 +1,84 @@
 'use client'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { useFormStatus } from 'react-dom'
 import useKeyboardOffset from '@/components/useKeyboardOffset'
 
-function ClearOnDone({ inputRef }) {
+function SubmitBtn() {
   const { pending } = useFormStatus()
-  const wasPending = useRef(false)
-  if (wasPending.current && !pending && inputRef.current) {
-    inputRef.current.value = ''
-  }
-  wasPending.current = pending
-  return null
+  return (
+    <button type="submit" disabled={pending} style={{
+      border: '1px solid #5a6a8a', borderRadius: 3, background: pending ? '#3a4360' : '#4a5580',
+      color: '#e8eaf5', fontWeight: 700, fontSize: 13, padding: '0 16px', letterSpacing: '.03em',
+    }}>
+      {pending ? '…' : '送信'}
+    </button>
+  )
 }
 
 export default function OocPanel({ roomId, myUserId, messages, sendAction, onClose }) {
   const inputRef = useRef(null)
+  const submittingRef = useRef(false)
+  const [localMessages, setLocalMessages] = useState(null)
   const keyboardOffset = useKeyboardOffset()
   const now = new Date()
   const timeLabel = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
 
+  function handleSubmit(e) {
+    if (submittingRef.current) {
+      e.preventDefault()
+      return
+    }
+    submittingRef.current = true
+    setTimeout(() => {
+      submittingRef.current = false
+      if (inputRef.current) inputRef.current.value = ''
+    }, 600)
+  }
+
   return (
     <div style={{
-      position: 'fixed', inset: 0, background: '#f3e9d8', zIndex: 90,
+      position: 'fixed', inset: 0, background: '#1c2133', zIndex: 90,
       display: 'flex', flexDirection: 'column',
     }}>
-      <div style={{ background: '#3d2d1c', color: '#f3e9d8', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-        <span style={{ fontSize: 14, fontWeight: 700 }}>中の人チャット</span>
+      <div style={{
+        background: '#12151f', color: '#c7ccdd', padding: '14px 16px',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        flexShrink: 0, borderBottom: '1px solid #3a4360',
+      }}>
+        <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '.1em', fontFamily: "'Courier New', monospace" }}>
+          MEMO — 中の人チャット
+        </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 12, opacity: 0.7 }}>現在時刻 {timeLabel}</span>
-          <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', color: '#f3e9d8', fontSize: 18, cursor: 'pointer' }}>×</button>
+          <span style={{ fontSize: 11, color: '#7a82a0', fontFamily: "'Courier New', monospace" }}>{timeLabel}</span>
+          <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', color: '#c7ccdd', fontSize: 18, cursor: 'pointer' }}>×</button>
         </div>
       </div>
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px 16px 74px' }}>
         {(!messages || messages.length === 0) && (
-          <p style={{ fontSize: 12.5, color: '#8b7355', textAlign: 'center', marginTop: 20 }}>まだメッセージがありません。</p>
+          <p style={{ fontSize: 12.5, color: '#7a82a0', textAlign: 'center', marginTop: 20, fontFamily: "'Courier New', monospace" }}>
+            まだメッセージがありません。
+          </p>
         )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {messages && messages.map((msg) => {
             const mine = msg.user_id === myUserId
             if (msg.is_system) {
               return (
-                <div key={msg.id} style={{ textAlign: 'center', fontSize: 12, color: '#8b7355', whiteSpace: 'pre-wrap' }}>
+                <div key={msg.id} style={{
+                  textAlign: 'center', fontSize: 11.5, color: '#8a92b5', whiteSpace: 'pre-wrap',
+                  fontFamily: "'Courier New', monospace", padding: '4px 0',
+                }}>
                   {msg.content}
                 </div>
               )
             }
             return (
               <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start' }}>
-                <div style={{ fontSize: 10.5, color: '#8b7355', marginBottom: 2 }}>{msg.senderName}</div>
+                <div style={{ fontSize: 10, color: '#7a82a0', marginBottom: 2, fontFamily: "'Courier New', monospace" }}>{msg.senderName}</div>
                 <div style={{
                   maxWidth: '75%', padding: '9px 13px', borderRadius: 3, fontSize: 14, lineHeight: 1.5,
-                  background: mine ? '#5c3a21' : '#fff', color: mine ? '#f3e9d8' : '#241a10',
-                  border: mine ? 'none' : '2px solid #d8c7ac',
+                  background: mine ? '#4a5580' : '#252b40', color: '#e8eaf5',
+                  border: '1px solid #3a4360',
                 }}>
                   {msg.content}
                 </div>
@@ -62,10 +89,11 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
       </div>
       <form
         action={sendAction}
+        onSubmit={handleSubmit}
         style={{
-          position: 'fixed', left: 0, right: 0,
-          bottom: keyboardOffset > 0 ? keyboardOffset : 60,
-          display: 'flex', gap: 8, padding: '12px 16px', borderTop: '2px solid #8b6a4a', background: '#fff', zIndex: 95,
+          position: 'fixed', left: 0, right: 0, bottom: keyboardOffset,
+          display: 'flex', gap: 8, padding: '12px 16px', background: '#12151f',
+          borderTop: '1px solid #3a4360', zIndex: 95,
         }}
       >
         <input type="hidden" name="room_id" value={roomId} />
@@ -73,12 +101,12 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
           ref={inputRef}
           name="content"
           placeholder="中の人として発言"
-          style={{ flex: 1, border: '2px solid #8b6a4a', borderRadius: 3, padding: '10px 12px', fontSize: 16, background: '#fbf5e9', color: '#241a10' }}
+          style={{
+            flex: 1, border: '1px solid #3a4360', borderRadius: 3, padding: '10px 12px', fontSize: 16,
+            background: '#252b40', color: '#e8eaf5', fontFamily: "'Courier New', monospace",
+          }}
         />
-        <button type="submit" style={{ border: 'none', borderRadius: 3, background: '#8b5a2b', color: '#f3e9d8', fontWeight: 700, fontSize: 13, padding: '0 16px' }}>
-          送信
-        </button>
-        <ClearOnDone inputRef={inputRef} />
+        <SubmitBtn />
       </form>
     </div>
   )
