@@ -26,8 +26,7 @@ export async function openFrogCard(formData) {
   const roomId = formData.get('room_id')?.toString()
   if (!roomId) return { error: '部屋情報が取得できませんでした。' }
 
-  const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
-  const openerName = profile?.display_name || '名前未設定'
+  const openerName = formData.get('speaker_name')?.toString() || '名前未設定'
 
   const { count, error: countError } = await supabase
     .from('frog_cards')
