@@ -165,6 +165,15 @@ export default async function ChatListPage() {
       >
         + 新しい部屋を作る
       </Link>
+      <div
+        style={{
+          display: 'block', textAlign: 'center', marginTop: 10,
+          background: '#d8cdb0', color: '#8a8168', fontWeight: 700, fontSize: 13,
+          padding: 13, letterSpacing: '.05em', cursor: 'default',
+        }}
+      >
+        ランダムマッチング(近日公開予定)
+      </div>
 
       {invitations && invitations.length > 0 && (
         <>
