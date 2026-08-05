@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
 import { getNotifications } from '@/lib/notifications'
 import { signOutOnly } from '../dev/reset/actions'
+import CoachMark from '@/components/CoachMark'
+import { markHomeTutorialSeen } from '../tutorialActions'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -12,7 +14,7 @@ export default async function HomePage() {
   }
   const { data: profile } = await supabase
     .from('profiles')
-    .select('display_name, onboarding_completed')
+    .select('display_name, onboarding_completed, seen_home_tutorial')
     .eq('id', user.id)
     .single()
   if (!profile?.onboarding_completed) {
@@ -30,6 +32,15 @@ export default async function HomePage() {
   ].filter(Boolean)
 
   return (
+    {!profile?.seen_home_tutorial && (
+        <CoachMark
+          steps={[
+            { text: 'ここがあなたのホーム画面です。届いた便りは、ここに速報として並びます。' },
+            { targetId: 'coach-bottomnav', text: 'ここから遊べます。' },
+          ]}
+          onFinish={markHomeTutorialSeen}
+        />
+      )}
     <div style={{
       fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh',
       padding: '24px 20px 100px',
