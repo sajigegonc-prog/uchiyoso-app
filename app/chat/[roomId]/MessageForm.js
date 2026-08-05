@@ -26,7 +26,8 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
 
   return (
     <div style={{
-      position: 'fixed', left: 0, right: 0, bottom: keyboardOffset,
+      position: 'fixed', left: 0, right: 0,
+      bottom: keyboardOffset > 0 ? keyboardOffset : 60,
       background: '#fff', borderTop: '2px solid #8b6a4a', zIndex: 60,
     }}>
       {oocOpen && (
