@@ -3,8 +3,8 @@ import { useState } from 'react'
 import { lightFieldLabelStyle, lightInputStyle, lightBtnStyle } from '../../ocs/styles'
 import SubmitButton from '@/components/SubmitButton'
 
-export default function RecipientSelect({ action, myOcs, recipients }) {
-  const [senderOcId, setSenderOcId] = useState(myOcs[0]?.id || '')
+export default function RecipientSelect({ action, myOcs, recipients, initialSenderOcId, initialRecipientOcId }) {
+  const [senderOcId, setSenderOcId] = useState(initialSenderOcId || myOcs[0]?.id || '')
 
   return (
     <form action={action} style={{ width: '100%', maxWidth: 360, marginTop: 16 }}>
@@ -27,7 +27,7 @@ export default function RecipientSelect({ action, myOcs, recipients }) {
           <p style={{ fontSize: 12.5, color: '#8b7355' }}>送れる相手がいません。フレンドを追加するか、他のOCを登録してください。</p>
         )}
         {recipients.length > 0 && (
-          <select name="recipient_oc_id" style={lightInputStyle} defaultValue="">
+          <select name="recipient_oc_id" style={lightInputStyle} defaultValue={initialRecipientOcId || ''}>
             <option value="" disabled>選んでください</option>
             {recipients.map((group) => (
               <optgroup key={group.label} label={group.label}>
