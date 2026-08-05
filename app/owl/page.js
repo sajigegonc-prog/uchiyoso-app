@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
 import LetterCard from './LetterCard'
+import AutoRefresh from '@/components/AutoRefresh'
 
 export default async function OwlMailPage() {
   const supabase = await createClient()
