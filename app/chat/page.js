@@ -13,12 +13,13 @@ export default async function ChatListPage() {
 
   const { data: memberships } = await supabase
     .from('chat_room_members')
-    .select('room_id, oc_id, left_at, last_read_at, ooc_last_read_at, chat_rooms(id, deleted_at, primary_oc_id)')
+    .select('room_id, oc_id, left_at, last_read_at, ooc_last_read_at, .select('room_id, oc_id, left_at, last_read_at, ooc_last_read_at, chat_rooms(id, deleted_at, primary_oc_id, title)')')
     .eq('user_id', user.id)
     .is('left_at', null)
   const roomIdSet = new Set()
   const roomIds = []
   const primaryOcByRoom = new Map()
+  const customTitleByRoom = new Map()
   const lastReadByRoom = new Map()
   const oocLastReadByRoom = new Map()
   const myOcIdsInRoom = new Map()
@@ -29,6 +30,7 @@ export default async function ChatListPage() {
         roomIds.push(m.chat_rooms.id)
       }
       primaryOcByRoom.set(m.chat_rooms.id, m.chat_rooms.primary_oc_id)
+      customTitleByRoom.set(m.chat_rooms.id, m.chat_rooms.title)
       const existing = lastReadByRoom.get(m.room_id)
       if (!existing || (m.last_read_at && m.last_read_at > existing)) {
         lastReadByRoom.set(m.room_id, m.last_read_at)
@@ -126,7 +128,7 @@ export default async function ChatListPage() {
     const primaryOcId = primaryOcByRoom.get(id)
     const otherOcs = allInRoom.filter((m) => m.oc_id !== primaryOcId)
     const displayMembers = otherOcs.length > 0 ? otherOcs : allInRoom
-    const title = allInRoom.map((m) => m.ocs?.name).filter(Boolean).join('、')
+    const title = customTitleByRoom.get(id) || allInRoom.map((m) => m.ocs?.name).filter(Boolean).join('、')
     return {
       id, title, displayMembers,
       unread: unreadByRoom.get(id) || false,
