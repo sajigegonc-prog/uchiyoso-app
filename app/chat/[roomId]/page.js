@@ -184,7 +184,10 @@ export default async function ChatRoomPage({ params }) {
           変更は「/場所 ○○」「/時間帯 ○○」と発言すると反映されます
         </p>
       </div>
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 16px 74px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{
+        flex: 1, minHeight: 0, overflowY: 'auto', padding: '16px 16px 74px', display: 'flex', flexDirection: 'column', gap: 12,
+        WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain',
+      }}>
         {(!messages || messages.length === 0) && (
           <p style={{ fontSize: 12.5, color: '#8a8168', textAlign: 'center', marginTop: 20, fontStyle: 'italic' }}>まだメッセージがありません。</p>
         )}
