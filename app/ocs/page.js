@@ -99,6 +99,7 @@ export default async function OCsPage() {
           中の人設定
         </div>
         <p style={{ fontSize: 12, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>マッチングを避けたいお相手</p>
+        <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 2, fontStyle: 'italic' }}>(ランダムマッチングは近日公開予定です)</p>
         <form action={addAvoidedPartner} style={{ display: 'flex', gap: 8, marginTop: 10 }}>
           <input
             name="character_name"
