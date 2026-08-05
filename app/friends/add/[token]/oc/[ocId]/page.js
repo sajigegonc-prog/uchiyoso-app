@@ -71,7 +71,7 @@ export default async function PublicOCDetailPage({ params }) {
       {!isSelf && owner && (
         <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>
           <Link
-            href={`/chat/new?friend_id=${owner.id}&friend_name=${encodeURIComponent(owner.display_name || '名前未設定')}`}
+            href={`/chat/new?friend_oc_id=${oc.id}`}
             style={{ display: 'block', textAlign: 'center', padding: 13, border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 13.5, letterSpacing: '.03em', textDecoration: 'none' }}
           >
             この子とおしゃべりする
