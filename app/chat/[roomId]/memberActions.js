@@ -34,6 +34,17 @@ export async function inviteMoreMembers(formData) {
     return { error: '招待するメンバー全員が、既存メンバー全員と友達である必要があります。' }
   }
 
+  const { data: currentOcIds } = await supabase
+    .from('chat_room_members')
+    .select('oc_id')
+    .eq('room_id', roomId)
+    .is('left_at', null)
+  const ocIdsForCheck = [...new Set([...(currentOcIds || []).map((m) => m.oc_id), ...friendOcIds])]
+  const { data: dup } = await supabase.rpc('room_with_exact_members_exists', { _oc_ids: ocIdsForCheck, _exclude_room_id: roomId })
+  if (dup) {
+    return { error: 'その組み合わせだと、既存の別のトークルームとメンバーが完全に一致してしまいます。招待できません。' }
+  }
+
   for (const { ocId, userId } of ownerIds) {
     await supabase.from('chat_room_invitations').insert({
       room_id: roomId,
