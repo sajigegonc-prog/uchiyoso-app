@@ -5,12 +5,10 @@ import { lightBackLinkStyle } from './styles'
 import { addAvoidedPartner } from './actions'
 import AvoidedPartnerTag from './AvoidedPartnerTag'
 import SubmitButton from '@/components/SubmitButton'
-import Avatar from '@/components/Avatar'
 
 export default async function OCsPage() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const user = session?.user
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
 
   const { data: ocs } = await supabase
@@ -27,32 +25,51 @@ export default async function OCsPage() {
 
   return (
     <div style={{
-      fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f3e9d8', minHeight: '100vh',
-      padding: '28px 20px 100px',
+      fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh',
+      padding: '24px 20px 100px',
     }}>
-      <Link href="/home" style={lightBackLinkStyle}>← ホームに戻る</Link>
-      <h1 style={{ fontSize: 18, color: '#241a10', fontWeight: 700, marginTop: 14 }}>
-        あなたのOC ({ocs?.length ?? 0} / 5)
-      </h1>
+      <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
+        <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO GAZETTE</div>
+        <div style={{ fontSize: 26, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>
+          あなたのOC
+        </div>
+        <div style={{ fontSize: 9.5, color: '#8a8168', marginTop: 8, letterSpacing: '.1em' }}>
+          登録数 {ocs?.length ?? 0} / 5
+        </div>
+      </div>
+
       {(!ocs || ocs.length === 0) && (
-        <p style={{ fontSize: 13, color: '#8b7355', marginTop: 12 }}>まだOCが登録されていません。</p>
+        <p style={{ fontSize: 13, color: '#8a8168', marginTop: 20, fontStyle: 'italic', textAlign: 'center' }}>
+          まだOCが登録されていません。
+        </p>
       )}
       {ocs && ocs.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 14 }}>
+        <div style={{ marginTop: 6 }}>
           {ocs.map((oc) => (
             <Link
               key={oc.id}
               href={`/ocs/${oc.id}`}
               style={{
-                display: 'flex', alignItems: 'center', gap: 12,
-                background: '#fbf5e9', border: '2px solid #8b6a4a', borderRadius: 3,
-                padding: 14, boxShadow: '3px 3px 0 rgba(61,39,23,.15)', textDecoration: 'none',
+                display: 'flex', alignItems: 'center', gap: 14,
+                padding: '16px 2px', borderBottom: '1px solid #211d17',
+                textDecoration: 'none',
               }}
             >
-              <Avatar name={oc.name} iconUrl={oc.icon_url} size={44} />
+              <div style={{
+                width: 46, height: 46, borderRadius: '50%', flexShrink: 0, overflow: 'hidden',
+                background: '#211d17', border: '1px solid #211d17',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#f4eee0', fontWeight: 700, fontSize: 16, fontFamily: 'Georgia, serif',
+              }}>
+                {oc.icon_url ? (
+                  <img src={oc.icon_url} alt={oc.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : oc.name?.charAt(0)}
+              </div>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#241a10' }}>{oc.name}</div>
-                <div style={{ fontSize: 12, color: '#8b7355', marginTop: 2 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: '#211d17', fontFamily: 'Georgia, serif' }}>
+                  {oc.name}
+                </div>
+                <div style={{ fontSize: 11.5, color: '#6b6250', marginTop: 3, fontStyle: 'italic' }}>
                   {oc.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{oc.house ? ` ・ ${oc.house}` : ''}
                 </div>
               </div>
@@ -65,44 +82,53 @@ export default async function OCsPage() {
         <Link
           href="/ocs/new"
           style={{
-            display: 'block', textAlign: 'center', marginTop: 14,
-            border: '2px dashed #b3966a', borderRadius: 3, padding: 14,
-            color: '#8b5a2b', fontWeight: 700, fontSize: 14, textDecoration: 'none',
+            display: 'block', textAlign: 'center', marginTop: 20,
+            border: '1px dashed #6b6250', padding: 14,
+            color: '#3d2717', fontWeight: 700, fontSize: 13, textDecoration: 'none',
+            letterSpacing: '.05em',
           }}
         >
-          ＋ 新しいOCを登録する
+          + 新しいOCを登録する
         </Link>
       )}
 
-      <h2 style={{ fontSize: 15, color: '#241a10', fontWeight: 700, marginTop: 32 }}>中の人設定</h2>
-      <p style={{ fontSize: 12.5, color: '#8b7355', marginTop: 4 }}>マッチングを避けたいお相手</p>
-      <form action={addAvoidedPartner} style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-        <input
-          name="character_name"
-          placeholder="キャラクター名を入力"
-          style={{
-            flex: 1, padding: '10px 12px', borderRadius: 3, fontSize: 14,
-            background: '#fff', border: '2px solid #d8c7ac', color: '#241a10',
-          }}
-        />
-        <SubmitButton
-          style={{
-            flexShrink: 0, padding: '10px 16px', borderRadius: 3, border: 'none',
-            background: '#8b5a2b', color: '#f3e9d8', fontWeight: 700, fontSize: 13, cursor: 'pointer',
-          }}
-          pendingText="追加中…"
-        >
-          追加
-        </SubmitButton>
-      </form>
-      {avoidedPartners && avoidedPartners.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
-          {avoidedPartners.map((p) => (
-            <AvoidedPartnerTag key={p.id} partner={p} />
-          ))}
+      <div style={{ marginTop: 32 }}>
+        <div style={{ fontSize: 11, letterSpacing: '.15em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6 }}>
+          中の人設定
         </div>
-      )}
-      <p style={{ fontSize: 11, color: '#8b7355', marginTop: 10 }}>各一配慮用です。</p>
+        <p style={{ fontSize: 12, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>マッチングを避けたいお相手</p>
+        <form action={addAvoidedPartner} style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+          <input
+            name="character_name"
+            placeholder="キャラクター名を入力"
+            style={{
+              flex: 1, padding: '10px 12px', fontSize: 14,
+              background: '#fff', border: '1px solid #211d17', color: '#211d17',
+            }}
+          />
+          <SubmitButton
+            style={{
+              flexShrink: 0, padding: '10px 16px', border: '1px solid #211d17',
+              background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 13, cursor: 'pointer',
+            }}
+            pendingText="追加中…"
+          >
+            追加
+          </SubmitButton>
+        </form>
+        {avoidedPartners && avoidedPartners.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
+            {avoidedPartners.map((p) => (
+              <AvoidedPartnerTag key={p.id} partner={p} />
+            ))}
+          </div>
+        )}
+        <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>各一配慮用です。</p>
+      </div>
+
+      <Link href="/home" style={{ ...lightBackLinkStyle, display: 'block', marginTop: 30, textAlign: 'center', fontSize: 11.5 }}>
+        ← ホームに戻る
+      </Link>
     </div>
   )
 }
