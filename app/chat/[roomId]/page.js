@@ -77,7 +77,7 @@ export default async function ChatRoomPage({ params }) {
     .order('created_at', { ascending: true })
   const oocUserIds = [...new Set((oocMessagesRaw || []).map((m) => m.user_id))]
   const { data: oocProfiles } = oocUserIds.length > 0
-    ? await supabase.from('profiles').select('id, display_name').in('id', oocUserIds)
+    ? await supabase.rpc('get_display_names', { _ids: oocUserIds })
     : { data: [] }
   const oocNameMap = new Map((oocProfiles || []).map((p) => [p.id, p.display_name]))
   const oocMessages = (oocMessagesRaw || []).map((m) => ({
@@ -132,7 +132,7 @@ export default async function ChatRoomPage({ params }) {
       fontFamily: "'BIZ UDPGothic', sans-serif", background: '#efe8d8',
       display: 'flex', flexDirection: 'column', overflow: 'hidden',
     }}>
-      <RealtimeRefresh tables={['messages', 'room_ooc_messages']} fallbackMs={15000} />
+      <RealtimeRefresh tables={['messages', 'room_ooc_messages', 'chat_room_members', 'chat_room_invitations']} fallbackMs={15000} />
       {showFullTutorial && (
         <CoachMark
           steps={[
