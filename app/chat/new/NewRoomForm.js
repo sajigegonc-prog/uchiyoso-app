@@ -1,7 +1,6 @@
 'use client'
 import { useState, useRef } from 'react'
-
-const stepTitles = { 1: '誰が話しますか?', 2: 'お相手を選ぶ' }
+import { useRouter } from 'next/navigation'
 
 const labelStyle = { fontSize: 11, color: '#6b6250', display: 'block', marginBottom: 5, letterSpacing: '.05em' }
 const inputStyle = {
@@ -15,15 +14,28 @@ const btnStyle = {
   background: '#211d17', color: '#f4eee0', letterSpacing: '.05em',
 }
 const btnGhostStyle = { ...btnStyle, background: '#fff', color: '#6b6250', border: '1px solid #8a8168' }
+const typeBtnStyle = (active) => ({
+  display: 'block', width: '100%', padding: 16, marginBottom: 10,
+  border: active ? '1px solid #211d17' : '1px solid #8a8168',
+  background: active ? '#fff' : '#f4eee0', color: '#211d17',
+  fontSize: 14, fontWeight: 700, cursor: 'pointer', textAlign: 'left',
+})
 
-export default function NewRoomForm({ action, ocs, friendOcs, initialFriendOcId }) {
-  const [step, setStep] = useState(1)
-  const [selfPlay, setSelfPlay] = useState(false)
+export default function NewRoomForm({ ocs, friendOcs, initialFriendOcId }) {
+  const router = useRouter()
+  const [step, setStep] = useState(0)
+  const [roomType, setRoomType] = useState('')
   const [speakerOcId, setSpeakerOcId] = useState(ocs[0]?.id || '')
-  const [checkedFriendOcIds, setCheckedFriendOcIds] = useState(initialFriendOcId ? [initialFriendOcId] : [])
+  const [extraOcIds, setExtraOcIds] = useState([])
+  const [oneFriendOcId, setOneFriendOcId] = useState(initialFriendOcId || '')
+  const [groupFriendOcIds, setGroupFriendOcIds] = useState([])
+  const [title, setTitle] = useState('')
+  const [location, setLocation] = useState('')
+  const [timePeriod, setTimePeriod] = useState('')
+  const [pending, setPending] = useState(false)
+  const [error, setError] = useState(null)
   const submittingRef = useRef(false)
 
-  const secStyle = (visible) => ({ display: visible ? 'block' : 'none' })
   const otherOcs = ocs.filter((oc) => oc.id !== speakerOcId)
 
   const groups = []
@@ -35,123 +47,200 @@ export default function NewRoomForm({ action, ocs, friendOcs, initialFriendOcId 
     }
   }
 
-  function toggleFriendOc(ocId) {
-    setCheckedFriendOcIds((prev) => prev.includes(ocId) ? prev.filter((id) => id !== ocId) : [...prev, ocId])
+  function toggleExtraOc(id) {
+    setExtraOcIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
+  }
+  function toggleGroupFriendOc(id) {
+    setGroupFriendOcIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
   }
 
-  function handleSubmit(e) {
-    if (submittingRef.current) { e.preventDefault(); return }
+  async function handleSubmit() {
+    if (submittingRef.current) return
     submittingRef.current = true
+    setPending(true)
+    setError(null)
+
+    const formData = new FormData()
+    formData.set('oc_id', speakerOcId)
+    formData.set('location', location)
+    formData.set('time_period', timePeriod)
+    formData.set('room_type', roomType === 'self' ? 'self' : roomType === 'one' ? 'friend_1on1' : 'friend_group')
+    if (roomType === 'self') {
+      extraOcIds.forEach((id) => formData.append('extra_oc_ids', id))
+    } else if (roomType === 'one') {
+      formData.append('friend_oc_ids', oneFriendOcId)
+    } else if (roomType === 'group') {
+      groupFriendOcIds.forEach((id) => formData.append('friend_oc_ids', id))
+      formData.set('title', title)
+    }
+
+    const { createRoom } = await import('../actions')
+    const result = await createRoom(formData)
+    submittingRef.current = false
+    setPending(false)
+    if (result?.error) {
+      setError(result.error)
+    } else if (result?.id) {
+      router.push(`/chat/${result.id}`)
+    }
   }
+
+  const canProceedToDetails = roomType === 'self'
+    ? true
+    : roomType === 'one'
+      ? !!oneFriendOcId
+      : groupFriendOcIds.length >= 2
+
+  const canSubmit = roomType === 'group' ? title.trim().length > 0 && canProceedToDetails : canProceedToDetails
 
   return (
-    <form action={action} onSubmit={handleSubmit} style={{ width: '100%', maxWidth: 360, marginTop: 16 }}>
-      <input type="hidden" name="oc_id" value={speakerOcId} />
-      {checkedFriendOcIds.map((id) => (
-        <input key={id} type="hidden" name="friend_oc_ids" value={id} />
-      ))}
+    <div style={{ width: '100%', maxWidth: 360, marginTop: 16 }}>
       <div style={{ fontSize: 11, color: '#6b6250', fontWeight: 700, marginBottom: 12, letterSpacing: '.1em' }}>
-        {step} / 2 ・ {stepTitles[step]}
+        {step + 1} / 3
       </div>
 
-      <div style={secStyle(step === 1)}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 8 }}>
-          {ocs.map((oc) => (
-            <button key={oc.id} type="button" onClick={() => setSpeakerOcId(oc.id)}
-              style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                width: 76, padding: '10px 6px', cursor: 'pointer',
-                border: speakerOcId === oc.id ? '1px solid #211d17' : '1px solid #8a8168',
-                background: speakerOcId === oc.id ? '#fff' : '#f4eee0',
-              }}>
-              <div style={{
-                width: 44, height: 44, borderRadius: '50%', overflow: 'hidden',
-                background: '#211d17', border: '1px solid #211d17',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#f4eee0', fontWeight: 700, fontSize: 15, fontFamily: 'Georgia, serif',
-              }}>
-                {oc.icon_url ? <img src={oc.icon_url} alt={oc.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : oc.name?.charAt(0)}
-              </div>
-              <span style={{ fontSize: 11, color: '#211d17', textAlign: 'center', lineHeight: 1.3 }}>{oc.name}</span>
-            </button>
-          ))}
+      {step === 0 && (
+        <div>
+          <button type="button" style={typeBtnStyle(roomType === 'one')} onClick={() => { setRoomType('one'); setStep(1) }}>
+            お友達と話す
+          </button>
+          <button type="button" style={typeBtnStyle(roomType === 'group')} onClick={() => { setRoomType('group'); setStep(1) }}>
+            複数のお友達と話す
+          </button>
+          <button type="button" style={typeBtnStyle(roomType === 'self')} onClick={() => { setRoomType('self'); setStep(1) }}>
+            うちの子同士で話す
+          </button>
         </div>
-        <p style={{ fontSize: 11, color: '#8a8168', lineHeight: 1.7, fontStyle: 'italic' }}>
-          チャット内でいつでも他の子に切り替えることができます。
-        </p>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#211d17', fontWeight: 700, marginTop: 14 }}>
-          <input type="checkbox" checked={selfPlay} onChange={(e) => setSelfPlay(e.target.checked)} style={{ width: 16, height: 16 }} />
-          うちの子同士で会話する
-        </label>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}>
-          <button type="button" style={btnStyle} onClick={() => setStep(2)} disabled={!speakerOcId}>次へ</button>
-        </div>
-      </div>
+      )}
 
-      <div style={secStyle(step === 2)}>
-        <div style={{ marginBottom: 14 }}>
-          <label style={labelStyle}>場所(任意)</label>
-          <input name="location" placeholder="例:図書室3階" style={inputStyle} />
-        </div>
-        <div style={{ marginBottom: 14 }}>
-          <label style={labelStyle}>時間帯(任意)</label>
-          <input name="time_period" placeholder="例:放課後、夜" style={inputStyle} />
-        </div>
-
-        {selfPlay && (
-          <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>一緒に参加させるOC</label>
-            {otherOcs.length === 0 && <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic' }}>他に登録済みのOCがありません。</p>}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 8 }}>
-              {otherOcs.map((oc) => (
-                <label key={oc.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, width: 76, padding: '10px 6px', cursor: 'pointer', border: '1px solid #8a8168', background: '#fff' }}>
-                  <input type="checkbox" name="extra_oc_ids" value={oc.id} style={{ width: 16, height: 16 }} />
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', background: '#211d17', border: '1px solid #211d17', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f4eee0', fontWeight: 700, fontSize: 13, fontFamily: 'Georgia, serif' }}>
-                    {oc.icon_url ? <img src={oc.icon_url} alt={oc.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : oc.name?.charAt(0)}
-                  </div>
-                  <span style={{ fontSize: 10.5, color: '#211d17', textAlign: 'center', lineHeight: 1.3 }}>{oc.name}</span>
-                </label>
-              ))}
-            </div>
+      {step === 1 && (
+        <div>
+          <label style={labelStyle}>誰が話しますか?</label>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 8, marginBottom: 8 }}>
+            {ocs.map((oc) => (
+              <button key={oc.id} type="button" onClick={() => setSpeakerOcId(oc.id)}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                  width: 76, padding: '10px 6px', cursor: 'pointer',
+                  border: speakerOcId === oc.id ? '1px solid #211d17' : '1px solid #8a8168',
+                  background: speakerOcId === oc.id ? '#fff' : '#f4eee0',
+                }}>
+                <div style={{
+                  width: 44, height: 44, borderRadius: '50%', overflow: 'hidden',
+                  background: '#211d17', border: '1px solid #211d17',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#f4eee0', fontWeight: 700, fontSize: 15, fontFamily: 'Georgia, serif',
+                }}>
+                  {oc.icon_url ? <img src={oc.icon_url} alt={oc.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : oc.name?.charAt(0)}
+                </div>
+                <span style={{ fontSize: 11, color: '#211d17', textAlign: 'center', lineHeight: 1.3 }}>{oc.name}</span>
+              </button>
+            ))}
           </div>
-        )}
+          <p style={{ fontSize: 11, color: '#8a8168', lineHeight: 1.7, fontStyle: 'italic' }}>
+            チャット内でいつでも他の子に切り替えることができます。
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 18 }}>
+            <button type="button" style={btnGhostStyle} onClick={() => setStep(0)}>戻る</button>
+            <button type="button" style={btnStyle} onClick={() => setStep(2)} disabled={!speakerOcId}>次へ</button>
+          </div>
+        </div>
+      )}
 
-        <div style={{ marginBottom: 14 }}>
-          <label style={labelStyle}>招待する友達のOC(複数選択可)</label>
-          {groups.length === 0 && <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic' }}>まだ友達がいません。</p>}
-          {groups.map((g) => (
-            <div key={g.label} style={{ marginTop: 10 }}>
-              <div style={{ fontSize: 10.5, color: '#6b6250', fontStyle: 'italic', marginBottom: 6 }}>{g.label}</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {g.ocs.map((oc) => (
-                  <label key={oc.oc_id} style={{
-                    display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', cursor: 'pointer',
-                    border: checkedFriendOcIds.includes(oc.oc_id) ? '1px solid #211d17' : '1px solid #8a8168',
-                    background: checkedFriendOcIds.includes(oc.oc_id) ? '#fff' : '#f4eee0',
-                    fontSize: 12.5, color: '#211d17',
-                  }}>
-                    <input
-                      type="checkbox"
-                      checked={checkedFriendOcIds.includes(oc.oc_id)}
-                      onChange={() => toggleFriendOc(oc.oc_id)}
-                      style={{ width: 14, height: 14 }}
-                    />
-                    {oc.oc_name}
+      {step === 2 && (
+        <div>
+          <div style={{ marginBottom: 14 }}>
+            <label style={labelStyle}>場所(任意)</label>
+            <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="例:図書室3階" style={inputStyle} />
+          </div>
+          <div style={{ marginBottom: 14 }}>
+            <label style={labelStyle}>時間帯(任意)</label>
+            <input value={timePeriod} onChange={(e) => setTimePeriod(e.target.value)} placeholder="例:放課後、夜" style={inputStyle} />
+          </div>
+
+          {roomType === 'group' && (
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelStyle}>部屋のタイトル</label>
+              <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="例:談話室" style={inputStyle} />
+            </div>
+          )}
+
+          {roomType === 'self' && (
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelStyle}>一緒に参加させるOC</label>
+              {otherOcs.length === 0 && <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic' }}>他に登録済みのOCがありません。</p>}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 8 }}>
+                {otherOcs.map((oc) => (
+                  <label key={oc.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, width: 76, padding: '10px 6px', cursor: 'pointer', border: '1px solid #8a8168', background: '#fff' }}>
+                    <input type="checkbox" checked={extraOcIds.includes(oc.id)} onChange={() => toggleExtraOc(oc.id)} style={{ width: 16, height: 16 }} />
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', background: '#211d17', border: '1px solid #211d17', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f4eee0', fontWeight: 700, fontSize: 13, fontFamily: 'Georgia, serif' }}>
+                      {oc.icon_url ? <img src={oc.icon_url} alt={oc.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : oc.name?.charAt(0)}
+                    </div>
+                    <span style={{ fontSize: 10.5, color: '#211d17', textAlign: 'center', lineHeight: 1.3 }}>{oc.name}</span>
                   </label>
                 ))}
               </div>
             </div>
-          ))}
-          <p style={{ fontSize: 11, color: '#8a8168', marginTop: 10, lineHeight: 1.7, fontStyle: 'italic' }}>
-            招待すると相手に通知が届き、相手が承認するとチャットに参加します。複数選ぶとグループチャットになります。
-          </p>
-        </div>
+          )}
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 18 }}>
-          <button type="button" style={btnGhostStyle} onClick={() => setStep(1)}>戻る</button>
-          <button type="submit" style={btnStyle}>この内容で作成する</button>
+          {roomType === 'one' && (
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelStyle}>お相手のOC</label>
+              {groups.length === 0 && <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic' }}>まだ友達がいません。</p>}
+              {groups.map((g) => (
+                <div key={g.label} style={{ marginTop: 10 }}>
+                  <div style={{ fontSize: 10.5, color: '#6b6250', fontStyle: 'italic', marginBottom: 6 }}>{g.label}</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {g.ocs.map((oc) => (
+                      <label key={oc.oc_id} style={{
+                        display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', cursor: 'pointer',
+                        border: oneFriendOcId === oc.oc_id ? '1px solid #211d17' : '1px solid #8a8168',
+                        background: oneFriendOcId === oc.oc_id ? '#fff' : '#f4eee0', fontSize: 12.5, color: '#211d17',
+                      }}>
+                        <input type="radio" name="one_friend_oc" checked={oneFriendOcId === oc.oc_id} onChange={() => setOneFriendOcId(oc.oc_id)} style={{ width: 14, height: 14 }} />
+                        {oc.oc_name}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {roomType === 'group' && (
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelStyle}>招待する友達のOC(2人以上・全員が友達である必要があります)</label>
+              {groups.length === 0 && <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic' }}>まだ友達がいません。</p>}
+              {groups.map((g) => (
+                <div key={g.label} style={{ marginTop: 10 }}>
+                  <div style={{ fontSize: 10.5, color: '#6b6250', fontStyle: 'italic', marginBottom: 6 }}>{g.label}</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {g.ocs.map((oc) => (
+                      <label key={oc.oc_id} style={{
+                        display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', cursor: 'pointer',
+                        border: groupFriendOcIds.includes(oc.oc_id) ? '1px solid #211d17' : '1px solid #8a8168',
+                        background: groupFriendOcIds.includes(oc.oc_id) ? '#fff' : '#f4eee0', fontSize: 12.5, color: '#211d17',
+                      }}>
+                        <input type="checkbox" checked={groupFriendOcIds.includes(oc.oc_id)} onChange={() => toggleGroupFriendOc(oc.oc_id)} style={{ width: 14, height: 14 }} />
+                        {oc.oc_name}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {error && <p style={{ fontSize: 12, color: '#8a2418', marginTop: 8, lineHeight: 1.7 }}>{error}</p>}
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 18 }}>
+            <button type="button" style={btnGhostStyle} onClick={() => setStep(1)} disabled={pending}>戻る</button>
+            <button type="button" style={btnStyle} onClick={handleSubmit} disabled={!canSubmit || pending}>
+              {pending ? '作成中…' : 'この内容で作成する'}
+            </button>
+          </div>
         </div>
-      </div>
-    </form>
+      )}
+    </div>
   )
 }
