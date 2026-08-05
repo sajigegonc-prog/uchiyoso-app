@@ -58,7 +58,7 @@ export default async function LetterDetailPage({ params }) {
             position: 'absolute', inset: 6, border: '1px dashed rgba(92,58,33,.3)', borderRadius: 2, pointerEvents: 'none',
           }} />
           <div style={{ fontSize: 13, color: '#5c3a21', lineHeight: 1.8 }}>
-            {direction === 'received' ? `${otherOcName} より` : `${otherOcName} へ`}
+            {direction === 'received' ? `${myOcName} へ` : `${otherOcName} へ`}
           </div>
           <div style={{
             marginTop: 18, paddingTop: 18, borderTop: '1px solid rgba(92,58,33,.25)',
@@ -68,7 +68,7 @@ export default async function LetterDetailPage({ params }) {
             {letter.content}
           </div>
           <div style={{ marginTop: 22, textAlign: 'right', fontSize: 12.5, color: '#5c3a21' }}>
-            {direction === 'received' ? myOcName : otherOcName}
+            {direction === 'received' ? otherOcName : myOcName} より
           </div>
         </div>
 
