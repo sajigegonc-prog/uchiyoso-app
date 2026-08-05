@@ -82,7 +82,7 @@ export default async function HomePage() {
         </div>
       ) : (
         <p style={{ fontSize: 12.5, color: '#8a8168', marginTop: 24, fontStyle: 'italic', textAlign: 'center' }}>
-          — 本日、新しい便りはありません —
+          — 新しい報せはありません —
         </p>
       )}
     </div>
