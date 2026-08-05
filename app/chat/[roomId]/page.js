@@ -42,8 +42,16 @@ export default async function ChatRoomPage({ params }) {
     .select('user_id, oc_id, ocs(name), left_at, ooc_last_read_at')
     .eq('room_id', roomId)
   const { data: allFriendOcs } = await supabase.rpc('list_friend_ocs')
-  const currentMemberOcIds = new Set((members || []).filter((m) => !m.left_at).map((m) => m.oc_id))
-  const invitableFriendOcs = (allFriendOcs || []).filter((f) => !currentMemberOcIds.has(f.oc_id))
+  const currentMemberUserIds = new Set((members || []).filter((m) => !m.left_at).map((m) => m.user_id))
+  const { data: pendingInvites } = await supabase
+    .from('chat_room_invitations')
+    .select('invitee_id')
+    .eq('room_id', roomId)
+    .eq('status', 'pending')
+  const pendingUserIds = new Set((pendingInvites || []).map((p) => p.invitee_id))
+  const invitableFriendOcs = (allFriendOcs || []).filter(
+    (f) => !currentMemberUserIds.has(f.friend_user_id) && !pendingUserIds.has(f.friend_user_id)
+  )
   const { data: npcs } = await supabase
     .from('chat_room_npcs')
     .select('id, name, created_by')
