@@ -4,8 +4,8 @@ import BottomNav from '@/components/BottomNav'
 import PullToRefresh from '@/components/PullToRefresh'
 
 export const metadata = {
-  title: 'うちよそ',
-  description: 'うちの子と、よその子と。すれ違いから始まる、二次創作チャット。',
+  title: 'ウィザワ向けうちよそ通信クラブ',
+  description: '全うちよそ魔人に捧げます。',
 }
 
 export default async function RootLayout({ children }) {
