@@ -132,6 +132,7 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
         <input type="hidden" name="speaker_type" value={speaker.type} />
         <input type="hidden" name="speaker_id" value={speaker.id} />
         <button
+          id="coach-speaker-btn"
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-label="話し手を切り替え"
@@ -188,6 +189,7 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
           <>
             <FrogChocolateButton roomId={roomId} action={frogAction} speakerName={speaker.name} />
             <button
+          id="coach-ooc-btn"
           type="button"
           onClick={() => setOocOpen(true)}
           style={{
