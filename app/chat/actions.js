@@ -28,9 +28,21 @@ export async function createRoom(formData) {
     if (checkErr || !allFriends) {
       return { error: '参加者全員が友達同士である必要があります。' }
     }
+    const { data: dup } = await supabase.rpc('room_with_exact_members_exists', { _user_ids: participantIds })
+    if (dup) {
+      return { error: '同じメンバー構成のトークルームがすでに存在します。' }
+    }
   }
-  if (roomType === 'friend_1on1' && friendOcIds.length !== 1) {
-    return { error: 'お相手を1人選んでください' }
+  if (roomType === 'friend_1on1') {
+    if (friendOcIds.length !== 1) return { error: 'お相手を1人選んでください' }
+    const { data: friendOc } = await supabase.from('ocs').select('user_id').eq('id', friendOcIds[0]).maybeSingle()
+    if (friendOc) {
+      const participantIds = [user.id, friendOc.user_id]
+      const { data: dup } = await supabase.rpc('room_with_exact_members_exists', { _user_ids: participantIds })
+      if (dup) {
+        return { error: '同じメンバー構成のトークルームがすでに存在します。' }
+      }
+    }
   }
 
   const { data: room, error } = await supabase
