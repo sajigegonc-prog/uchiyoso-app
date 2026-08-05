@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
 import InvitationRow from './InvitationRow'
 import { respondToChatInvitation } from './actions'
+import AutoRefresh from '@/components/AutoRefresh'
 
 export default async function ChatListPage() {
   const supabase = await createClient()
