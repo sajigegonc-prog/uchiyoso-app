@@ -55,6 +55,7 @@ export default async function ChatListPage() {
   const selfOnlyRooms = new Set(roomIds.filter((id) => (uniqueUsersByRoom.get(id)?.size || 1) <= 1))
 
   const lastMessages = {}
+  const lastActivityByRoom = new Map()
   const unreadByRoom = new Map()
   if (roomIds.length > 0) {
     const { data: msgs } = await supabase
@@ -66,6 +67,7 @@ export default async function ChatListPage() {
     for (const m of msgs || []) {
       if (!seenForPreview.has(m.room_id) && !m.is_system) {
         lastMessages[m.room_id] = m.content
+        lastActivityByRoom.set(m.room_id, m.created_at)
         seenForPreview.add(m.room_id)
       }
       if (!unreadByRoom.has(m.room_id) && !m.is_system) {
@@ -95,18 +97,13 @@ export default async function ChatListPage() {
     return { id, title, displayMembers, unread: unreadByRoom.get(id) || false }
   })
 
+  rooms.sort((a, b) => {
+    const ta = lastActivityByRoom.get(a.id) ? new Date(lastActivityByRoom.get(a.id)).getTime() : 0
+    const tb = lastActivityByRoom.get(b.id) ? new Date(lastActivityByRoom.get(b.id)).getTime() : 0
+    return tb - ta
+  })
+
   const { data: invitations } = await supabase.rpc('list_incoming_chat_invitations')
-  if (invitations && invitations.length > 0) {
-    await supabase
-      .from('chat_room_invitations')
-      .update({ seen_at: new Date().toISOString() })
-      .eq('invitee_id', user.id)
-      .is('seen_at', null)
-  }
-  const { data: myOcs } = await supabase
-    .from('ocs')
-    .select('id, name')
-    .eq('user_id', user.id)
 
   return (
     <div style={{
@@ -139,7 +136,7 @@ export default async function ChatListPage() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 10 }}>
             {invitations.map((inv) => (
-              <InvitationRow key={inv.invitation_id} invitation={inv} myOcs={myOcs || []} action={respondToChatInvitation} />
+              <InvitationRow key={inv.invitation_id} invitation={inv} action={respondToChatInvitation} />
             ))}
           </div>
         </>
