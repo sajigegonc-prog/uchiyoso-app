@@ -30,9 +30,21 @@ export default async function RootLayout({ children }) {
           }
         `}</style>
       </head>
-      <body style={{ margin: 0, fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f3e9d8' }}>
-        {children}
-        {user && <BottomNav notifications={notifications} />}
+      <body style={{ margin: 0, fontFamily: "'BIZ UDPGothic', sans-serif", background: '#1a120b' }}>
+        <div
+          style={{
+            maxWidth: 480,
+            margin: '0 auto',
+            minHeight: '100vh',
+            background: '#f3e9d8',
+            position: 'relative',
+            transform: 'translateZ(0)',
+            boxShadow: '0 0 50px rgba(0,0,0,.5)',
+          }}
+        >
+          {children}
+          {user && <BottomNav notifications={notifications} />}
+        </div>
       </body>
     </html>
   )
