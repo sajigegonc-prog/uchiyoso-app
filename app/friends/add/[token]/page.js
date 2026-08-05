@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
-import { sendFriendRequestByToken } from '../../actions'
+import { sendFriendRequestByToken, unfriendUser } from '../../actions'
 import Link from 'next/link'
 
 export default async function ProfilePage({ params }) {
@@ -22,6 +22,16 @@ export default async function ProfilePage({ params }) {
 
   const isSelf = owner.id === user.id
   const { data: ocs } = await supabase.rpc('get_public_ocs_by_token', { _token: token })
+
+  let friendshipStatus = null
+  if (!isSelf) {
+    const { data: existing } = await supabase
+      .from('friendships')
+      .select('id, status')
+      .or(`and(requester_id.eq.${user.id},addressee_id.eq.${owner.id}),and(requester_id.eq.${owner.id},addressee_id.eq.${user.id})`)
+      .maybeSingle()
+    friendshipStatus = existing?.status || null
+  }
 
   return (
     <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px 60px' }}>
@@ -76,7 +86,26 @@ export default async function ProfilePage({ params }) {
         </Link>
       ))}
 
-      {!isSelf && (
+      {!isSelf && friendshipStatus === 'accepted' && (
+        <form action={unfriendUser} style={{ marginTop: 24 }}>
+          <input type="hidden" name="other_id" value={owner.id} />
+          <input type="hidden" name="token" value={token} />
+          <button
+            type="submit"
+            style={{ display: 'block', width: '100%', padding: 13, border: '1px solid #8a2418', background: '#fff', color: '#8a2418', fontWeight: 700, fontSize: 14, letterSpacing: '.05em', cursor: 'pointer' }}
+          >
+            友達を解除する
+          </button>
+        </form>
+      )}
+
+      {!isSelf && friendshipStatus === 'pending' && (
+        <p style={{ fontSize: 12.5, color: '#8a8168', marginTop: 24, textAlign: 'center', fontStyle: 'italic' }}>
+          申請中です。相手の承認をお待ちください。
+        </p>
+      )}
+
+      {!isSelf && !friendshipStatus && (
         <form action={sendFriendRequestByToken} style={{ marginTop: 24 }}>
           <input type="hidden" name="token" value={token} />
           <button
