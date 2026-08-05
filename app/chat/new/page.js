@@ -4,7 +4,7 @@ import { createRoom } from '../actions'
 import NewRoomForm from './NewRoomForm'
 import Link from 'next/link'
 
-export default async function NewChatPage() {
+export default async function NewChatPage({ searchParams }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -14,6 +14,10 @@ export default async function NewChatPage() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: true })
   const { data: friends } = await supabase.rpc('list_my_friends')
+
+  const initialFriendId = searchParams?.friend_id
+  const initialFriendName = searchParams?.friend_name
+
   return (
     <div style={{
       fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh',
@@ -30,7 +34,13 @@ export default async function NewChatPage() {
           チャットを作るには、まずOCを1人登録してください。
         </p>
       ) : (
-        <NewRoomForm action={createRoom} ocs={ocs} friends={friends || []} />
+        <NewRoomForm
+          action={createRoom}
+          ocs={ocs}
+          friends={friends || []}
+          initialFriendId={initialFriendId}
+          initialFriendName={initialFriendName}
+        />
       )}
       <Link href="/chat" style={{ display: 'block', marginTop: 24, marginBottom: 10, padding: '10px 0', textAlign: 'center', fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>
         ← チャット一覧に戻る
