@@ -18,7 +18,6 @@ function SubmitBtn() {
 export default function OocPanel({ roomId, myUserId, messages, sendAction, onClose }) {
   const inputRef = useRef(null)
   const submittingRef = useRef(false)
-  const [localMessages, setLocalMessages] = useState(null)
   const keyboardOffset = useKeyboardOffset()
   const now = new Date()
   const timeLabel = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
@@ -91,7 +90,8 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
         action={sendAction}
         onSubmit={handleSubmit}
         style={{
-          position: 'fixed', left: 0, right: 0, bottom: keyboardOffset,
+          position: 'fixed', left: 0, right: 0,
+          bottom: keyboardOffset > 0 ? keyboardOffset : 60,
           display: 'flex', gap: 8, padding: '12px 16px', background: '#12151f',
           borderTop: '1px solid #3a4360', zIndex: 95,
         }}
