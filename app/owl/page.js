@@ -14,9 +14,11 @@ export default async function OwlMailPage() {
 
   if (myOcIds.length === 0) {
     return (
-      <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f3e9d8', minHeight: '100vh', padding: '28px 20px 100px' }}>
-        <h1 style={{ fontSize: 18, color: '#241a10', fontWeight: 700 }}>ふくろう便</h1>
-        <p style={{ fontSize: 13, color: '#8b7355', marginTop: 12 }}>先にOCを登録してください。</p>
+      <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px 110px' }}>
+        <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
+          <div style={{ fontSize: 26, color: '#211d17', fontWeight: 700, fontFamily: 'Georgia, serif' }}>ふくろう便</div>
+        </div>
+        <p style={{ fontSize: 13, color: '#8a8168', marginTop: 20, fontStyle: 'italic', textAlign: 'center' }}>先にOCを登録してください。</p>
       </div>
     )
   }
@@ -39,37 +41,45 @@ export default async function OwlMailPage() {
 
   const enrichedLetters = (letters || []).map((l) => {
     const direction = myOcIds.includes(l.recipient_oc_id) ? 'received' : 'sent'
-    return {
-      ...l,
-      direction,
-      senderName: nameOf(l.sender_oc_id),
-      recipientName: nameOf(l.recipient_oc_id),
-    }
+    return { ...l, direction, senderName: nameOf(l.sender_oc_id), recipientName: nameOf(l.recipient_oc_id) }
   })
 
+  const received = enrichedLetters.filter((l) => l.direction === 'received')
+  const sent = enrichedLetters.filter((l) => l.direction === 'sent')
+
   return (
-    <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f3e9d8', minHeight: '100vh', padding: '28px 20px 100px' }}>
-      <h1 style={{ fontSize: 18, color: '#241a10', fontWeight: 700 }}>ふくろう便</h1>
+    <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px 110px' }}>
+      <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
+        <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO GAZETTE</div>
+        <div style={{ fontSize: 26, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>ふくろう便</div>
+      </div>
 
       <Link
         href="/owl/new"
         style={{
-          display: 'block', textAlign: 'center', marginTop: 16,
-          background: '#8b5a2b', color: '#f3e9d8', fontWeight: 700, fontSize: 14,
-          borderRadius: 3, padding: 14, textDecoration: 'none',
+          display: 'block', textAlign: 'center', marginTop: 18,
+          background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 13,
+          padding: 13, textDecoration: 'none', letterSpacing: '.05em',
         }}
       >
-        🦉 手紙を送る
+        + 手紙を送る
       </Link>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 20 }}>
-        {enrichedLetters.length === 0 && (
-          <p style={{ fontSize: 13, color: '#8b7355', marginTop: 10 }}>まだ手紙がありません。</p>
-        )}
-        {enrichedLetters.map((letter) => (
-          <LetterCard key={letter.id} letter={letter} />
-        ))}
+      <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 24 }}>
+        届いた便り
       </div>
+      {received.length === 0 && (
+        <p style={{ fontSize: 12.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>まだ届いていません。</p>
+      )}
+      {received.map((letter) => <LetterCard key={letter.id} letter={letter} />)}
+
+      <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 24 }}>
+        送った便り
+      </div>
+      {sent.length === 0 && (
+        <p style={{ fontSize: 12.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>まだ送っていません。</p>
+      )}
+      {sent.map((letter) => <LetterCard key={letter.id} letter={letter} />)}
     </div>
   )
 }
