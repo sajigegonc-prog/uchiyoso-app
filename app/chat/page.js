@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
-import Avatar from '@/components/Avatar'
 import InvitationRow from './InvitationRow'
 import { respondToChatInvitation } from './actions'
 
@@ -99,25 +98,32 @@ export default async function ChatListPage() {
 
   return (
     <div style={{
-      fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f3e9d8', minHeight: '100vh',
-      padding: '24px 20px 100px', position: 'relative',
+      fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh',
+      padding: '24px 20px 110px',
     }}>
-      <h1 style={{ fontSize: 20, color: '#241a10', fontWeight: 700 }}>チャット</h1>
+      <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
+        <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO GAZETTE</div>
+        <div style={{ fontSize: 26, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>
+          おしゃべり欄
+        </div>
+      </div>
 
       <Link
         href="/chat/new"
         style={{
-          display: 'block', textAlign: 'center', marginTop: 16,
-          background: '#8b5a2b', color: '#f3e9d8', fontWeight: 700, fontSize: 14,
-          borderRadius: 3, padding: 14, textDecoration: 'none',
+          display: 'block', textAlign: 'center', marginTop: 18,
+          background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 13,
+          padding: 13, textDecoration: 'none', letterSpacing: '.05em',
         }}
       >
-        ＋ 新しい部屋を作る
+        + 新しい部屋を作る
       </Link>
 
       {invitations && invitations.length > 0 && (
         <>
-          <h2 style={{ fontSize: 13, color: '#5c3a21', fontWeight: 700, marginTop: 22 }}>招待されています</h2>
+          <div style={{ fontSize: 11, letterSpacing: '.15em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 24 }}>
+            招待されています
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 10 }}>
             {invitations.map((inv) => (
               <InvitationRow key={inv.invitation_id} invitation={inv} myOcs={myOcs || []} action={respondToChatInvitation} />
@@ -126,9 +132,11 @@ export default async function ChatListPage() {
         </>
       )}
 
-      <div style={{ marginTop: 20 }}>
+      <div style={{ marginTop: 22 }}>
         {rooms.length === 0 && (
-          <p style={{ fontSize: 13, color: '#8b7355', marginTop: 20 }}>まだ部屋がありません。</p>
+          <p style={{ fontSize: 13, color: '#8a8168', marginTop: 20, fontStyle: 'italic', textAlign: 'center' }}>
+            まだ部屋がありません。
+          </p>
         )}
         {rooms.map((room) => (
           <Link
@@ -136,15 +144,24 @@ export default async function ChatListPage() {
             href={`/chat/${room.id}`}
             style={{
               display: 'flex', alignItems: 'center', gap: 14,
-              padding: '14px 4px', borderBottom: '1px solid #d8c7ac',
+              padding: '15px 2px', borderBottom: '1px solid #211d17',
               textDecoration: 'none', position: 'relative',
             }}
           >
             <div style={{ position: 'relative', flexShrink: 0 }}>
               {room.displayMembers.length === 1 ? (
-                <Avatar name={room.displayMembers[0].ocs?.name} iconUrl={room.displayMembers[0].ocs?.icon_url} size={52} />
+                <div style={{
+                  width: 48, height: 48, borderRadius: '50%', overflow: 'hidden',
+                  background: '#211d17', border: '1px solid #211d17',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#f4eee0', fontWeight: 700, fontSize: 16, fontFamily: 'Georgia, serif',
+                }}>
+                  {room.displayMembers[0].ocs?.icon_url ? (
+                    <img src={room.displayMembers[0].ocs.icon_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : room.displayMembers[0].ocs?.name?.charAt(0)}
+                </div>
               ) : (
-                <div style={{ position: 'relative', width: 52, height: 52 }}>
+                <div style={{ position: 'relative', width: 48, height: 48 }}>
                   {room.displayMembers.slice(0, 3).map((m, i) => (
                     <div
                       key={m.user_id + '_' + m.oc_id}
@@ -152,10 +169,15 @@ export default async function ChatListPage() {
                         position: 'absolute',
                         top: i === 0 ? 0 : 14,
                         left: i === 0 ? 0 : i === 1 ? 20 : 0,
-                        border: '2px solid #f3e9d8', borderRadius: '50%',
+                        width: 30, height: 30, borderRadius: '50%', overflow: 'hidden',
+                        background: '#211d17', border: '2px solid #f4eee0',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: '#f4eee0', fontWeight: 700, fontSize: 12, fontFamily: 'Georgia, serif',
                       }}
                     >
-                      <Avatar name={m.ocs?.name} iconUrl={m.ocs?.icon_url} size={30} />
+                      {m.ocs?.icon_url ? (
+                        <img src={m.ocs.icon_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : m.ocs?.name?.charAt(0)}
                     </div>
                   ))}
                 </div>
@@ -163,17 +185,17 @@ export default async function ChatListPage() {
               {room.unread && (
                 <span style={{
                   position: 'absolute', top: -2, right: -2,
-                  width: 12, height: 12, borderRadius: '50%',
-                  background: '#e0503c', border: '2px solid #f3e9d8',
+                  width: 11, height: 11, borderRadius: '50%',
+                  background: '#8a2418', border: '2px solid #f4eee0',
                 }} />
               )}
             </div>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: '#241a10' }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: '#211d17', fontFamily: 'Georgia, serif' }}>
                 {room.title || '名前未設定'}
               </div>
               <div style={{
-                fontSize: 12.5, color: room.unread ? '#241a10' : '#8b7355', fontWeight: room.unread ? 700 : 400, marginTop: 2,
+                fontSize: 12, color: room.unread ? '#211d17' : '#8a8168', fontStyle: 'italic', marginTop: 3,
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
               }}>
                 {lastMessages[room.id] || 'まだメッセージがありません'}
