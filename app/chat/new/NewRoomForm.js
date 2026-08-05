@@ -20,13 +20,11 @@ export default function NewRoomForm({ action, ocs, friendOcs, initialFriendOcId 
   const [step, setStep] = useState(1)
   const [selfPlay, setSelfPlay] = useState(false)
   const [speakerOcId, setSpeakerOcId] = useState(ocs[0]?.id || '')
-  const [friendOcId, setFriendOcId] = useState(initialFriendOcId || '')
+  const [checkedFriendOcIds, setCheckedFriendOcIds] = useState(initialFriendOcId ? [initialFriendOcId] : [])
   const submittingRef = useRef(false)
 
   const secStyle = (visible) => ({ display: visible ? 'block' : 'none' })
   const otherOcs = ocs.filter((oc) => oc.id !== speakerOcId)
-  const lockedFriend = !!initialFriendOcId
-  const selectedFriendOc = friendOcs.find((f) => f.oc_id === friendOcId)
 
   const groups = []
   const seenFriend = new Set()
@@ -37,6 +35,10 @@ export default function NewRoomForm({ action, ocs, friendOcs, initialFriendOcId 
     }
   }
 
+  function toggleFriendOc(ocId) {
+    setCheckedFriendOcIds((prev) => prev.includes(ocId) ? prev.filter((id) => id !== ocId) : [...prev, ocId])
+  }
+
   function handleSubmit(e) {
     if (submittingRef.current) { e.preventDefault(); return }
     submittingRef.current = true
@@ -45,7 +47,9 @@ export default function NewRoomForm({ action, ocs, friendOcs, initialFriendOcId 
   return (
     <form action={action} onSubmit={handleSubmit} style={{ width: '100%', maxWidth: 360, marginTop: 16 }}>
       <input type="hidden" name="oc_id" value={speakerOcId} />
-      {friendOcId && <input type="hidden" name="friend_oc_id" value={friendOcId} />}
+      {checkedFriendOcIds.map((id) => (
+        <input key={id} type="hidden" name="friend_oc_ids" value={id} />
+      ))}
       <div style={{ fontSize: 11, color: '#6b6250', fontWeight: 700, marginBottom: 12, letterSpacing: '.1em' }}>
         {step} / 2 ・ {stepTitles[step]}
       </div>
@@ -75,17 +79,10 @@ export default function NewRoomForm({ action, ocs, friendOcs, initialFriendOcId 
         <p style={{ fontSize: 11, color: '#8a8168', lineHeight: 1.7, fontStyle: 'italic' }}>
           チャット内でいつでも他の子に切り替えることができます。
         </p>
-        {lockedFriend && selectedFriendOc && (
-          <p style={{ fontSize: 12, color: '#211d17', marginTop: 10, background: '#fff', border: '1px solid #211d17', padding: 10 }}>
-            お相手: {selectedFriendOc.friend_display_name} さんの {selectedFriendOc.oc_name}
-          </p>
-        )}
-        {!lockedFriend && (
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#211d17', fontWeight: 700, marginTop: 14 }}>
-            <input type="checkbox" checked={selfPlay} onChange={(e) => setSelfPlay(e.target.checked)} style={{ width: 16, height: 16 }} />
-            うちの子同士で会話する
-          </label>
-        )}
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#211d17', fontWeight: 700, marginTop: 14 }}>
+          <input type="checkbox" checked={selfPlay} onChange={(e) => setSelfPlay(e.target.checked)} style={{ width: 16, height: 16 }} />
+          うちの子同士で会話する
+        </label>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}>
           <button type="button" style={btnStyle} onClick={() => setStep(2)} disabled={!speakerOcId}>次へ</button>
         </div>
@@ -101,14 +98,7 @@ export default function NewRoomForm({ action, ocs, friendOcs, initialFriendOcId 
           <input name="time_period" placeholder="例:放課後、夜" style={inputStyle} />
         </div>
 
-        {lockedFriend ? (
-          <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>お相手</label>
-            <div style={{ fontSize: 14, color: '#211d17', padding: '10px 12px', border: '1px solid #211d17', background: '#fff' }}>
-              {selectedFriendOc ? `${selectedFriendOc.friend_display_name} さんの ${selectedFriendOc.oc_name}` : '選択済み'}
-            </div>
-          </div>
-        ) : selfPlay ? (
+        {selfPlay && (
           <div style={{ marginBottom: 14 }}>
             <label style={labelStyle}>一緒に参加させるOC</label>
             {otherOcs.length === 0 && <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic' }}>他に登録済みのOCがありません。</p>}
@@ -124,28 +114,42 @@ export default function NewRoomForm({ action, ocs, friendOcs, initialFriendOcId 
               ))}
             </div>
           </div>
-        ) : (
-          <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>お相手のOC</label>
-            {groups.length === 0 && <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic' }}>まだ友達がいません。</p>}
-            {groups.length > 0 && (
-              <select value={friendOcId} onChange={(e) => setFriendOcId(e.target.value)} style={inputStyle}>
-                <option value="" disabled>選んでください</option>
-                {groups.map((g) => (
-                  <optgroup key={g.label} label={g.label}>
-                    {g.ocs.map((oc) => <option key={oc.oc_id} value={oc.oc_id}>{oc.oc_name}</option>)}
-                  </optgroup>
-                ))}
-              </select>
-            )}
-            <p style={{ fontSize: 11, color: '#8a8168', marginTop: 6, lineHeight: 1.7, fontStyle: 'italic' }}>
-              招待すると相手に通知が届き、相手が承認するとチャットに参加します。
-            </p>
-          </div>
         )}
+
+        <div style={{ marginBottom: 14 }}>
+          <label style={labelStyle}>招待する友達のOC(複数選択可)</label>
+          {groups.length === 0 && <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic' }}>まだ友達がいません。</p>}
+          {groups.map((g) => (
+            <div key={g.label} style={{ marginTop: 10 }}>
+              <div style={{ fontSize: 10.5, color: '#6b6250', fontStyle: 'italic', marginBottom: 6 }}>{g.label}</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {g.ocs.map((oc) => (
+                  <label key={oc.oc_id} style={{
+                    display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', cursor: 'pointer',
+                    border: checkedFriendOcIds.includes(oc.oc_id) ? '1px solid #211d17' : '1px solid #8a8168',
+                    background: checkedFriendOcIds.includes(oc.oc_id) ? '#fff' : '#f4eee0',
+                    fontSize: 12.5, color: '#211d17',
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={checkedFriendOcIds.includes(oc.oc_id)}
+                      onChange={() => toggleFriendOc(oc.oc_id)}
+                      style={{ width: 14, height: 14 }}
+                    />
+                    {oc.oc_name}
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+          <p style={{ fontSize: 11, color: '#8a8168', marginTop: 10, lineHeight: 1.7, fontStyle: 'italic' }}>
+            招待すると相手に通知が届き、相手が承認するとチャットに参加します。複数選ぶとグループチャットになります。
+          </p>
+        </div>
+
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 18 }}>
           <button type="button" style={btnGhostStyle} onClick={() => setStep(1)}>戻る</button>
-          <button type="submit" style={btnStyle} disabled={!lockedFriend && !selfPlay && !friendOcId}>この内容で作成する</button>
+          <button type="submit" style={btnStyle}>この内容で作成する</button>
         </div>
       </div>
     </form>
