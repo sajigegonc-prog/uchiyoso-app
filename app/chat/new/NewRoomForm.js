@@ -1,6 +1,7 @@
 'use client'
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { createRoom } from '../actions'
 
 const labelStyle = { fontSize: 11, color: '#6b6250', display: 'block', marginBottom: 5, letterSpacing: '.05em' }
 const inputStyle = {
@@ -88,7 +89,6 @@ export default function NewRoomForm({ ocs, friendOcs, initialFriendOcId }) {
       formData.set('title', title)
     }
 
-    const { createRoom } = await import('../actions')
     const result = await createRoom(formData)
     submittingRef.current = false
     setPending(false)
