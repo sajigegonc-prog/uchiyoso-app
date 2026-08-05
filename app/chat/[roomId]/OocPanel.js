@@ -1,6 +1,7 @@
 'use client'
-import { useRef, useEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useFormStatus } from 'react-dom'
+import { createPortal } from 'react-dom'
 import useKeyboardOffset from '@/components/useKeyboardOffset'
 import { markOocRead } from './oocActions'
 
@@ -20,8 +21,13 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
   const inputRef = useRef(null)
   const submittingRef = useRef(false)
   const keyboardOffset = useKeyboardOffset()
+  const [mounted, setMounted] = useState(false)
   const now = new Date()
   const timeLabel = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     markOocRead(roomId)
@@ -36,7 +42,9 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
     }, 600)
   }
 
-  return (
+  if (!mounted) return null
+
+  return createPortal(
     <div style={{ position: 'fixed', inset: 0, background: '#1c2133', zIndex: 90, display: 'flex', flexDirection: 'column' }}>
       <div style={{ background: '#12151f', color: '#c7ccdd', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0, borderBottom: '1px solid #3a4360' }}>
         <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '.1em', fontFamily: "'Courier New', monospace" }}>MEMO — 中の人チャット</span>
@@ -71,6 +79,7 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
         <input ref={inputRef} name="content" placeholder="中の人として発言" style={{ flex: 1, border: '1px solid #3a4360', borderRadius: 3, padding: '10px 12px', fontSize: 16, background: '#252b40', color: '#e8eaf5', fontFamily: "'Courier New', monospace" }} />
         <SubmitBtn />
       </form>
-    </div>
+    </div>,
+    document.body
   )
 }
