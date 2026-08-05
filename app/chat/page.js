@@ -13,7 +13,7 @@ export default async function ChatListPage() {
 
   const { data: memberships } = await supabase
     .from('chat_room_members')
-    .select('room_id, oc_id, left_at, last_read_at, ooc_last_read_at, .select('room_id, oc_id, left_at, last_read_at, ooc_last_read_at, chat_rooms(id, deleted_at, primary_oc_id, title)')')
+    .select('room_id, oc_id, left_at, last_read_at, ooc_last_read_at, chat_rooms(id, deleted_at, primary_oc_id, title)')
     .eq('user_id', user.id)
     .is('left_at', null)
   const roomIdSet = new Set()
