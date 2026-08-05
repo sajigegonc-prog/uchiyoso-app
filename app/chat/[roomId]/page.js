@@ -9,6 +9,7 @@ import MessageForm from './MessageForm'
 import DeletionNotice from './DeletionNotice'
 import DeleteRoomButton from './DeleteRoomButton'
 import AutoRefresh from '@/components/AutoRefresh'
+import Image from 'next/image'
 export default async function ChatRoomPage({ params }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -136,9 +137,10 @@ export default async function ChatRoomPage({ params }) {
                 background: '#211d17', border: '1px solid #211d17',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: '#f4eee0', fontWeight: 700, fontSize: 12, fontFamily: 'Georgia, serif',
+                position: 'relative',
               }}>
                 {speakerIcon ? (
-                  <img src={speakerIcon} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <Image src={speakerIcon} alt="" fill sizes="30px" style={{ objectFit: 'cover' }} />
                 ) : (speakerName || '?').charAt(0)}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', maxWidth: '72%' }}>
