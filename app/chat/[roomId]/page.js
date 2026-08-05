@@ -13,6 +13,7 @@ import DeleteRoomButton from './DeleteRoomButton'
 import AddMemberButton from './AddMemberButton'
 import MessageBubble from './MessageBubble'
 import RealtimeRefresh from '@/components/RealtimeRefresh'
+import SceneTransitionButton from './SceneTransitionButton'
 
 export default async function ChatRoomPage({ params }) {
   const supabase = await createClient()
@@ -21,7 +22,7 @@ export default async function ChatRoomPage({ params }) {
   const { roomId } = params
   const { data: room } = await supabase
     .from('chat_rooms')
-    .select('id, location, time_period, primary_oc_id, pending_deletion_by, deleted_at, title')
+    .select('id, location, time_period, primary_oc_id, pending_deletion_by, deleted_at, title, transition_requested_at, transition_requested_by')
     .eq('id', roomId)
     .maybeSingle()
   if (!room) {
@@ -87,6 +88,21 @@ export default async function ChatRoomPage({ params }) {
   const isSelfRoom = uniqueUserCount <= 1
   const isGroup = uniqueUserCount > 2
   const myMembership = (members || []).find((m) => m.user_id === user.id)
+  let requestedByName = null
+  let alreadyApprovedTransition = false
+  if (room.transition_requested_at) {
+    if (room.transition_requested_by) {
+      const { data: reqProfile } = await supabase.from('profiles').select('display_name').eq('id', room.transition_requested_by).maybeSingle()
+      requestedByName = reqProfile?.display_name || null
+    }
+    const { data: myApproval } = await supabase
+      .from('scene_transition_approvals')
+      .select('user_id')
+      .eq('room_id', roomId)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    alreadyApprovedTransition = !!myApproval
+  }
   const showDeletionNotice = !isSelfRoom && room.pending_deletion_by && room.pending_deletion_by !== user.id && !myMembership?.left_at
   const deleteButtonLabel = isGroup ? '退出' : '削除'
   const { data: latestOocMsg } = await supabase
@@ -113,7 +129,13 @@ export default async function ChatRoomPage({ params }) {
       <div style={{ background: '#f4eee0', padding: '14px 18px', flexShrink: 0, borderBottom: '4px double #211d17' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <Link href="/chat" style={{ fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>← 一覧に戻る</Link>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <SceneTransitionButton
+              roomId={room.id}
+              pending={!!room.transition_requested_at}
+              alreadyApproved={alreadyApprovedTransition}
+              requestedByName={requestedByName}
+            />
             <AddMemberButton roomId={room.id} action={inviteMoreMembers} friendOcs={invitableFriendOcs} />
             <DeleteRoomButton roomId={room.id} label={deleteButtonLabel} action={requestDeleteRoom} />
           </div>
