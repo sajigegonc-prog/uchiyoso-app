@@ -10,6 +10,8 @@ import DeletionNotice from './DeletionNotice'
 import DeleteRoomButton from './DeleteRoomButton'
 import AutoRefresh from '@/components/AutoRefresh'
 import Image from 'next/image'
+import { inviteMoreMembers } from './memberActions'
+import AddMemberButton from './AddMemberButton'
 export default async function ChatRoomPage({ params }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -37,6 +39,9 @@ export default async function ChatRoomPage({ params }) {
     .from('chat_room_members')
     .select('user_id, oc_id, ocs(name), left_at, ooc_last_read_at')
     .eq('room_id', roomId)
+  const { data: allFriendOcs } = await supabase.rpc('list_friend_ocs')
+  const currentMemberOcIds = new Set((members || []).filter((m) => !m.left_at).map((m) => m.oc_id))
+  const invitableFriendOcs = (allFriendOcs || []).filter((f) => !currentMemberOcIds.has(f.oc_id))
   const { data: npcs } = await supabase
     .from('chat_room_npcs')
     .select('id, name, created_by')
@@ -97,6 +102,7 @@ export default async function ChatRoomPage({ params }) {
       <div style={{ background: '#f4eee0', padding: '14px 18px', flexShrink: 0, borderBottom: '4px double #211d17' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <Link href="/chat" style={{ fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>← 一覧に戻る</Link>
+          <AddMemberButton roomId={room.id} action={inviteMoreMembers} friendOcs={invitableFriendOcs} />
           <DeleteRoomButton roomId={room.id} label={deleteButtonLabel} action={requestDeleteRoom} />
         </div>
         <div style={{ fontSize: 17, fontWeight: 700, marginTop: 8, color: '#211d17', fontFamily: 'Georgia, serif' }}>
