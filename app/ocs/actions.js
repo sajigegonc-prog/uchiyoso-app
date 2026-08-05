@@ -25,8 +25,6 @@ export async function addOC(formData) {
   if (error || !data) return { error: '登録に失敗しました' }
   return { id: data.id }
 }
-  redirect('/ocs')
-}
 export async function addAvoidedPartner(formData) {
   const supabase = await createClient()
   const { data: { session } } = await supabase.auth.getSession()
