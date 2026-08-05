@@ -19,6 +19,7 @@ export default function BottomNav({ notifications = {} }) {
 
   return (
     <nav
+      id="coach-bottomnav"
       style={{
         height: 60,
         background: '#f4eee0', borderTop: '4px double #211d17',
