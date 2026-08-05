@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
 import { getNotifications } from '@/lib/notifications'
+import { signOutOnly } from '../dev/reset/actions'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -85,6 +86,11 @@ export default async function HomePage() {
           — 新しい報せはありません —
         </p>
       )}
+      <form action={signOutOnly} style={{ marginTop: 40, textAlign: 'center' }}>
+        <button type="submit" style={{ background: 'none', border: 'none', color: '#8a8168', fontSize: 11.5, textDecoration: 'underline', cursor: 'pointer', fontStyle: 'italic' }}>
+          ログアウト
+        </button>
+      </form>
     </div>
   )
 }
