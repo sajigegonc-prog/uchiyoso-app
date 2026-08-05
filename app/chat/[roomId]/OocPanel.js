@@ -63,7 +63,8 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
       <form
         action={sendAction}
         style={{
-          position: 'fixed', left: 0, right: 0, bottom: keyboardOffset,
+          position: 'fixed', left: 0, right: 0,
+          bottom: keyboardOffset > 0 ? keyboardOffset : 60,
           display: 'flex', gap: 8, padding: '12px 16px', borderTop: '2px solid #8b6a4a', background: '#fff', zIndex: 95,
         }}
       >
