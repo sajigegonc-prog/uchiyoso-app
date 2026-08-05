@@ -20,14 +20,29 @@ export default async function PublicOCDetailPage({ params }) {
 
       <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17', marginTop: 12 }}>
         <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO GAZETTE</div>
-        <div style={{ fontSize: 22, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{oc.name}</div>
-        <div style={{ fontSize: 10.5, color: '#8a8168', marginTop: 6, fontStyle: 'italic' }}>
-          {oc.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{oc.house ? ` ・ ${oc.house}` : ''}
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
+        <div style={{
+          width: 68, height: 68, borderRadius: '50%', overflow: 'hidden',
+          background: '#211d17', border: '1px solid #211d17',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#f4eee0', fontWeight: 700, fontSize: 22, fontFamily: 'Georgia, serif',
+        }}>
+          {oc.icon_url ? (
+            <img src={oc.icon_url} alt={oc.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : oc.name?.charAt(0)}
         </div>
+      </div>
+      <div style={{ fontSize: 20, color: '#211d17', marginTop: 10, fontWeight: 700, fontFamily: 'Georgia, serif', textAlign: 'center' }}>
+        {oc.name}
+      </div>
+      <div style={{ fontSize: 10.5, color: '#8a8168', marginTop: 6, fontStyle: 'italic', textAlign: 'center' }}>
+        {oc.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{oc.house ? ` ・ ${oc.house}` : ''}
       </div>
 
       {oc.oc_type === 'dreamer' && oc.paired_character && (
-        <div style={{ marginTop: 20 }}>
+        <div style={{ marginTop: 22 }}>
           <div style={{ fontSize: 10, color: '#6b6250', letterSpacing: '.05em' }}>お相手</div>
           <div style={{ fontSize: 13, color: '#211d17', marginTop: 4 }}>{oc.paired_character}</div>
         </div>
