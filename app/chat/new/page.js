@@ -13,10 +13,9 @@ export default async function NewChatPage({ searchParams }) {
     .select('id, name, icon_url')
     .eq('user_id', user.id)
     .order('created_at', { ascending: true })
-  const { data: friends } = await supabase.rpc('list_my_friends')
+  const { data: friendOcs } = await supabase.rpc('list_friend_ocs')
 
-  const initialFriendId = searchParams?.friend_id
-  const initialFriendName = searchParams?.friend_name
+  const initialFriendOcId = searchParams?.friend_oc_id
 
   return (
     <div style={{
@@ -37,9 +36,8 @@ export default async function NewChatPage({ searchParams }) {
         <NewRoomForm
           action={createRoom}
           ocs={ocs}
-          friends={friends || []}
-          initialFriendId={initialFriendId}
-          initialFriendName={initialFriendName}
+          friendOcs={friendOcs || []}
+          initialFriendOcId={initialFriendOcId}
         />
       )}
       <Link href="/chat" style={{ display: 'block', marginTop: 24, marginBottom: 10, padding: '10px 0', textAlign: 'center', fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>
