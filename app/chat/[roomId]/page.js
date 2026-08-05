@@ -5,13 +5,15 @@ import { sendMessage } from './actions'
 import { addNpc, deleteNpc } from './npcActions'
 import { sendOocMessage, openFrogCard } from './oocActions'
 import { requestDeleteRoom, acknowledgeDeletion } from './deleteActions'
+import { editMessage, deleteMessage } from './messageActions'
+import { inviteMoreMembers } from './memberActions'
 import MessageForm from './MessageForm'
 import DeletionNotice from './DeletionNotice'
 import DeleteRoomButton from './DeleteRoomButton'
-import AutoRefresh from '@/components/AutoRefresh'
-import Image from 'next/image'
-import { inviteMoreMembers } from './memberActions'
 import AddMemberButton from './AddMemberButton'
+import MessageBubble from './MessageBubble'
+import AutoRefresh from '@/components/AutoRefresh'
+
 export default async function ChatRoomPage({ params }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -49,7 +51,7 @@ export default async function ChatRoomPage({ params }) {
     .order('created_at', { ascending: true })
   const { data: messages } = await supabase
     .from('messages')
-    .select('id, content, created_at, sender_oc_id, sender_npc_id, is_system, ocs(name, icon_url), chat_room_npcs(name)')
+    .select('id, content, created_at, sender_oc_id, sender_npc_id, is_system, edited_at, deleted_at, ocs(name, icon_url), chat_room_npcs(name)')
     .eq('room_id', roomId)
     .order('created_at', { ascending: true })
   const { data: oocMessagesRaw } = await supabase
@@ -69,6 +71,7 @@ export default async function ChatRoomPage({ params }) {
   const myOcs = (members || [])
     .filter((m) => m.user_id === user.id)
     .map((m) => ({ id: m.oc_id, name: m.ocs?.name }))
+  const myOcIdSet = new Set(myOcs.map((oc) => oc.id))
   const myNpcs = (npcs || []).filter((n) => n.created_by === user.id).map((n) => n.id)
   const memberNames = (members || []).map((m) => m.ocs?.name).filter(Boolean)
   const activeMembers = (members || []).filter((m) => !m.left_at)
@@ -76,6 +79,8 @@ export default async function ChatRoomPage({ params }) {
   const isSelfRoom = uniqueUserCount <= 1
   const isGroup = uniqueUserCount > 2
   const myMembership = (members || []).find((m) => m.user_id === user.id)
+  const showDeletionNotice = !isSelfRoom && room.pending_deletion_by && room.pending_deletion_by !== user.id && !myMembership?.left_at
+  const deleteButtonLabel = isGroup ? '退出' : '削除'
   const { data: latestOocMsg } = await supabase
     .from('room_ooc_messages')
     .select('created_at, user_id')
@@ -88,8 +93,6 @@ export default async function ChatRoomPage({ params }) {
     latestOocMsg.user_id !== user.id &&
     (!myMembership?.ooc_last_read_at || new Date(latestOocMsg.created_at) > new Date(myMembership.ooc_last_read_at))
   )
-  const showDeletionNotice = !isSelfRoom && room.pending_deletion_by && room.pending_deletion_by !== user.id && !myMembership?.left_at
-  const deleteButtonLabel = isGroup ? '退出' : '削除'
   return (
     <div className="chat-room-height" style={{
       fontFamily: "'BIZ UDPGothic', sans-serif", background: '#efe8d8',
@@ -102,8 +105,10 @@ export default async function ChatRoomPage({ params }) {
       <div style={{ background: '#f4eee0', padding: '14px 18px', flexShrink: 0, borderBottom: '4px double #211d17' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <Link href="/chat" style={{ fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>← 一覧に戻る</Link>
-          <AddMemberButton roomId={room.id} action={inviteMoreMembers} friendOcs={invitableFriendOcs} />
-          <DeleteRoomButton roomId={room.id} label={deleteButtonLabel} action={requestDeleteRoom} />
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <AddMemberButton roomId={room.id} action={inviteMoreMembers} friendOcs={invitableFriendOcs} />
+            <DeleteRoomButton roomId={room.id} label={deleteButtonLabel} action={requestDeleteRoom} />
+          </div>
         </div>
         <div style={{ fontSize: 17, fontWeight: 700, marginTop: 8, color: '#211d17', fontFamily: 'Georgia, serif' }}>
           {memberNames.join('、')}
@@ -131,37 +136,21 @@ export default async function ChatRoomPage({ params }) {
             )
           }
           const mine = msg.sender_oc_id === room.primary_oc_id
+          const isOwner = msg.sender_oc_id ? myOcIdSet.has(msg.sender_oc_id) : myNpcs.includes(msg.sender_npc_id)
           const speakerName = msg.ocs?.name || msg.chat_room_npcs?.name
           const speakerIcon = msg.ocs?.icon_url || null
           return (
-            <div key={msg.id} style={{
-              display: 'flex', gap: 8, alignItems: 'flex-end',
-              flexDirection: mine ? 'row-reverse' : 'row',
-            }}>
-              <div style={{
-                width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
-                background: '#211d17', border: '1px solid #211d17',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#f4eee0', fontWeight: 700, fontSize: 12, fontFamily: 'Georgia, serif',
-                position: 'relative',
-              }}>
-                {speakerIcon ? (
-                  <Image src={speakerIcon} alt="" fill sizes="30px" style={{ objectFit: 'cover' }} />
-                ) : (speakerName || '?').charAt(0)}
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', maxWidth: '72%' }}>
-                {!mine && (
-                  <div style={{ fontSize: 10.5, color: '#6b6250', marginBottom: 3, fontStyle: 'italic' }}>{speakerName}</div>
-                )}
-                <div style={{
-                  padding: '9px 13px', fontSize: 14, lineHeight: 1.6,
-                  background: mine ? '#211d17' : '#fff', color: mine ? '#f4eee0' : '#211d17',
-                  border: '1px solid #211d17',
-                }}>
-                  {msg.content}
-                </div>
-              </div>
-            </div>
+            <MessageBubble
+              key={msg.id}
+              msg={msg}
+              mine={mine}
+              isOwner={isOwner}
+              speakerName={speakerName}
+              speakerIcon={speakerIcon}
+              roomId={room.id}
+              editAction={editMessage}
+              deleteAction={deleteMessage}
+            />
           )
         })}
       </div>
