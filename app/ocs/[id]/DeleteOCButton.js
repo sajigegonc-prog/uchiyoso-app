@@ -13,8 +13,9 @@ export default function DeleteOCButton() {
         }
       }}
       style={{
-        width: '100%', padding: 13, borderRadius: 3, border: '2px solid #b3402c',
-        background: '#fff', color: '#b3402c', fontWeight: 700, fontSize: 14, cursor: 'pointer',
+        width: '100%', padding: 12, border: '1px solid #8a2418',
+        background: '#fff', color: '#8a2418', fontWeight: 700, fontSize: 13, cursor: 'pointer',
+        letterSpacing: '.05em',
       }}
     >
       {pending ? '削除中…' : 'このOCを削除する'}
