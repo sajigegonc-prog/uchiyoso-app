@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
-import AutoRefresh from '@/components/AutoRefresh'
+import RealtimeRefresh from '@/components/AutoRefresh'
 
 export default async function OwlMailPage() {
   const supabase = await createClient()
@@ -15,7 +15,7 @@ export default async function OwlMailPage() {
   if (myOcIds.length === 0) {
     return (
       <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px 110px' }}>
-        <AutoRefresh intervalMs={3000} />
+        <RealtimeRefresh tables={['owl_letters']} fallbackMs={15000} />
         <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
           <div style={{ fontSize: 26, color: '#211d17', fontWeight: 700, fontFamily: 'Georgia, serif' }}>ふくろう便</div>
         </div>
