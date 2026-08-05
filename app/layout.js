@@ -51,8 +51,14 @@ export default async function RootLayout({ children }) {
           }}
         >
           {children}
-          {user && <BottomNav notifications={notifications} />}
         </div>
+        {user && (
+          <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 50 }}>
+            <div style={{ maxWidth: 480, margin: '0 auto' }}>
+              <BottomNav notifications={notifications} />
+            </div>
+          </div>
+        )}
       </body>
     </html>
   )
