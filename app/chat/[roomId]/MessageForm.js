@@ -3,7 +3,6 @@ import { useRef, useState, useEffect } from 'react'
 import { useFormStatus } from 'react-dom'
 import FrogChocolateButton from './FrogChocolateButton'
 import OocPanel from './OocPanel'
-import useKeyboardOffset from '@/components/useKeyboardOffset'
 
 function ClearOnDone({ inputRef, onClear }) {
   const { pending } = useFormStatus()
@@ -25,7 +24,6 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
   const [oocOpen, setOocOpen] = useState(false)
   const [extrasOpen, setExtrasOpen] = useState(true)
   const [speaker, setSpeaker] = useState({ type: 'oc', id: myOcs[0]?.id, name: myOcs[0]?.name })
-  const keyboardOffset = useKeyboardOffset()
 
   const avatarInitial = (speaker.name || '?').charAt(0)
 
@@ -42,11 +40,7 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
   }, [])
 
   return (
-    <div style={{
-      position: 'fixed', left: 0, right: 0,
-      bottom: keyboardOffset > 0 ? keyboardOffset : 60,
-      background: '#fff', borderTop: '1px solid #211d17', zIndex: 60,
-    }}>
+    <div style={{ position: 'relative', flexShrink: 0, background: '#fff', borderTop: '1px solid #211d17' }}>
       {oocOpen && (
         <OocPanel roomId={roomId} myUserId={myUserId} messages={oocMessages} sendAction={oocSendAction} onClose={() => setOocOpen(false)} />
       )}
@@ -126,7 +120,7 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
 
       <form
         action={action}
-        style={{ display: 'flex', gap: 6, alignItems: 'flex-end', padding: '10px 12px' }}
+        style={{ display: 'flex', gap: 6, alignItems: 'flex-end', padding: '10px 12px', paddingBottom: 'calc(10px + env(safe-area-inset-bottom))' }}
       >
         <input type="hidden" name="room_id" value={roomId} />
         <input type="hidden" name="speaker_type" value={speaker.type} />
@@ -189,24 +183,25 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
           <>
             <FrogChocolateButton roomId={roomId} action={frogAction} speakerName={speaker.name} />
             <button
-          id="coach-ooc-btn"
-          type="button"
-          onClick={() => setOocOpen(true)}
-          style={{
-            position: 'relative', flexShrink: 0, padding: '0 10px', height: 38, borderRadius: 0,
-            border: '1px solid #211d17', background: '#f4eee0', color: '#211d17',
-            fontSize: 10.5, cursor: 'pointer', letterSpacing: '.03em', lineHeight: 1.2, marginBottom: 2,
-          }}
-        >
-          中の人<br />チャットへ
-          {hasUnreadOoc && (
-            <span style={{
-              position: 'absolute', top: -3, right: -3,
-              width: 8, height: 8, borderRadius: '50%',
-              background: '#8a2418', border: '1px solid #f4eee0',
-            }} />
-          )}
-        </button>
+              id="coach-ooc-btn"
+              type="button"
+              onClick={() => setOocOpen(true)}
+              style={{
+                position: 'relative', flexShrink: 0, padding: '0 8px', height: 36,
+                border: '1px solid #211d17', background: '#f4eee0', color: '#211d17',
+                fontSize: 9.5, cursor: 'pointer', letterSpacing: '.02em', lineHeight: 1.15,
+                marginBottom: 2,
+              }}
+            >
+              中の人<br />チャットへ
+              {hasUnreadOoc && (
+                <span style={{
+                  position: 'absolute', top: -3, right: -3,
+                  width: 8, height: 8, borderRadius: '50%',
+                  background: '#8a2418', border: '1px solid #f4eee0',
+                }} />
+              )}
+            </button>
           </>
         )}
         <ClearOnDone inputRef={inputRef} onClear={autoResize} />
