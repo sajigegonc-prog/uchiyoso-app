@@ -28,6 +28,14 @@ export default async function RootLayout({ children }) {
             height: calc(100vh - 60px);
             height: calc(100dvh - 60px);
           }
+          @keyframes fadeInNotice {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .fade-in-notice {
+            opacity: 0;
+            animation: fadeInNotice .7s ease forwards;
+          }
         `}</style>
       </head>
       <body style={{ margin: 0, fontFamily: "'BIZ UDPGothic', sans-serif", background: '#1a120b' }}>
