@@ -23,6 +23,7 @@ export default function FrogChocolateButton({ roomId, action, speakerName }) {
   return (
     <>
       <button
+        id="coach-frog-btn"
         type="button"
         onClick={() => setConfirming(true)}
         style={{
