@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 function avatarGradient(name) {
   const colors = [
     ['#6b5b95', '#3a2f5c'], ['#8b5a3c', '#5c3a21'], ['#3c6b5a', '#1f3d33'],
@@ -16,10 +18,10 @@ export default function Avatar({ name, iconUrl, size = 48 }) {
       width: size, height: size, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
       background: iconUrl ? '#ddd' : avatarGradient(name || ''),
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      color: '#fff', fontWeight: 700, fontSize: size * 0.4,
+      color: '#fff', fontWeight: 700, fontSize: size * 0.4, position: 'relative',
     }}>
       {iconUrl ? (
-        <img src={iconUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <Image src={iconUrl} alt={name || ''} fill sizes={`${size}px`} style={{ objectFit: 'cover' }} />
       ) : initial}
     </div>
   )
