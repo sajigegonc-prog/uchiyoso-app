@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { lightFieldLabelStyle, lightInputStyle, lightBtnStyle } from '../../ocs/styles'
 import Avatar from '@/components/Avatar'
 import SubmitButton from '@/components/SubmitButton'
@@ -13,19 +13,26 @@ export default function NewRoomForm({ action, ocs, friends }) {
   const [step, setStep] = useState(1)
   const [selfPlay, setSelfPlay] = useState(false)
   const [speakerOcId, setSpeakerOcId] = useState(ocs[0]?.id || '')
+  const submittingRef = useRef(false)
 
   const secStyle = (visible) => ({ display: visible ? 'block' : 'none' })
   const otherOcs = ocs.filter((oc) => oc.id !== speakerOcId)
-  const speakerOc = ocs.find((oc) => oc.id === speakerOcId)
+
+  function handleSubmit(e) {
+    if (submittingRef.current) {
+      e.preventDefault()
+      return
+    }
+    submittingRef.current = true
+  }
 
   return (
-    <form action={action} style={{ width: '100%', maxWidth: 360, marginTop: 16 }}>
+    <form action={action} onSubmit={handleSubmit} style={{ width: '100%', maxWidth: 360, marginTop: 16 }}>
       <input type="hidden" name="oc_id" value={speakerOcId} />
       <div style={{ fontSize: 12.5, color: '#8b5a2b', fontWeight: 700, marginBottom: 10 }}>
         {step} / 2 ・ {stepTitles[step]}
       </div>
 
-      {/* Step 1: 話すOCを選ぶ */}
       <div style={secStyle(step === 1)}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 8 }}>
           {ocs.map((oc) => (
@@ -63,7 +70,6 @@ export default function NewRoomForm({ action, ocs, friends }) {
         </div>
       </div>
 
-      {/* Step 2: 場所・時間帯、自分の別OC or フレンド招待 */}
       <div style={secStyle(step === 2)}>
         <div style={{ marginBottom: 14 }}>
           <label style={lightFieldLabelStyle}>場所(任意)</label>
