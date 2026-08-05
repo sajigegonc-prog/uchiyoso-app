@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabaseServer'
 import { getNotifications } from '@/lib/notifications'
 import BottomNav from '@/components/BottomNav'
+import PullToRefresh from '@/components/PullToRefresh'
 
 export const metadata = {
   title: 'うちよそ',
@@ -54,6 +55,7 @@ export default async function RootLayout({ children }) {
             boxShadow: '0 0 50px rgba(0,0,0,.5)',
           }}
         >
+          <PullToRefresh />
           {children}
         </div>
         {user && (
