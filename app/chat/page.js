@@ -41,10 +41,14 @@ export default async function ChatListPage() {
     : { data: [] }
 
   const membersByRoom = new Map()
+  const uniqueUsersByRoom = new Map()
   for (const m of allMembers || []) {
     if (!membersByRoom.has(m.room_id)) membersByRoom.set(m.room_id, [])
     membersByRoom.get(m.room_id).push(m)
+    if (!uniqueUsersByRoom.has(m.room_id)) uniqueUsersByRoom.set(m.room_id, new Set())
+    uniqueUsersByRoom.get(m.room_id).add(m.user_id)
   }
+  const selfOnlyRooms = new Set(roomIds.filter((id) => (uniqueUsersByRoom.get(id)?.size || 1) <= 1))
 
   const lastMessages = {}
   const unreadByRoom = new Map()
@@ -61,6 +65,10 @@ export default async function ChatListPage() {
         seenForPreview.add(m.room_id)
       }
       if (!unreadByRoom.has(m.room_id) && !m.is_system) {
+        if (selfOnlyRooms.has(m.room_id)) {
+          unreadByRoom.set(m.room_id, false)
+          continue
+        }
         const myOcs = myOcIdsInRoom.get(m.room_id) || new Set()
         if (!myOcs.has(m.sender_oc_id)) {
           const lastRead = lastReadByRoom.get(m.room_id)
