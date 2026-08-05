@@ -53,6 +53,7 @@ export default function AddMemberButton({ roomId, action, friendOcs }) {
   return (
     <>
       <button
+        id="coach-invite-btn"
         type="button"
         onClick={() => setOpen(true)}
         style={{ fontSize: 11, color: '#6b6250', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
