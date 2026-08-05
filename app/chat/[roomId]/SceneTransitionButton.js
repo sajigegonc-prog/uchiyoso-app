@@ -75,7 +75,7 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
 
   return (
     <>
-      <button type="button" onClick={() => setConfirming(true)}
+      <button id="coach-scene-btn" type="button" onClick={() => setConfirming(true)}
         style={{ fontSize: 11, color: '#6b6250', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
         場面転換
       </button>
