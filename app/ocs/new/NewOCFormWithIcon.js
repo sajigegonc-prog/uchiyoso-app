@@ -97,7 +97,7 @@ export default function NewOCFormWithIcon({ action, userId }) {
 
   return (
     <div style={{ width: '100%', maxWidth: 360, marginTop: 16 }}>
-      <div style={{ fontSize: 11.5, color: '#6b6250', marginBottom: 12 }}>
+      <div style={{ fontSize: 11, color: '#6b6250', marginBottom: 12, letterSpacing: '.1em' }}>
         {step} / 2
       </div>
 
