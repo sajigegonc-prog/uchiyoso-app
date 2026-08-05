@@ -1,9 +1,15 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 export default function CoachMark({ steps, onFinish }) {
   const [index, setIndex] = useState(0)
   const [rect, setRect] = useState(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     function update() {
@@ -23,7 +29,7 @@ export default function CoachMark({ steps, onFinish }) {
     return () => window.removeEventListener('resize', update)
   }, [index, steps])
 
-  if (index >= steps.length) return null
+  if (!mounted || index >= steps.length) return null
   const step = steps[index]
   const isLast = index === steps.length - 1
 
@@ -47,20 +53,25 @@ export default function CoachMark({ steps, onFinish }) {
   }
 
   const tooltipTop = rect
-    ? Math.min(Math.max(rect.bottom + 16, 20), (typeof window !== 'undefined' ? window.innerHeight : 800) - 170)
+    ? Math.min(Math.max(rect.bottom + 16, 20), window.innerHeight - 170)
     : null
 
+  const centerX = window.innerWidth / 2
+  const tooltipWidth = Math.min(360, window.innerWidth - 40)
+
   const tooltipStyle = rect ? {
-    position: 'fixed', top: tooltipTop, left: 20, right: 20, zIndex: 201,
+    position: 'fixed', top: tooltipTop,
+    left: centerX - tooltipWidth / 2, width: tooltipWidth, zIndex: 201,
   } : {
-    position: 'fixed', top: '50%', left: 20, right: 20, transform: 'translateY(-50%)', zIndex: 201,
+    position: 'fixed', top: '50%', left: centerX - tooltipWidth / 2,
+    width: tooltipWidth, transform: 'translateY(-50%)', zIndex: 201,
   }
 
-  return (
+  return createPortal(
     <>
       <div style={highlightStyle} />
       <div style={tooltipStyle}>
-        <div style={{ background: '#f4eee0', border: '1px solid #211d17', padding: 16, maxWidth: 360, margin: '0 auto' }}>
+        <div style={{ background: '#f4eee0', border: '1px solid #211d17', padding: 16 }}>
           <p style={{ fontSize: 13, color: '#211d17', lineHeight: 1.8 }}>{step.text}</p>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14 }}>
             <span style={{ fontSize: 10.5, color: '#8a8168' }}>{index + 1} / {steps.length}</span>
@@ -74,6 +85,7 @@ export default function CoachMark({ steps, onFinish }) {
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   )
 }
