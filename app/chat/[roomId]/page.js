@@ -14,12 +14,19 @@ import AddMemberButton from './AddMemberButton'
 import MessageBubble from './MessageBubble'
 import RealtimeRefresh from '@/components/RealtimeRefresh'
 import SceneTransitionButton from './SceneTransitionButton'
+import CoachMark from '@/components/CoachMark'
+import { markChatTutorialSeen, markInviteTutorialSeen } from '../../tutorialActions'
 
 export default async function ChatRoomPage({ params }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
   const { roomId } = params
+  const { data: tutorialProfile } = await supabase
+    .from('profiles')
+    .select('seen_chat_tutorial, seen_invite_tutorial')
+    .eq('id', user.id)
+    .maybeSingle()
   const { data: room } = await supabase
     .from('chat_rooms')
     .select('id, location, time_period, primary_oc_id, pending_deletion_by, deleted_at, title, transition_requested_at, transition_requested_by')
@@ -87,6 +94,9 @@ export default async function ChatRoomPage({ params }) {
   const uniqueUserCount = new Set(activeMembers.map((m) => m.user_id)).size
   const isSelfRoom = uniqueUserCount <= 1
   const isGroup = uniqueUserCount > 2
+  const inviteVisible = isGroup
+  const showFullTutorial = !tutorialProfile?.seen_chat_tutorial
+  const showInviteOnlyTutorial = !showFullTutorial && inviteVisible && !tutorialProfile?.seen_invite_tutorial
   const myMembership = (members || []).find((m) => m.user_id === user.id)
   let requestedByName = null
   let alreadyApprovedTransition = false
@@ -123,6 +133,27 @@ export default async function ChatRoomPage({ params }) {
       display: 'flex', flexDirection: 'column', overflow: 'hidden',
     }}>
       <RealtimeRefresh tables={['messages', 'room_ooc_messages']} fallbackMs={15000} />
+      {showFullTutorial && (
+        <CoachMark
+          steps={[
+            { targetId: 'coach-speaker-btn', text: 'タップすると話すキャラを切り替えられます。NPCの追加もここから。' },
+            { targetId: 'coach-frog-btn', text: '気になったら開けてみて。中身はお楽しみです。' },
+            { targetId: 'coach-ooc-btn', text: 'キャラではなく、中の人同士でこっそり話せる場所です。' },
+            { targetId: 'coach-scene-btn', text: '会話が一区切りついたら、ここで次の場面に切り替えられます。' },
+            ...(inviteVisible ? [{ targetId: 'coach-invite-btn', text: '新しい友達をこの部屋に招待できます。' }] : []),
+            { targetId: 'coach-exit-btn', text: 'この部屋を抜けたいときはこちらから。' },
+          ]}
+          onFinish={markChatTutorialSeen.bind(null, inviteVisible)}
+        />
+      )}
+      {showInviteOnlyTutorial && (
+        <CoachMark
+          steps={[
+            { targetId: 'coach-invite-btn', text: '新しい友達をこの部屋に招待できます。' },
+          ]}
+          onFinish={markInviteTutorialSeen}
+        />
+      )}
       {showDeletionNotice && (
         <DeletionNotice roomId={room.id} action={acknowledgeDeletion} />
       )}
