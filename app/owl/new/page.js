@@ -5,7 +5,7 @@ import { sendLetter } from '../actions'
 import RecipientSelect from './RecipientSelect'
 import { lightBackLinkStyle } from '../../ocs/styles'
 
-export default async function NewLetterPage() {
+export default async function NewLetterPage({ searchParams }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -41,6 +41,9 @@ export default async function NewLetterPage() {
     }
   }
 
+  const initialSenderOcId = searchParams?.from
+  const initialRecipientOcId = searchParams?.to
+
   return (
     <div style={{
       fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f3e9d8', minHeight: '100vh',
@@ -53,7 +56,13 @@ export default async function NewLetterPage() {
       {(!myOcs || myOcs.length === 0) ? (
         <p style={{ fontSize: 13, color: '#8b7355', marginTop: 20 }}>先にOCを登録してください。</p>
       ) : (
-        <RecipientSelect action={sendLetter} myOcs={myOcs} recipients={recipients} />
+        <RecipientSelect
+          action={sendLetter}
+          myOcs={myOcs}
+          recipients={recipients}
+          initialSenderOcId={initialSenderOcId}
+          initialRecipientOcId={initialRecipientOcId}
+        />
       )}
     </div>
   )
