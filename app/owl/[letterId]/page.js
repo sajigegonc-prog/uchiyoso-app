@@ -30,7 +30,8 @@ export default async function LetterDetailPage({ params }) {
     const { data: otherOc } = await supabase.from('ocs').select('name').eq('id', otherOcId).maybeSingle()
     otherOcName = otherOc?.name || '名前未設定'
   }
-  const myOcName = myOcNameMap.get(direction === 'received' ? letter.recipient_oc_id : letter.sender_oc_id)
+  const myOcId = direction === 'received' ? letter.recipient_oc_id : letter.sender_oc_id
+  const myOcName = myOcNameMap.get(myOcId)
 
   if (direction === 'received' && !letter.read_at) {
     await supabase.from('owl_letters').update({ read_at: new Date().toISOString() }).eq('id', letter.id)
@@ -57,9 +58,6 @@ export default async function LetterDetailPage({ params }) {
         <div style={{
           position: 'absolute', inset: 6, border: '1px dashed rgba(92,58,33,.3)', borderRadius: 2, pointerEvents: 'none',
         }} />
-        <div style={{ textAlign: 'center', fontSize: 11, color: '#8b5a2b', letterSpacing: '.15em', marginBottom: 18 }}>
-          🦉 ふくろう便
-        </div>
         <div style={{ fontSize: 13, color: '#5c3a21', lineHeight: 1.8 }}>
           {direction === 'received' ? `${otherOcName} より` : `${otherOcName} へ`}
         </div>
@@ -74,6 +72,20 @@ export default async function LetterDetailPage({ params }) {
           {direction === 'received' ? myOcName : otherOcName}
         </div>
       </div>
+
+      {direction === 'received' && (
+        <Link
+          href={`/owl/new?from=${myOcId}&to=${otherOcId}`}
+          style={{
+            marginTop: 18, width: '100%', maxWidth: 380, textAlign: 'center',
+            background: '#8b5a2b', color: '#f3e9d8', fontWeight: 700, fontSize: 14,
+            borderRadius: 3, padding: 13, textDecoration: 'none',
+            border: '2px solid #3d2717', boxShadow: '0 3px 0 #3d2717',
+          }}
+        >
+          返事を出す
+        </Link>
+      )}
     </div>
   )
 }
