@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
-import RealtimeRefresh from '@/components/AutoRefresh'
+import RealtimeRefresh from '@/components/RealtimeRefresh'
 
 export default async function OwlMailPage() {
   const supabase = await createClient()
