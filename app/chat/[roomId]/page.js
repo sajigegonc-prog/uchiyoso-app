@@ -21,7 +21,7 @@ export default async function ChatRoomPage({ params }) {
   const { roomId } = params
   const { data: room } = await supabase
     .from('chat_rooms')
-    .select('id, location, time_period, primary_oc_id, pending_deletion_by, deleted_at')
+    .select('id, location, time_period, primary_oc_id, pending_deletion_by, deleted_at, title')
     .eq('id', roomId)
     .maybeSingle()
   if (!room) {
@@ -111,7 +111,7 @@ export default async function ChatRoomPage({ params }) {
           </div>
         </div>
         <div style={{ fontSize: 17, fontWeight: 700, marginTop: 8, color: '#211d17', fontFamily: 'Georgia, serif' }}>
-          {memberNames.join('、')}
+          {room.title || memberNames.join('、')}
         </div>
         {(room.location || room.time_period) && (
           <div style={{ fontSize: 11, opacity: .85, marginTop: 5, display: 'flex', gap: 12, color: '#6b6250', fontStyle: 'italic' }}>
