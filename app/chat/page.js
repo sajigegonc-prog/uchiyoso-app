@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
 import InvitationRow from './InvitationRow'
 import { respondToChatInvitation } from './actions'
-import AutoRefresh from '@/components/AutoRefresh'
+import RealtimeRefresh from '@/components/AutoRefresh'
 import Image from 'next/image'
 
 export default async function ChatListPage() {
@@ -149,7 +149,7 @@ export default async function ChatListPage() {
       fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh',
       padding: '24px 20px 110px',
     }}>
-      <AutoRefresh intervalMs={4000} />
+      <RealtimeRefresh tables={['messages', 'room_ooc_messages', 'chat_room_invitations', 'chat_room_members']} fallbackMs={15000} />
       <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
         <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO GAZETTE</div>
         <div style={{ fontSize: 26, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>
