@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
-import LetterCard from './LetterCard'
 import AutoRefresh from '@/components/AutoRefresh'
 
 export default async function OwlMailPage() {
@@ -16,7 +15,7 @@ export default async function OwlMailPage() {
   if (myOcIds.length === 0) {
     return (
       <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px 110px' }}>
-        <AutoRefresh intervalMs={5000} />
+        <AutoRefresh intervalMs={3000} />
         <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
           <div style={{ fontSize: 26, color: '#211d17', fontWeight: 700, fontFamily: 'Georgia, serif' }}>ふくろう便</div>
         </div>
@@ -41,17 +40,34 @@ export default async function OwlMailPage() {
     return myOcNameMap.get(id) || otherOcNameMap.get(id) || '名前未設定'
   }
 
-  const enrichedLetters = (letters || []).map((l) => {
-    const direction = myOcIds.includes(l.recipient_oc_id) ? 'received' : 'sent'
-    return { ...l, direction, senderName: nameOf(l.sender_oc_id), recipientName: nameOf(l.recipient_oc_id) }
+  const enriched = (letters || []).map((l) => {
+    const isReceived = myOcIds.includes(l.recipient_oc_id)
+    const otherOcId = isReceived ? l.sender_oc_id : l.recipient_oc_id
+    return {
+      ...l,
+      isReceived,
+      unread: isReceived && !l.read_at,
+      otherOcId,
+      otherOcName: nameOf(otherOcId),
+      recipientName: nameOf(l.recipient_oc_id),
+      senderName: nameOf(l.sender_oc_id),
+    }
   })
 
-  const received = enrichedLetters.filter((l) => l.direction === 'received')
-  const sent = enrichedLetters.filter((l) => l.direction === 'sent')
+  const groupMap = new Map()
+  for (const l of enriched) {
+    if (!groupMap.has(l.otherOcId)) groupMap.set(l.otherOcId, { otherOcName: l.otherOcName, letters: [] })
+    groupMap.get(l.otherOcId).letters.push(l)
+  }
+  const groups = Array.from(groupMap.values()).sort((a, b) => {
+    const ta = new Date(a.letters[0]?.created_at || 0).getTime()
+    const tb = new Date(b.letters[0]?.created_at || 0).getTime()
+    return tb - ta
+  })
 
   return (
     <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px 110px' }}>
-      <AutoRefresh intervalMs={5000} />
+      <AutoRefresh intervalMs={3000} />
       <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
         <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO GAZETTE</div>
         <div style={{ fontSize: 26, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>ふくろう便</div>
@@ -68,21 +84,39 @@ export default async function OwlMailPage() {
         + 手紙を送る
       </Link>
 
-      <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 24 }}>
-        届いた便り
-      </div>
-      {received.length === 0 && (
-        <p style={{ fontSize: 12.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>まだ届いていません。</p>
+      {groups.length === 0 && (
+        <p style={{ fontSize: 13, color: '#8a8168', marginTop: 24, fontStyle: 'italic', textAlign: 'center' }}>まだ便りがありません。</p>
       )}
-      {received.map((letter) => <LetterCard key={letter.id} letter={letter} />)}
 
-      <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 24 }}>
-        送った便り
-      </div>
-      {sent.length === 0 && (
-        <p style={{ fontSize: 12.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>まだ送っていません。</p>
-      )}
-      {sent.map((letter) => <LetterCard key={letter.id} letter={letter} />)}
+      {groups.map((g) => (
+        <div key={g.otherOcName} style={{ marginTop: 22 }}>
+          <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6 }}>
+            {g.otherOcName} 宛
+          </div>
+          {g.letters.map((letter) => (
+            <Link
+              key={letter.id}
+              href={`/owl/${letter.id}`}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none',
+                background: 'linear-gradient(160deg, #f3e6c8 0%, #e8d6ac 55%, #ddc794 100%)',
+                opacity: letter.unread ? 1 : 0.55,
+                border: '1px solid #c9a876', padding: '10px 10px', marginTop: 8,
+              }}
+            >
+              <span style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: letter.unread ? '#8a2418' : 'transparent' }} />
+              <div>
+                <div style={{ fontSize: 12.5, fontWeight: letter.unread ? 700 : 400, color: '#3d2c14', fontFamily: 'Georgia, serif' }}>
+                  {letter.recipientName}へ　{letter.senderName}より
+                </div>
+                {letter.unread && (
+                  <div style={{ fontSize: 9.5, color: '#7a6537', marginTop: 2, fontStyle: 'italic' }}>未開封</div>
+                )}
+              </div>
+            </Link>
+          ))}
+        </div>
+      ))}
     </div>
   )
 }
