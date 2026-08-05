@@ -96,6 +96,13 @@ export default async function ChatListPage() {
   })
 
   const { data: invitations } = await supabase.rpc('list_incoming_chat_invitations')
+  if (invitations && invitations.length > 0) {
+    await supabase
+      .from('chat_room_invitations')
+      .update({ seen_at: new Date().toISOString() })
+      .eq('invitee_id', user.id)
+      .is('seen_at', null)
+  }
   const { data: myOcs } = await supabase
     .from('ocs')
     .select('id, name')
