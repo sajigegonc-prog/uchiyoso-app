@@ -77,6 +77,7 @@ export default async function ChatRoomPage({ params }) {
       fontFamily: "'BIZ UDPGothic', sans-serif", background: '#efe8d8',
       display: 'flex', flexDirection: 'column', overflow: 'hidden',
     }}>
+      <AutoRefresh intervalMs={4000} />
       {showDeletionNotice && (
         <DeletionNotice roomId={room.id} action={acknowledgeDeletion} />
       )}
