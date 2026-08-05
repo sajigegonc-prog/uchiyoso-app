@@ -34,7 +34,7 @@ export default async function ChatRoomPage({ params }) {
     .eq('user_id', user.id)
   const { data: members } = await supabase
     .from('chat_room_members')
-    .select('user_id, oc_id, ocs(name), left_at')
+    .select('user_id, oc_id, ocs(name), left_at, ooc_last_read_at')
     .eq('room_id', roomId)
   const { data: npcs } = await supabase
     .from('chat_room_npcs')
@@ -70,6 +70,18 @@ export default async function ChatRoomPage({ params }) {
   const isSelfRoom = uniqueUserCount <= 1
   const isGroup = uniqueUserCount > 2
   const myMembership = (members || []).find((m) => m.user_id === user.id)
+  const { data: latestOocMsg } = await supabase
+    .from('room_ooc_messages')
+    .select('created_at, user_id')
+    .eq('room_id', roomId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  const hasUnreadOoc = !!(
+    latestOocMsg &&
+    latestOocMsg.user_id !== user.id &&
+    (!myMembership?.ooc_last_read_at || new Date(latestOocMsg.created_at) > new Date(myMembership.ooc_last_read_at))
+  )
   const showDeletionNotice = !isSelfRoom && room.pending_deletion_by && room.pending_deletion_by !== user.id && !myMembership?.left_at
   const deleteButtonLabel = isGroup ? '退出' : '削除'
   return (
@@ -157,6 +169,7 @@ export default async function ChatRoomPage({ params }) {
           frogAction={openFrogCard}
           oocMessages={oocMessages || []}
           oocSendAction={sendOocMessage}
+          hasUnreadOoc={hasUnreadOoc}
         />
       ) : (
         <p style={{ fontSize: 12, color: '#8a8168', textAlign: 'center', padding: 16, flexShrink: 0, fontStyle: 'italic' }}>あなたはこの部屋のメンバーではありません。</p>
