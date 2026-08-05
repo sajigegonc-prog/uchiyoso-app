@@ -2,6 +2,7 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
+
 export async function createRoom(formData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -10,9 +11,16 @@ export async function createRoom(formData) {
   const location = formData.get('location')?.toString().trim()
   const timePeriod = formData.get('time_period')?.toString().trim()
   const selfPlay = formData.get('self_play')?.toString() === 'on'
-  const friendId = formData.get('friend_id')?.toString()
+  const friendOcId = formData.get('friend_oc_id')?.toString()
   const extraOcIds = formData.getAll('extra_oc_ids').map((v) => v.toString()).filter(Boolean)
   if (!ocId) redirect('/chat/new')
+
+  let inviteeId = null
+  if (friendOcId) {
+    const { data: friendOc } = await supabase.from('ocs').select('user_id').eq('id', friendOcId).maybeSingle()
+    inviteeId = friendOc?.user_id || null
+  }
+
   const { data: room, error } = await supabase
     .from('chat_rooms')
     .insert({
@@ -42,15 +50,17 @@ export async function createRoom(formData) {
         })
       }
     }
-  } else if (friendId) {
+  } else if (friendOcId && inviteeId) {
     await supabase.from('chat_room_invitations').insert({
       room_id: room.id,
       inviter_id: user.id,
-      invitee_id: friendId,
+      invitee_id: inviteeId,
+      invitee_oc_id: friendOcId,
     })
   }
   redirect(`/chat/${room.id}`)
 }
+
 export async function respondToChatInvitation(formData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
