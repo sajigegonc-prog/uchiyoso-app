@@ -20,7 +20,7 @@ export default async function FriendsPage() {
   const profileUrl = `${proto}://${host}/friends/add/${profile?.invite_token}`
 
   const { data: incoming } = await supabase.rpc('list_incoming_friend_requests')
-  const { data: friends } = await supabase.rpc('list_my_friends')
+  const { data: friends } = await supabase.rpc('list_my_friends_with_token')
 
   return (
     <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px 110px' }}>
@@ -71,9 +71,13 @@ export default async function FriendsPage() {
         <p style={{ fontSize: 13, color: '#8a8168', marginTop: 12, fontStyle: 'italic' }}>まだ友達がいません。</p>
       )}
       {friends && friends.map((f) => (
-        <div key={f.id} style={{ padding: '12px 2px', borderBottom: '1px solid #211d17', fontSize: 13.5, fontWeight: 700, color: '#211d17' }}>
+        <Link
+          key={f.id}
+          href={`/friends/add/${f.invite_token}`}
+          style={{ display: 'block', padding: '12px 2px', borderBottom: '1px solid #211d17', fontSize: 13.5, fontWeight: 700, color: '#211d17', textDecoration: 'none' }}
+        >
           {f.display_name || '名前未設定'}
-        </div>
+        </Link>
       ))}
 
       <Link href="/home" style={{ display: 'block', marginTop: 30, marginBottom: 10, padding: '10px 0', textAlign: 'center', fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>
