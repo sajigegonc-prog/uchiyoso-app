@@ -53,7 +53,7 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
           <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', color: '#c7ccdd', fontSize: 18, cursor: 'pointer' }}>×</button>
         </div>
       </div>
-      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '16px 16px 74px' }}>
+      <div style={{         flex: 1, minHeight: 0, overflowY: 'auto', padding: '16px 16px 74px',         WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', touchAction: 'pan-y',       }}>
         {(!messages || messages.length === 0) && (
           <p style={{ fontSize: 12.5, color: '#7a82a0', textAlign: 'center', marginTop: 20, fontFamily: "'Courier New', monospace" }}>まだメッセージがありません。</p>
         )}
