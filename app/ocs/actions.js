@@ -4,8 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
 export async function addOC(formData) {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const user = session?.user
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
   const name = formData.get('name')?.toString().trim()
   const ocType = formData.get('oc_type')?.toString() || 'creation'
@@ -13,18 +12,19 @@ export async function addOC(formData) {
   const house = formData.get('house')?.toString().trim()
   const birthDate = formData.get('birth_date')?.toString()
   const description = formData.get('description')?.toString().trim()
-  if (name) {
-    const { data } = await supabase.from('ocs').insert({
-      user_id: user.id,
-      name,
-      oc_type: ocType,
-      paired_character: pairedCharacter || null,
-      house: house || null,
-      birth_date: birthDate || null,
-      description: description || null,
-    }).select('id').single()
-    if (data) redirect(`/ocs/${data.id}`)
-  }
+  if (!name) return { error: '名前を入力してください' }
+  const { data, error } = await supabase.from('ocs').insert({
+    user_id: user.id,
+    name,
+    oc_type: ocType,
+    paired_character: pairedCharacter || null,
+    house: house || null,
+    birth_date: birthDate || null,
+    description: description || null,
+  }).select('id').single()
+  if (error || !data) return { error: '登録に失敗しました' }
+  return { id: data.id }
+}
   redirect('/ocs')
 }
 export async function addAvoidedPartner(formData) {
