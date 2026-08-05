@@ -16,6 +16,7 @@ import RealtimeRefresh from '@/components/RealtimeRefresh'
 import SceneTransitionButton from './SceneTransitionButton'
 import CoachMark from '@/components/CoachMark'
 import { markChatTutorialSeen, markInviteTutorialSeen } from '../../tutorialActions'
+import MarkRoomReadOnMount from './MarkRoomReadOnMount'
 
 export default async function ChatRoomPage({ params }) {
   const supabase = await createClient()
@@ -40,11 +41,6 @@ export default async function ChatRoomPage({ params }) {
       </div>
     )
   }
-  await supabase
-    .from('chat_room_members')
-    .update({ last_read_at: new Date().toISOString() })
-    .eq('room_id', roomId)
-    .eq('user_id', user.id)
   const { data: members } = await supabase
     .from('chat_room_members')
     .select('user_id, oc_id, ocs(name), left_at, ooc_last_read_at')
@@ -133,6 +129,7 @@ export default async function ChatRoomPage({ params }) {
       display: 'flex', flexDirection: 'column', overflow: 'hidden',
     }}>
       <RealtimeRefresh tables={['messages', 'room_ooc_messages', 'chat_room_members', 'chat_room_invitations']} fallbackMs={15000} />
+      <MarkRoomReadOnMount roomId={room.id} />
       {showFullTutorial && (
         <CoachMark
           steps={[
