@@ -42,22 +42,22 @@ export default async function OwlMailPage() {
 
   const enriched = (letters || []).map((l) => {
     const isReceived = myOcIds.includes(l.recipient_oc_id)
+    const myOcId = isReceived ? l.recipient_oc_id : l.sender_oc_id
     const otherOcId = isReceived ? l.sender_oc_id : l.recipient_oc_id
     return {
       ...l,
       isReceived,
       unread: isReceived && !l.read_at,
-      otherOcId,
+      myOcId,
+      myOcName: nameOf(myOcId),
       otherOcName: nameOf(otherOcId),
-      recipientName: nameOf(l.recipient_oc_id),
-      senderName: nameOf(l.sender_oc_id),
     }
   })
 
   const groupMap = new Map()
   for (const l of enriched) {
-    if (!groupMap.has(l.otherOcId)) groupMap.set(l.otherOcId, { otherOcName: l.otherOcName, letters: [] })
-    groupMap.get(l.otherOcId).letters.push(l)
+    if (!groupMap.has(l.myOcId)) groupMap.set(l.myOcId, { myOcName: l.myOcName, letters: [] })
+    groupMap.get(l.myOcId).letters.push(l)
   }
   const groups = Array.from(groupMap.values()).sort((a, b) => {
     const ta = new Date(a.letters[0]?.created_at || 0).getTime()
@@ -89,9 +89,9 @@ export default async function OwlMailPage() {
       )}
 
       {groups.map((g) => (
-        <div key={g.otherOcName} style={{ marginTop: 22 }}>
+        <div key={g.myOcName} style={{ marginTop: 22 }}>
           <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6 }}>
-            {g.otherOcName} 宛
+            {g.myOcName} 宛
           </div>
           {g.letters.map((letter) => (
             <Link
@@ -107,7 +107,7 @@ export default async function OwlMailPage() {
               <span style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: letter.unread ? '#8a2418' : 'transparent' }} />
               <div>
                 <div style={{ fontSize: 12.5, fontWeight: letter.unread ? 700 : 400, color: '#3d2c14', fontFamily: 'Georgia, serif' }}>
-                  {letter.recipientName}へ　{letter.senderName}より
+                  {letter.isReceived ? `${letter.otherOcName} より` : `${letter.otherOcName} へ`}
                 </div>
                 {letter.unread && (
                   <div style={{ fontSize: 9.5, color: '#7a6537', marginTop: 2, fontStyle: 'italic' }}>未開封</div>
