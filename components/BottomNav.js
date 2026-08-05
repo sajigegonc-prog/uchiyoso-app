@@ -20,9 +20,9 @@ export default function BottomNav({ notifications = {} }) {
   return (
     <nav
       style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0, height: 60,
+        height: 60,
         background: '#241a10', borderTop: '2px solid #5c3a21',
-        display: 'flex', zIndex: 50,
+        display: 'flex', width: '100%',
       }}
     >
       {NAV_ITEMS.map((item, i) => {
