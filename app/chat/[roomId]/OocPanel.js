@@ -2,7 +2,6 @@
 import { useRef, useState, useEffect } from 'react'
 import { useFormStatus } from 'react-dom'
 import { createPortal } from 'react-dom'
-import useKeyboardOffset from '@/components/useKeyboardOffset'
 import { markOocRead } from './oocActions'
 
 function SubmitBtn() {
@@ -20,23 +19,25 @@ function SubmitBtn() {
 export default function OocPanel({ roomId, myUserId, messages, sendAction, onClose }) {
   const inputRef = useRef(null)
   const submittingRef = useRef(false)
-  const keyboardOffset = useKeyboardOffset()
   const [mounted, setMounted] = useState(false)
   const now = new Date()
   const timeLabel = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
 
   useEffect(() => {
     setMounted(true)
-    const originalOverflow = document.body.style.overflow
+    const originalBodyOverflow = document.body.style.overflow
+    const originalHtmlOverflow = document.documentElement.style.overflow
     const originalPosition = document.body.style.position
     const originalWidth = document.body.style.width
     const scrollY = window.scrollY
     document.body.style.overflow = 'hidden'
+    document.documentElement.style.overflow = 'hidden'
     document.body.style.position = 'fixed'
     document.body.style.width = '100%'
     document.body.style.top = `-${scrollY}px`
     return () => {
-      document.body.style.overflow = originalOverflow
+      document.body.style.overflow = originalBodyOverflow
+      document.documentElement.style.overflow = originalHtmlOverflow
       document.body.style.position = originalPosition
       document.body.style.width = originalWidth
       document.body.style.top = ''
@@ -60,7 +61,11 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
   if (!mounted) return null
 
   return createPortal(
-    <div style={{ position: 'fixed', inset: 0, background: '#1c2133', zIndex: 90, display: 'flex', flexDirection: 'column' }}>
+    <div style={{
+      position: 'fixed', inset: 0, background: '#1c2133', zIndex: 90,
+      display: 'flex', flexDirection: 'column',
+      height: '100dvh',
+    }}>
       <div style={{ background: '#12151f', color: '#c7ccdd', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0, borderBottom: '1px solid #3a4360' }}>
         <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '.1em', fontFamily: "'Courier New', monospace" }}>MEMO — 中の人チャット</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -68,9 +73,10 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
           <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', color: '#c7ccdd', fontSize: 18, cursor: 'pointer' }}>×</button>
         </div>
       </div>
+
       <div style={{
-        flex: 1, minHeight: 0, overflowY: 'auto', padding: '16px 16px 74px',
-        WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', touchAction: 'pan-y',
+        flex: '1 1 auto', minHeight: 0, overflowY: 'auto', padding: '16px',
+        WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain',
       }}>
         {(!messages || messages.length === 0) && (
           <p style={{ fontSize: 12.5, color: '#7a82a0', textAlign: 'center', marginTop: 20, fontFamily: "'Courier New', monospace" }}>まだメッセージがありません。</p>
@@ -92,7 +98,12 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
           })}
         </div>
       </div>
-      <form action={sendAction} onSubmit={handleSubmit} style={{ position: 'fixed', left: 0, right: 0, bottom: keyboardOffset > 0 ? keyboardOffset : 60, display: 'flex', gap: 8, padding: '12px 16px', background: '#12151f', borderTop: '1px solid #3a4360', zIndex: 95 }}>
+
+      <form action={sendAction} onSubmit={handleSubmit} style={{
+        flexShrink: 0, display: 'flex', gap: 8, padding: '12px 16px',
+        background: '#12151f', borderTop: '1px solid #3a4360',
+        paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
+      }}>
         <input type="hidden" name="room_id" value={roomId} />
         <input ref={inputRef} name="content" placeholder="中の人として発言" style={{ flex: 1, border: '1px solid #3a4360', borderRadius: 3, padding: '10px 12px', fontSize: 16, background: '#252b40', color: '#e8eaf5', fontFamily: "'Courier New', monospace" }} />
         <SubmitBtn />
