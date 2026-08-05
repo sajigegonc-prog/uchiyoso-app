@@ -1,34 +1,51 @@
 'use client'
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useFormStatus } from 'react-dom'
 import FrogChocolateButton from './FrogChocolateButton'
 import OocPanel from './OocPanel'
 import useKeyboardOffset from '@/components/useKeyboardOffset'
 
-function ClearOnDone({ inputRef }) {
+function ClearOnDone({ inputRef, onClear }) {
   const { pending } = useFormStatus()
   const wasPending = useRef(false)
   if (wasPending.current && !pending && inputRef.current) {
     inputRef.current.value = ''
+    onClear?.()
   }
   wasPending.current = pending
   return null
 }
 
+const LINE_HEIGHT = 20
+const MAX_LINES = 5
+
 export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, addNpcAction, deleteNpcAction, frogAction, oocMessages, oocSendAction }) {
   const inputRef = useRef(null)
   const [open, setOpen] = useState(false)
   const [oocOpen, setOocOpen] = useState(false)
+  const [extrasOpen, setExtrasOpen] = useState(true)
   const [speaker, setSpeaker] = useState({ type: 'oc', id: myOcs[0]?.id, name: myOcs[0]?.name })
   const keyboardOffset = useKeyboardOffset()
 
   const avatarInitial = (speaker.name || '?').charAt(0)
 
+  function autoResize() {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    const maxHeight = LINE_HEIGHT * MAX_LINES + 16
+    el.style.height = Math.min(el.scrollHeight, maxHeight) + 'px'
+  }
+
+  useEffect(() => {
+    autoResize()
+  }, [])
+
   return (
     <div style={{
       position: 'fixed', left: 0, right: 0,
       bottom: keyboardOffset > 0 ? keyboardOffset : 60,
-      background: '#fff', borderTop: '2px solid #8b6a4a', zIndex: 60,
+      background: '#fff', borderTop: '1px solid #211d17', zIndex: 60,
     }}>
       {oocOpen && (
         <OocPanel roomId={roomId} myUserId={myUserId} messages={oocMessages} sendAction={oocSendAction} onClose={() => setOocOpen(false)} />
@@ -37,10 +54,10 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
       {open && (
         <div style={{
           position: 'absolute', bottom: '100%', left: 0, right: 0,
-          background: '#fbf5e9', borderTop: '2px solid #8b6a4a', borderBottom: '2px solid #8b6a4a',
+          background: '#f4eee0', borderTop: '1px solid #211d17', borderBottom: '1px solid #211d17',
           padding: 14, maxHeight: 260, overflowY: 'auto',
         }}>
-          <div style={{ fontSize: 11.5, color: '#8b7355', fontWeight: 700, marginBottom: 8 }}>あなたのOC</div>
+          <div style={{ fontSize: 11, color: '#6b6250', fontWeight: 700, marginBottom: 8, letterSpacing: '.05em' }}>あなたのOC</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
             {myOcs.map((oc) => (
               <button
@@ -48,8 +65,10 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
                 type="button"
                 onClick={() => { setSpeaker({ type: 'oc', id: oc.id, name: oc.name }); setOpen(false) }}
                 style={{
-                  border: speaker.type === 'oc' && speaker.id === oc.id ? '2px solid #8b5a2b' : '2px solid #d8c7ac',
-                  background: '#fff', borderRadius: 20, padding: '6px 14px', fontSize: 13, color: '#241a10', cursor: 'pointer',
+                  border: speaker.type === 'oc' && speaker.id === oc.id ? '1px solid #211d17' : '1px solid #8a8168',
+                  background: speaker.type === 'oc' && speaker.id === oc.id ? '#211d17' : '#fff',
+                  color: speaker.type === 'oc' && speaker.id === oc.id ? '#f4eee0' : '#211d17',
+                  padding: '6px 14px', fontSize: 13, cursor: 'pointer',
                 }}
               >
                 {oc.name}
@@ -57,24 +76,24 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
             ))}
           </div>
 
-          <div style={{ fontSize: 11.5, color: '#8b7355', fontWeight: 700, marginBottom: 8 }}>NPC</div>
+          <div style={{ fontSize: 11, color: '#6b6250', fontWeight: 700, marginBottom: 8, letterSpacing: '.05em' }}>NPC</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
             {npcs.length === 0 && (
-              <p style={{ fontSize: 12, color: '#b3a98f' }}>まだNPCがいません。</p>
+              <p style={{ fontSize: 12, color: '#8a8168', fontStyle: 'italic' }}>まだNPCがいません。</p>
             )}
             {npcs.map((npc) => (
               <span
                 key={npc.id}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 4,
-                  border: speaker.type === 'npc' && speaker.id === npc.id ? '2px solid #8b5a2b' : '2px solid #d8c7ac',
-                  background: '#fff', borderRadius: 20, padding: '4px 6px 4px 14px', fontSize: 13, color: '#241a10',
+                  border: speaker.type === 'npc' && speaker.id === npc.id ? '1px solid #211d17' : '1px solid #8a8168',
+                  background: '#fff', padding: '4px 6px 4px 14px', fontSize: 13, color: '#211d17',
                 }}
               >
                 <button
                   type="button"
                   onClick={() => { setSpeaker({ type: 'npc', id: npc.id, name: npc.name }); setOpen(false) }}
-                  style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 13, color: '#241a10', padding: 0 }}
+                  style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 13, color: '#211d17', padding: 0 }}
                 >
                   {npc.name}
                 </button>
@@ -82,7 +101,7 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
                   <form action={deleteNpcAction}>
                     <input type="hidden" name="room_id" value={roomId} />
                     <input type="hidden" name="npc_id" value={npc.id} />
-                    <button type="submit" style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#b3a98f', fontSize: 13, padding: 0 }} aria-label="NPCを削除">
+                    <button type="submit" style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#8a8168', fontSize: 13, padding: 0 }} aria-label="NPCを削除">
                       ×
                     </button>
                   </form>
@@ -96,9 +115,9 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
             <input
               name="name"
               placeholder="NPC名(例:マクゴナガル先生)"
-              style={{ flex: 1, padding: '8px 10px', borderRadius: 3, fontSize: 13, border: '2px solid #d8c7ac', background: '#fff', color: '#241a10' }}
+              style={{ flex: 1, padding: '8px 10px', fontSize: 13, border: '1px solid #8a8168', background: '#fff', color: '#211d17' }}
             />
-            <button type="submit" style={{ border: 'none', borderRadius: 3, background: '#8b5a2b', color: '#f3e9d8', fontSize: 12.5, fontWeight: 700, padding: '0 14px', cursor: 'pointer' }}>
+            <button type="submit" style={{ border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', fontSize: 12.5, fontWeight: 700, padding: '0 14px', cursor: 'pointer' }}>
               追加
             </button>
           </form>
@@ -107,7 +126,7 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
 
       <form
         action={action}
-        style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '12px 16px' }}
+        style={{ display: 'flex', gap: 6, alignItems: 'flex-end', padding: '10px 12px' }}
       >
         <input type="hidden" name="room_id" value={roomId} />
         <input type="hidden" name="speaker_type" value={speaker.type} />
@@ -117,44 +136,65 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
           onClick={() => setOpen((v) => !v)}
           aria-label="話し手を切り替え"
           style={{
-            flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
-            border: '2px solid #8b6a4a', background: '#fbf5e9', color: '#241a10',
-            fontSize: 15, fontWeight: 700, cursor: 'pointer',
+            flexShrink: 0, width: 36, height: 36, borderRadius: '50%',
+            border: '1px solid #211d17', background: '#f4eee0', color: '#211d17',
+            fontSize: 14, fontWeight: 700, cursor: 'pointer', marginBottom: 2,
           }}
         >
           {avatarInitial}
         </button>
-        <input
+        <textarea
           ref={inputRef}
           name="content"
+          rows={1}
           placeholder={`${speaker.name || ''}として発言`}
+          onFocus={() => setExtrasOpen(false)}
+          onInput={autoResize}
           style={{
-            flex: 1, border: '2px solid #8b6a4a', borderRadius: 3, padding: '10px 12px', fontSize: 16,
-            fontFamily: "'BIZ UDPGothic', sans-serif", background: '#fbf5e9', color: '#241a10',
+            flex: 1, border: '1px solid #211d17', padding: '8px 10px', fontSize: 16,
+            fontFamily: "'BIZ UDPGothic', sans-serif", background: '#fff', color: '#211d17',
+            resize: 'none', overflowY: 'auto', lineHeight: `${LINE_HEIGHT}px`,
           }}
         />
         <button
           type="submit"
           style={{
-            flexShrink: 0, border: '2px solid #3d2717', borderRadius: 3, padding: '10px 14px',
-            background: '#8b5a2b', color: '#f3e9d8', fontWeight: 700, fontSize: 13, boxShadow: '0 3px 0 #3d2717',
+            flexShrink: 0, border: '1px solid #211d17', padding: '8px 12px',
+            background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 13,
+            marginBottom: 2,
           }}
         >
           送信
         </button>
-        <FrogChocolateButton roomId={roomId} action={frogAction} />
         <button
           type="button"
-          onClick={() => setOocOpen(true)}
+          onClick={() => setExtrasOpen((v) => !v)}
+          aria-label="その他の操作"
           style={{
-            flexShrink: 0, padding: '0 10px', height: 38, borderRadius: 0,
-            border: '1px solid #211d17', background: '#f4eee0', color: '#211d17',
-            fontSize: 10.5, cursor: 'pointer', letterSpacing: '.03em', lineHeight: 1.2,
+            flexShrink: 0, width: 28, height: 36, border: 'none', background: 'none',
+            color: '#6b6250', fontSize: 14, cursor: 'pointer', marginBottom: 2,
           }}
         >
-          中の人<br />チャットへ
+          {extrasOpen ? '›' : '‹'}
         </button>
-        <ClearOnDone inputRef={inputRef} />
+        {extrasOpen && (
+          <>
+            <FrogChocolateButton roomId={roomId} action={frogAction} />
+            <button
+              type="button"
+              onClick={() => setOocOpen(true)}
+              style={{
+                flexShrink: 0, padding: '0 8px', height: 36,
+                border: '1px solid #211d17', background: '#f4eee0', color: '#211d17',
+                fontSize: 9.5, cursor: 'pointer', letterSpacing: '.02em', lineHeight: 1.15,
+                marginBottom: 2,
+              }}
+            >
+              中の人<br />チャットへ
+            </button>
+          </>
+        )}
+        <ClearOnDone inputRef={inputRef} onClear={autoResize} />
       </form>
     </div>
   )
