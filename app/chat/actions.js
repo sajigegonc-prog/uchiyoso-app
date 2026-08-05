@@ -17,7 +17,7 @@ export async function createRoom(formData) {
   if (!ocId) return { error: '話すOCを選択してください' }
 
   if (roomType === 'friend_group') {
-    if (friendOcIds.length < 2) return { error: 'グループチャットには友達を2人以上選んでください' }
+    if (friendOcIds.length < 2) return { error: 'グループチャットは3人以上(自分+友達2人以上)が必要です' }
     const ownerIds = []
     for (const fid of friendOcIds) {
       const { data: oc } = await supabase.from('ocs').select('user_id').eq('id', fid).maybeSingle()
