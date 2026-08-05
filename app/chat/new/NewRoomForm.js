@@ -27,8 +27,9 @@ export default function NewRoomForm({ ocs, friendOcs, initialFriendOcId }) {
   const [roomType, setRoomType] = useState('')
   const [speakerOcId, setSpeakerOcId] = useState(ocs[0]?.id || '')
   const [extraOcIds, setExtraOcIds] = useState([])
+  const [oneFriendUserId, setOneFriendUserId] = useState('')
   const [oneFriendOcId, setOneFriendOcId] = useState(initialFriendOcId || '')
-  const [groupFriendOcIds, setGroupFriendOcIds] = useState([])
+  const [groupSlots, setGroupSlots] = useState([{ friendUserId: '', ocId: '' }])
   const [title, setTitle] = useState('')
   const [location, setLocation] = useState('')
   const [timePeriod, setTimePeriod] = useState('')
@@ -38,20 +39,33 @@ export default function NewRoomForm({ ocs, friendOcs, initialFriendOcId }) {
 
   const otherOcs = ocs.filter((oc) => oc.id !== speakerOcId)
 
-  const groups = []
+  const friendGroups = []
   const seenFriend = new Set()
   for (const f of friendOcs) {
     if (!seenFriend.has(f.friend_user_id)) {
       seenFriend.add(f.friend_user_id)
-      groups.push({ label: f.friend_display_name || '名前未設定', ocs: friendOcs.filter((x) => x.friend_user_id === f.friend_user_id) })
+      friendGroups.push({ userId: f.friend_user_id, label: f.friend_display_name || '名前未設定' })
     }
+  }
+  function ocsOfFriend(userId) {
+    return friendOcs.filter((f) => f.friend_user_id === userId)
   }
 
   function toggleExtraOc(id) {
     setExtraOcIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
   }
-  function toggleGroupFriendOc(id) {
-    setGroupFriendOcIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
+
+  function updateSlotFriend(index, userId) {
+    setGroupSlots((prev) => prev.map((s, i) => i === index ? { friendUserId: userId, ocId: '' } : s))
+  }
+  function updateSlotOc(index, ocId) {
+    setGroupSlots((prev) => prev.map((s, i) => i === index ? { ...s, ocId } : s))
+  }
+  function addSlot() {
+    setGroupSlots((prev) => [...prev, { friendUserId: '', ocId: '' }])
+  }
+  function removeSlot(index) {
+    setGroupSlots((prev) => prev.filter((_, i) => i !== index))
   }
 
   async function handleSubmit() {
@@ -70,7 +84,7 @@ export default function NewRoomForm({ ocs, friendOcs, initialFriendOcId }) {
     } else if (roomType === 'one') {
       formData.append('friend_oc_ids', oneFriendOcId)
     } else if (roomType === 'group') {
-      groupFriendOcIds.forEach((id) => formData.append('friend_oc_ids', id))
+      groupSlots.filter((s) => s.ocId).forEach((s) => formData.append('friend_oc_ids', s.ocId))
       formData.set('title', title)
     }
 
@@ -85,11 +99,13 @@ export default function NewRoomForm({ ocs, friendOcs, initialFriendOcId }) {
     }
   }
 
+  const validGroupSlotCount = groupSlots.filter((s) => s.ocId).length
+
   const canProceedToDetails = roomType === 'self'
     ? true
     : roomType === 'one'
       ? !!oneFriendOcId
-      : groupFriendOcIds.length >= 2
+      : validGroupSlotCount >= 2
 
   const canSubmit = roomType === 'group' ? title.trim().length > 0 && canProceedToDetails : canProceedToDetails
 
@@ -185,13 +201,24 @@ export default function NewRoomForm({ ocs, friendOcs, initialFriendOcId }) {
 
           {roomType === 'one' && (
             <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>お相手のOC</label>
-              {groups.length === 0 && <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic' }}>まだ友達がいません。</p>}
-              {groups.map((g) => (
-                <div key={g.label} style={{ marginTop: 10 }}>
-                  <div style={{ fontSize: 10.5, color: '#6b6250', fontStyle: 'italic', marginBottom: 6 }}>{g.label}</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {g.ocs.map((oc) => (
+              <label style={labelStyle}>中の人</label>
+              <select
+                value={oneFriendUserId}
+                onChange={(e) => { setOneFriendUserId(e.target.value); setOneFriendOcId('') }}
+                style={inputStyle}
+              >
+                <option value="">選んでください</option>
+                {friendGroups.map((f) => (
+                  <option key={f.userId} value={f.userId}>{f.label}</option>
+                ))}
+              </select>
+              {friendGroups.length === 0 && <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic', marginTop: 8 }}>まだ友達がいません。</p>}
+
+              {oneFriendUserId && (
+                <div style={{ marginTop: 12 }}>
+                  <label style={labelStyle}>OC</label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 6 }}>
+                    {ocsOfFriend(oneFriendUserId).map((oc) => (
                       <label key={oc.oc_id} style={{
                         display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', cursor: 'pointer',
                         border: oneFriendOcId === oc.oc_id ? '1px solid #211d17' : '1px solid #8a8168',
@@ -203,31 +230,57 @@ export default function NewRoomForm({ ocs, friendOcs, initialFriendOcId }) {
                     ))}
                   </div>
                 </div>
-              ))}
+              )}
             </div>
           )}
 
           {roomType === 'group' && (
             <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>招待する友達のOC(2人以上・全員が友達である必要があります)</label>
-              {groups.length === 0 && <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic' }}>まだ友達がいません。</p>}
-              {groups.map((g) => (
-                <div key={g.label} style={{ marginTop: 10 }}>
-                  <div style={{ fontSize: 10.5, color: '#6b6250', fontStyle: 'italic', marginBottom: 6 }}>{g.label}</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {g.ocs.map((oc) => (
-                      <label key={oc.oc_id} style={{
-                        display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', cursor: 'pointer',
-                        border: groupFriendOcIds.includes(oc.oc_id) ? '1px solid #211d17' : '1px solid #8a8168',
-                        background: groupFriendOcIds.includes(oc.oc_id) ? '#fff' : '#f4eee0', fontSize: 12.5, color: '#211d17',
-                      }}>
-                        <input type="checkbox" checked={groupFriendOcIds.includes(oc.oc_id)} onChange={() => toggleGroupFriendOc(oc.oc_id)} style={{ width: 14, height: 14 }} />
-                        {oc.oc_name}
-                      </label>
-                    ))}
+              <label style={labelStyle}>招待する友達(2人以上・全員が友達である必要があります)</label>
+              {friendGroups.length === 0 && <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic' }}>まだ友達がいません。</p>}
+              {groupSlots.map((slot, index) => (
+                <div key={index} style={{ marginTop: 10, padding: 10, border: '1px solid #8a8168', background: '#fff' }}>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <select
+                      value={slot.friendUserId}
+                      onChange={(e) => updateSlotFriend(index, e.target.value)}
+                      style={{ ...inputStyle, flex: 1 }}
+                    >
+                      <option value="">中の人を選んでください</option>
+                      {friendGroups.map((f) => (
+                        <option key={f.userId} value={f.userId}>{f.label}</option>
+                      ))}
+                    </select>
+                    {groupSlots.length > 1 && (
+                      <button type="button" onClick={() => removeSlot(index)} style={{ border: 'none', background: 'none', color: '#8a2418', fontSize: 18, cursor: 'pointer', flexShrink: 0 }}>×</button>
+                    )}
                   </div>
+                  {slot.friendUserId && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+                      {ocsOfFriend(slot.friendUserId).map((oc) => (
+                        <label key={oc.oc_id} style={{
+                          display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', cursor: 'pointer',
+                          border: slot.ocId === oc.oc_id ? '1px solid #211d17' : '1px solid #8a8168',
+                          background: slot.ocId === oc.oc_id ? '#f4eee0' : '#fff', fontSize: 12.5, color: '#211d17',
+                        }}>
+                          <input type="radio" name={`slot_${index}_oc`} checked={slot.ocId === oc.oc_id} onChange={() => updateSlotOc(index, oc.oc_id)} style={{ width: 14, height: 14 }} />
+                          {oc.oc_name}
+                        </label>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
+              <button
+                type="button"
+                onClick={addSlot}
+                style={{ display: 'block', width: '100%', textAlign: 'center', marginTop: 10, padding: 10, border: '1px dashed #6b6250', background: 'none', color: '#3d2717', fontSize: 12.5, fontWeight: 700, cursor: 'pointer' }}
+              >
+                + 友達を追加
+              </button>
+              <p style={{ fontSize: 11, color: '#8a8168', marginTop: 10, lineHeight: 1.7, fontStyle: 'italic' }}>
+                1人の中の人につき、選べるOCは1人までです。
+              </p>
             </div>
           )}
 
