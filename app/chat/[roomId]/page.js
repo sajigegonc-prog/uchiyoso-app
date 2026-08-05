@@ -136,7 +136,7 @@ export default async function ChatRoomPage({ params }) {
               alreadyApproved={alreadyApprovedTransition}
               requestedByName={requestedByName}
             />
-            <AddMemberButton roomId={room.id} action={inviteMoreMembers} friendOcs={invitableFriendOcs} />
+            {isGroup && <AddMemberButton roomId={room.id} action={inviteMoreMembers} friendOcs={invitableFriendOcs} />}
             <DeleteRoomButton roomId={room.id} label={deleteButtonLabel} action={requestDeleteRoom} />
           </div>
         </div>
