@@ -52,9 +52,23 @@ export default function CoachMark({ steps, onFinish }) {
     position: 'fixed', inset: 0, background: 'rgba(33,29,23,.78)', zIndex: 200,
   }
 
-  const tooltipTop = rect
-    ? Math.min(Math.max(rect.bottom + 16, 20), window.innerHeight - 170)
-    : null
+  const TOOLTIP_HEIGHT_ESTIMATE = 150
+  const GAP = 16
+
+  let tooltipTop
+  if (rect) {
+    const spaceBelow = window.innerHeight - rect.bottom
+    const spaceAbove = rect.top
+    if (spaceBelow >= TOOLTIP_HEIGHT_ESTIMATE + GAP) {
+      tooltipTop = rect.bottom + GAP
+    } else if (spaceAbove >= TOOLTIP_HEIGHT_ESTIMATE + GAP) {
+      tooltipTop = rect.top - TOOLTIP_HEIGHT_ESTIMATE - GAP
+    } else {
+      tooltipTop = Math.max(20, rect.top - TOOLTIP_HEIGHT_ESTIMATE - GAP)
+    }
+  } else {
+    tooltipTop = null
+  }
 
   const centerX = window.innerWidth / 2
   const tooltipWidth = Math.min(360, window.innerWidth - 40)
@@ -69,8 +83,14 @@ export default function CoachMark({ steps, onFinish }) {
 
   return createPortal(
     <>
+      <style>{`
+        @keyframes coachFadeIn {
+          from { opacity: 0; transform: translateY(6px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
       <div style={highlightStyle} />
-      <div style={tooltipStyle}>
+      <div key={index} style={{ ...tooltipStyle, animation: 'coachFadeIn .35s ease' }}>
         <div style={{ background: '#f4eee0', border: '1px solid #211d17', padding: 16 }}>
           <p style={{ fontSize: 13, color: '#211d17', lineHeight: 1.8 }}>{step.text}</p>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14 }}>
