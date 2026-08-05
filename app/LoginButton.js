@@ -14,9 +14,9 @@ export default function LoginButton() {
     <button
       onClick={handleLogin}
       style={{
-        width: '100%', maxWidth: 320, padding: 13, borderRadius: 3, border: '2px solid #3d2717',
-        fontSize: 14, fontWeight: 700, cursor: 'pointer', marginTop: 32,
-        background: '#f3e9d8', color: '#241a10', boxShadow: '0 3px 0 #3d2717',
+        width: '100%', padding: 12, border: '1px solid #f4eee0',
+        fontSize: 13, fontWeight: 700, cursor: 'pointer', marginTop: 30,
+        background: '#f4eee0', color: '#211d17', letterSpacing: '.05em',
       }}
     >
       Google でログイン / 新規登録
