@@ -5,6 +5,7 @@ import { updateOC, deleteOC } from './actions'
 import EditOCForm from './EditOCForm'
 import IconUploader from './IconUploader'
 import DeleteOCButton from './DeleteOCButton'
+import Image from 'next/image'
 
 export default async function OCDetailPage({ params }) {
   const supabase = await createClient()
@@ -37,9 +38,10 @@ export default async function OCDetailPage({ params }) {
           background: '#211d17', border: '1px solid #211d17',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           color: '#f4eee0', fontWeight: 700, fontSize: 24, fontFamily: 'Georgia, serif',
+          position: 'relative',
         }}>
           {oc.icon_url ? (
-            <img src={oc.icon_url} alt={oc.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <Image src={oc.icon_url} alt={oc.name} fill sizes="76px" style={{ objectFit: 'cover' }} />
           ) : oc.name?.charAt(0)}
         </div>
       </div>
