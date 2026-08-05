@@ -2,10 +2,10 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
+
 export async function sendFriendRequestByToken(formData) {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const user = session?.user
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
   const token = formData.get('token')?.toString()
   if (!token) redirect('/friends')
@@ -18,12 +18,12 @@ export async function sendFriendRequestByToken(formData) {
       addressee_id: owner.id,
     })
   }
-  redirect('/friends')
+  redirect(`/friends/add/${token}`)
 }
+
 export async function respondToFriendRequest(formData) {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const user = session?.user
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
   const friendshipId = formData.get('friendship_id')?.toString()
   const decision = formData.get('decision')?.toString()
