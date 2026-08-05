@@ -147,12 +147,12 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
           type="button"
           onClick={() => setOocOpen(true)}
           style={{
-            flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
-            border: '2px solid #8b6a4a', background: '#fbf5e9', fontSize: 15, cursor: 'pointer',
+            flexShrink: 0, padding: '0 10px', height: 38, borderRadius: 0,
+            border: '1px solid #211d17', background: '#f4eee0', color: '#211d17',
+            fontSize: 10.5, cursor: 'pointer', letterSpacing: '.03em', lineHeight: 1.2,
           }}
-          aria-label="中の人チャットを開く"
         >
-          👤
+          中の人<br />チャットへ
         </button>
         <ClearOnDone inputRef={inputRef} />
       </form>
