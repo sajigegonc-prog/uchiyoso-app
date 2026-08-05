@@ -7,6 +7,7 @@ export default function DeleteRoomButton({ roomId, label, action }) {
   return (
     <>
       <button
+        id="coach-exit-btn"
         type="button"
         onClick={() => setConfirming(true)}
         style={{ fontSize: 11, color: '#c9a876', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
