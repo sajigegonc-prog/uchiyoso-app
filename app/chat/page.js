@@ -14,13 +14,17 @@ export default async function ChatListPage() {
     .select('room_id, oc_id, left_at, last_read_at, chat_rooms(id, deleted_at, primary_oc_id)')
     .eq('user_id', user.id)
     .is('left_at', null)
+  const roomIdSet = new Set()
   const roomIds = []
   const primaryOcByRoom = new Map()
   const lastReadByRoom = new Map()
   const myOcIdsInRoom = new Map()
   for (const m of memberships || []) {
     if (m.chat_rooms && !m.chat_rooms.deleted_at) {
-      roomIds.push(m.chat_rooms.id)
+      if (!roomIdSet.has(m.chat_rooms.id)) {
+        roomIdSet.add(m.chat_rooms.id)
+        roomIds.push(m.chat_rooms.id)
+      }
       primaryOcByRoom.set(m.chat_rooms.id, m.chat_rooms.primary_oc_id)
       const existing = lastReadByRoom.get(m.room_id)
       if (!existing || (m.last_read_at && m.last_read_at > existing)) {
@@ -104,7 +108,7 @@ export default async function ChatListPage() {
       <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
         <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO GAZETTE</div>
         <div style={{ fontSize: 26, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>
-          おしゃべり欄
+          おしゃべりする
         </div>
       </div>
 
