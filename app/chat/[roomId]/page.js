@@ -8,6 +8,7 @@ import { requestDeleteRoom, acknowledgeDeletion } from './deleteActions'
 import MessageForm from './MessageForm'
 import DeletionNotice from './DeletionNotice'
 import DeleteRoomButton from './DeleteRoomButton'
+import AutoRefresh from '@/components/AutoRefresh'
 export default async function ChatRoomPage({ params }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
