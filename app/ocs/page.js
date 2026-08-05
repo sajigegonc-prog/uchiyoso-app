@@ -5,6 +5,7 @@ import { lightBackLinkStyle } from './styles'
 import { addAvoidedPartner } from './actions'
 import AvoidedPartnerTag from './AvoidedPartnerTag'
 import SubmitButton from '@/components/SubmitButton'
+import Image from 'next/image'
 
 export default async function OCsPage() {
   const supabase = await createClient()
@@ -60,9 +61,10 @@ export default async function OCsPage() {
                 background: '#211d17', border: '1px solid #211d17',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: '#f4eee0', fontWeight: 700, fontSize: 16, fontFamily: 'Georgia, serif',
+                position: 'relative',
               }}>
                 {oc.icon_url ? (
-                  <img src={oc.icon_url} alt={oc.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <Image src={oc.icon_url} alt={oc.name} fill sizes="46px" style={{ objectFit: 'cover' }} />
                 ) : oc.name?.charAt(0)}
               </div>
               <div>
