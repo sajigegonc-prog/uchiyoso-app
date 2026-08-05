@@ -171,11 +171,18 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
           onClick={() => setExtrasOpen((v) => !v)}
           aria-label="その他の操作"
           style={{
-            flexShrink: 0, width: 28, height: 36, border: 'none', background: 'none',
+            position: 'relative', flexShrink: 0, width: 28, height: 36, border: 'none', background: 'none',
             color: '#6b6250', fontSize: 14, cursor: 'pointer', marginBottom: 2,
           }}
         >
           {extrasOpen ? '›' : '‹'}
+          {!extrasOpen && hasUnreadOoc && (
+            <span style={{
+              position: 'absolute', top: 4, right: 2,
+              width: 7, height: 7, borderRadius: '50%',
+              background: '#8a2418',
+            }} />
+          )}
         </button>
         {extrasOpen && (
           <>
