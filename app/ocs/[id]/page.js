@@ -20,7 +20,7 @@ export default async function OCDetailPage({ params }) {
   if (!oc) notFound()
 
   return (
-    <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px 60px' }}>
+    <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px 110px' }}>
       <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
         <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO GAZETTE</div>
         <div style={{ fontSize: 24, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>
@@ -59,7 +59,7 @@ export default async function OCDetailPage({ params }) {
         <DeleteOCButton />
       </form>
 
-      <Link href="/ocs" style={{ display: 'block', marginTop: 24, textAlign: 'center', fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>
+      <Link href="/ocs" style={{ display: 'block', marginTop: 30, marginBottom: 10, padding: '10px 0', textAlign: 'center', fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>
         ← OC一覧に戻る
       </Link>
     </div>
