@@ -12,7 +12,7 @@ import DeletionNotice from './DeletionNotice'
 import DeleteRoomButton from './DeleteRoomButton'
 import AddMemberButton from './AddMemberButton'
 import MessageBubble from './MessageBubble'
-import AutoRefresh from '@/components/AutoRefresh'
+import RealtimeRefresh from '@/components/RealtimeRefresh'
 
 export default async function ChatRoomPage({ params }) {
   const supabase = await createClient()
@@ -98,7 +98,7 @@ export default async function ChatRoomPage({ params }) {
       fontFamily: "'BIZ UDPGothic', sans-serif", background: '#efe8d8',
       display: 'flex', flexDirection: 'column', overflow: 'hidden',
     }}>
-      <AutoRefresh intervalMs={4000} />
+      <RealtimeRefresh tables={['messages', 'room_ooc_messages']} fallbackMs={15000} />
       {showDeletionNotice && (
         <DeletionNotice roomId={room.id} action={acknowledgeDeletion} />
       )}
