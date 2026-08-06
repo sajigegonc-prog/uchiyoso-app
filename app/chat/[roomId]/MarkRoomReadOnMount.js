@@ -2,12 +2,12 @@
 import { useEffect, useRef } from 'react'
 import { markRoomRead } from './markRoomReadAction'
 
-export default function MarkRoomReadOnMount({ roomId }) {
-  const done = useRef(false)
+export default function MarkRoomReadOnMount({ roomId, messageCount }) {
+  const lastCount = useRef(null)
   useEffect(() => {
-    if (done.current) return
-    done.current = true
+    if (lastCount.current === messageCount) return
+    lastCount.current = messageCount
     markRoomRead(roomId)
-  }, [roomId])
+  }, [roomId, messageCount])
   return null
 }
