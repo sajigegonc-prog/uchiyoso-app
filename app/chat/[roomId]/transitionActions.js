@@ -3,16 +3,21 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
 
-async function generateTranscript(supabase, roomId) {
+async function generateTranscript(supabase, roomId, viewerId) {
+  const { data: myOcs } = await supabase.from('ocs').select('id').eq('user_id', viewerId)
+  const myOcIds = new Set((myOcs || []).map((o) => o.id))
+
   const { data: messages } = await supabase
     .from('messages')
     .select('content, created_at, sender_oc_id, sender_npc_id, is_system, ocs(name), chat_room_npcs(name)')
     .eq('room_id', roomId)
     .order('created_at', { ascending: true })
+
   const lines = (messages || []).map((m) => {
     if (m.is_system) return `（${m.content}）`
     const speaker = m.ocs?.name || m.chat_room_npcs?.name || '???'
-    return `${speaker}: ${m.content}`
+    const mark = m.sender_oc_id && myOcIds.has(m.sender_oc_id) ? '★' : ''
+    return `${mark}${speaker}: ${m.content}`
   })
   return lines.join('\n')
 }
@@ -51,7 +56,7 @@ export async function requestSceneTransition(roomId) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
-  const transcript = await generateTranscript(supabase, roomId)
+  const transcript = await generateTranscript(supabase, roomId, user.id)
   await supabase.from('scene_transition_approvals').delete().eq('room_id', roomId)
   await supabase.from('chat_rooms').update({
     transition_requested_at: new Date().toISOString(),
@@ -69,7 +74,7 @@ export async function approveSceneTransition(roomId) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
-  const transcript = await generateTranscript(supabase, roomId)
+  const transcript = await generateTranscript(supabase, roomId, user.id)
   await supabase.from('scene_transition_approvals').insert({ room_id: roomId, user_id: user.id })
 
   const completed = await checkAndComplete(supabase, roomId)
