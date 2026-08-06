@@ -18,6 +18,8 @@ import SceneTransitionButton from './SceneTransitionButton'
 import CoachMark from '@/components/CoachMark'
 import { markChatTutorialSeen, markInviteTutorialSeen } from '../../tutorialActions'
 import MarkRoomReadOnMount from './MarkRoomReadOnMount'
+import RoomTitleEditor from './RoomTitleEditor'
+import { updateRoomTitle } from './titleActions'
 
 export default async function ChatRoomPage({ params }) {
   const supabase = await createClient()
@@ -179,9 +181,7 @@ export default async function ChatRoomPage({ params }) {
             <DeleteRoomButton roomId={room.id} label={deleteButtonLabel} action={confirmLeaveOrDelete} transcript={myTranscriptPreview} />
           </div>
         </div>
-        <div style={{ fontSize: 17, fontWeight: 700, marginTop: 8, color: '#211d17', fontFamily: 'Georgia, serif' }}>
-          {room.title || memberNames.join('、')}
-        </div>
+        <RoomTitleEditor roomId={room.id} title={room.title} fallback={memberNames.join('、')} action={updateRoomTitle} />
         {(room.location || room.time_period) && (
           <div style={{ fontSize: 11, opacity: .85, marginTop: 5, display: 'flex', gap: 12, color: '#6b6250', fontStyle: 'italic' }}>
             {room.location && <span>場所: {room.location}</span>}
