@@ -104,9 +104,13 @@ export default async function OCsPage() {
         <div style={{ fontSize: 11, letterSpacing: '.15em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6 }}>
           中の人設定
         </div>
-        <p style={{ fontSize: 12, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>表示名</p>
+        <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 10 }}>
+        表示名
+        </div>
         <DisplayNameForm action={updateDisplayNameLimited} currentName={myProfile?.display_name || ''} />
-        <p style={{ fontSize: 12, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>絵文字・一言プロフィール</p>
+        <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 22 }}>
+          絵文字・一言プロフィール
+        </div>
         <ProfileMetaForm action={updateSelfProfile} emoji={myProfile?.emoji || ''} bio={myProfile?.bio || ''} />
         <p style={{ fontSize: 12, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>マッチングを避けたいお相手</p>
         <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 2, fontStyle: 'italic' }}>(ランダムマッチングは近日公開予定です)</p>
