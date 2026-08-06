@@ -5,7 +5,6 @@ import RealtimeRefresh from '@/components/RealtimeRefresh'
 import { deleteLetter } from './actions'
 import { DeleteLetterButtonSmall } from './DeleteLetterButton'
 
-
 const VISIBLE_COUNT = 3
 
 export default async function OwlMailPage({ searchParams }) {
@@ -46,20 +45,32 @@ export default async function OwlMailPage({ searchParams }) {
 
   const enriched = (letters || []).map((l) => {
     const isReceived = myOcIds.includes(l.recipient_oc_id)
-    const otherOcId = isReceived ? l.sender_oc_id : l.recipient_oc_id
     return {
       ...l,
       isReceived,
       unread: isReceived && !l.read_at,
-      otherOcName: nameOf(otherOcId),
+      myOcId: isReceived ? l.recipient_oc_id : l.sender_oc_id,
+      otherOcName: nameOf(isReceived ? l.sender_oc_id : l.recipient_oc_id),
     }
   })
 
   const received = enriched.filter((l) => l.isReceived)
   const sent = enriched.filter((l) => !l.isReceived)
 
-  const showAllReceived = searchParams?.all === 'received'
-  const visibleReceived = showAllReceived ? received : received.slice(0, VISIBLE_COUNT)
+  const receivedGroupMap = new Map()
+  for (const l of received) {
+    if (!receivedGroupMap.has(l.myOcId)) {
+      receivedGroupMap.set(l.myOcId, { myOcId: l.myOcId, myOcName: nameOf(l.myOcId), letters: [] })
+    }
+    receivedGroupMap.get(l.myOcId).letters.push(l)
+  }
+  const receivedGroups = Array.from(receivedGroupMap.values()).sort((a, b) => {
+    const ta = new Date(a.letters[0]?.created_at || 0).getTime()
+    const tb = new Date(b.letters[0]?.created_at || 0).getTime()
+    return tb - ta
+  })
+
+  const expandedIds = new Set((searchParams?.expand || '').split(',').filter(Boolean))
 
   function LetterRow({ letter }) {
     return (
@@ -110,18 +121,30 @@ export default async function OwlMailPage({ searchParams }) {
         <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6 }}>
           もらったもの
         </div>
-        {received.length === 0 && (
+        {receivedGroups.length === 0 && (
           <p style={{ fontSize: 12.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>まだ届いていません。</p>
         )}
-        {visibleReceived.map((letter) => <LetterRow key={letter.id} letter={letter} />)}
-        {!showAllReceived && received.length > VISIBLE_COUNT && (
-          <Link
-            href="/owl?all=received"
-            style={{ display: 'block', textAlign: 'center', marginTop: 10, fontSize: 11.5, color: '#6b6250', textDecoration: 'underline' }}
-          >
-            もっと見る({received.length - VISIBLE_COUNT}件)
-          </Link>
-        )}
+        {receivedGroups.map((g) => {
+          const isExpanded = expandedIds.has(g.myOcId)
+          const visibleLetters = isExpanded ? g.letters : g.letters.slice(0, VISIBLE_COUNT)
+          const expandParam = [...expandedIds, g.myOcId].join(',')
+          return (
+            <div key={g.myOcId} style={{ marginTop: 16 }}>
+              <div style={{ fontSize: 11, color: '#3d2717', fontWeight: 700, fontFamily: 'Georgia, serif' }}>
+                {g.myOcName} 宛
+              </div>
+              {visibleLetters.map((letter) => <LetterRow key={letter.id} letter={letter} />)}
+              {!isExpanded && g.letters.length > VISIBLE_COUNT && (
+                <Link
+                  href={`/owl?expand=${expandParam}`}
+                  style={{ display: 'block', textAlign: 'center', marginTop: 8, fontSize: 11, color: '#6b6250', textDecoration: 'underline' }}
+                >
+                  もっと見る({g.letters.length - VISIBLE_COUNT}件)
+                </Link>
+              )}
+            </div>
+          )
+        })}
       </div>
 
       <div style={{ marginTop: 24 }}>
