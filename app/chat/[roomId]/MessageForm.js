@@ -18,12 +18,13 @@ function ClearOnDone({ inputRef, onClear }) {
 const LINE_HEIGHT = 20
 const MAX_LINES = 5
 
-export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, addNpcAction, deleteNpcAction, frogAction, oocMessages, oocSendAction, hasUnreadOoc, drawSituationAction }) {
+export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, addNpcAction, deleteNpcAction, frogAction, oocMessages, oocSendAction, hasUnreadOoc, drawSituationAction, initialOcId }) {
   const inputRef = useRef(null)
   const [open, setOpen] = useState(false)
   const [oocOpen, setOocOpen] = useState(false)
   const [extrasOpen, setExtrasOpen] = useState(true)
-  const [speaker, setSpeaker] = useState({ type: 'oc', id: myOcs[0]?.id, name: myOcs[0]?.name })
+  const initialOc = myOcs.find((oc) => oc.id === initialOcId) || myOcs[0]
+  const [speaker, setSpeaker] = useState({ type: 'oc', id: initialOc?.id, name: initialOc?.name })
 
   const avatarInitial = (speaker.name || '?').charAt(0)
 
