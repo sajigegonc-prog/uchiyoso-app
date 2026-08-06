@@ -205,7 +205,9 @@ export default async function ChatRoomPage({ params }) {
               </div>
             )
           }
-          const mine = msg.sender_oc_id ? myOcIdSet.has(msg.sender_oc_id) : false
+          const mine = isSelfRoom
+            ? msg.sender_oc_id === room.primary_oc_id
+            : (msg.sender_oc_id ? myOcIdSet.has(msg.sender_oc_id) : false)
           const isOwner = msg.sender_oc_id ? myOcIdSet.has(msg.sender_oc_id) : myNpcs.includes(msg.sender_npc_id)
           const speakerName = msg.ocs?.name || msg.chat_room_npcs?.name
           const speakerIcon = msg.ocs?.icon_url || null
