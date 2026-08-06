@@ -21,9 +21,10 @@ import MarkRoomReadOnMount from './MarkRoomReadOnMount'
 import RoomTitleEditor from './RoomTitleEditor'
 import { updateRoomTitle } from './titleActions'
 import { drawSituation } from './situationActions'
+import WelcomePartnerModal from './WelcomePartnerModal'
 
 
-export default async function ChatRoomPage({ params }) {
+export default async function ChatRoomPage({ params, searchParams }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -48,7 +49,7 @@ export default async function ChatRoomPage({ params }) {
   }
   const { data: members } = await supabase
     .from('chat_room_members')
-    .select('user_id, oc_id, ocs(name), left_at, ooc_last_read_at')
+    .select('user_id, oc_id, ocs(name, icon_url, house, oc_type, description), left_at, ooc_last_read_at')
     .eq('room_id', roomId)
   const { data: allFriendOcs } = await supabase.rpc('list_friend_ocs')
   const currentMemberUserIds = new Set((members || []).filter((m) => !m.left_at).map((m) => m.user_id))
@@ -232,6 +233,12 @@ export default async function ChatRoomPage({ params }) {
           )
         })}
       </div>
+
+        {searchParams?.welcome === '1' && (() => {
+        const other = (members || []).find((m) => m.user_id !== user.id)
+        if (!other) return null
+        return <WelcomePartnerModal oc={{ ...other.ocs, roomId: room.id }} />
+      })()}
       {myOcs.length > 0 ? (
         <MessageForm
           action={sendMessage}
