@@ -35,13 +35,11 @@ export default async function HomePage() {
     <>
       {!profile?.seen_home_tutorial && (
         <CoachMark
-          steps={[
+                    steps={[
             { text: 'ここがあなたのホーム画面です。届いた便りは、ここに速報として並びます。' },
+            { targetId: 'coach-replay-link', text: '場面転換で発行したログを貼ると、チャット画面風に再現して見返せます。' },
             { targetId: 'coach-bottomnav', text: 'ここから遊べます。' },
           ]}
-          onFinish={markHomeTutorialSeen}
-        />
-      )}
       <div style={{
         fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh',
         padding: '24px 20px 100px',
@@ -98,7 +96,8 @@ export default async function HomePage() {
             — 新しい報せはありません —
           </p>
         )}
-      <Link
+            <Link
+        id="coach-replay-link"
         href="/replay"
         style={{
           display: 'block', textAlign: 'center', marginTop: 30,
