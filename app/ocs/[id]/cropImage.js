@@ -3,7 +3,9 @@ function createImage(url) {
     const img = new Image()
     img.addEventListener('load', () => resolve(img))
     img.addEventListener('error', reject)
-    img.setAttribute('crossOrigin', 'anonymous')
+    if (!url.startsWith('data:')) {
+      img.setAttribute('crossOrigin', 'anonymous')
+    }
     img.src = url
   })
 }
