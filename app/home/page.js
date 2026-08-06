@@ -70,9 +70,6 @@ export default async function HomePage() {
             <p style={{ fontSize: 12, color: '#6b6250', fontStyle: 'italic', marginTop: 2 }}>
               ここはあなたの寝室です。
             </p>
-            <Link href="/settings/name" style={{ fontSize: 10.5, color: '#8a8168', textDecoration: 'underline', fontStyle: 'italic' }}>
-              表示名を変更する
-            </Link>
           </div>
         </div>
 
