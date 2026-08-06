@@ -2,8 +2,6 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
 import RealtimeRefresh from '@/components/RealtimeRefresh'
-import { deleteLetter } from './actions'
-import { DeleteLetterButtonSmall } from './DeleteLetterButton'
 
 const VISIBLE_COUNT = 3
 
@@ -93,7 +91,7 @@ export default async function OwlMailPage({ searchParams }) {
             )}
           </div>
         </Link>
-        <DeleteLetterButtonSmall letterId={letter.id} action={deleteLetter} />
+        
       </div>
     )
   }
