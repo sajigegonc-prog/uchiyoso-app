@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import { addOC } from '../actions'
 import NewOCFormWithIcon from './NewOCFormWithIcon'
+import Link from 'next/link'
 
 export default async function NewOCPage() {
   const supabase = await createClient()
