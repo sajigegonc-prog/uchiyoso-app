@@ -94,7 +94,7 @@ export default async function RandomMatchPage() {
         <input type="hidden" name="situation_text" value={situationText} />
         <button type="submit" style={{ width: '100%', padding: 13, background: '#211d17', color: '#f4eee0', border: 'none', fontWeight: 700, fontSize: 13 }}>このお部屋を作る</button>
       </form>
-      <Link href="/chat" style={{ display: 'block', marginTop: 20, fontSize: 11.5, color: '#6b6250' }}>← 一覧に戻る</Link>
+      <Link href="/chat" style={{ display: 'block', marginTop: 20, fontSize: 11.5, color: '#6b6250' }}>やっぱりやめる</Link>
     </div>
   )
 }
