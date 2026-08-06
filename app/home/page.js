@@ -35,11 +35,14 @@ export default async function HomePage() {
     <>
       {!profile?.seen_home_tutorial && (
         <CoachMark
-                    steps={[
+          steps={[
             { text: 'ここがあなたのホーム画面です。届いた便りは、ここに速報として並びます。' },
-            { targetId: 'coach-bottomnav', text: 'ここから遊べます。' },
             { targetId: 'coach-replay-link', text: '場面転換で発行したログを貼ると、チャット画面風に再現して見返せます。' },
+            { targetId: 'coach-bottomnav', text: 'ここから遊べます。' },
           ]}
+          onFinish={markHomeTutorialSeen}
+        />
+      )}
       <div style={{
         fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh',
         padding: '24px 20px 100px',
@@ -96,17 +99,18 @@ export default async function HomePage() {
             — 新しい報せはありません —
           </p>
         )}
-            <Link
-        id="coach-replay-link"
-        href="/replay"
-        style={{
-          display: 'block', textAlign: 'center', marginTop: 30,
-          background: '#fff', color: '#211d17', fontWeight: 700, fontSize: 12.5,
-          border: '1px solid #211d17', padding: 11, textDecoration: 'none', letterSpacing: '.05em',
-        }}
-      >
-        過去のおしゃべりを思い出す
-      </Link>
+
+        <Link
+          id="coach-replay-link"
+          href="/replay"
+          style={{
+            display: 'block', textAlign: 'center', marginTop: 30,
+            background: '#fff', color: '#211d17', fontWeight: 700, fontSize: 12.5,
+            border: '1px solid #211d17', padding: 11, textDecoration: 'none', letterSpacing: '.05em',
+          }}
+        >
+          過去のおしゃべりを思い出す
+        </Link>
 
         <form action={signOutOnly} style={{ marginTop: 40, textAlign: 'center' }}>
           <button type="submit" style={{ background: 'none', border: 'none', color: '#8a8168', fontSize: 11.5, textDecoration: 'underline', cursor: 'pointer', fontStyle: 'italic' }}>
