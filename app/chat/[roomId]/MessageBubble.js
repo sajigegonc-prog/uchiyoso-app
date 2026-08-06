@@ -69,7 +69,24 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
             <>
               <div style={{ fontSize: 17, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{detail.name}</div>
               <div style={{ fontSize: 11, color: '#8a8168', marginTop: 4 }}>{detail.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{detail.house ? ` ・ ${detail.house}` : ''}</div>
-              {detail.description && <p style={{ fontSize: 12.5, marginTop: 12, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{detail.description}</p>}
+              {detail.oc_type === 'dreamer' && detail.paired_character && (
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ fontSize: 10, color: '#6b6250' }}>お相手</div>
+                  <div style={{ fontSize: 13, marginTop: 2 }}>{detail.paired_character}</div>
+                </div>
+              )}
+              {detail.birth_date && (
+                <div style={{ marginTop: 10 }}>
+                  <div style={{ fontSize: 10, color: '#6b6250' }}>生年月日</div>
+                  <div style={{ fontSize: 13, marginTop: 2 }}>{new Date(detail.birth_date).getMonth() + 1}月{new Date(detail.birth_date).getDate()}日</div>
+                </div>
+              )}
+              {detail.description && (
+                <div style={{ marginTop: 10 }}>
+                  <div style={{ fontSize: 10, color: '#6b6250' }}>設定・紹介文</div>
+                  <p style={{ fontSize: 12.5, marginTop: 4, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{detail.description}</p>
+                </div>
+              )}
             </>
           )}
         </OcInfoModal>
