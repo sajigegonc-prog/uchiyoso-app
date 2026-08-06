@@ -18,3 +18,18 @@ export default function DeleteLetterButton({ letterId, action }) {
     </form>
   )
 }
+
+export function DeleteLetterButtonSmall({ letterId, action }) {
+  return (
+    <form action={action}>
+      <input type="hidden" name="letter_id" value={letterId} />
+      <button
+        type="submit"
+        onClick={(e) => { if (!confirm('この便りを削除しますか？')) e.preventDefault() }}
+        style={{ border: 'none', background: 'none', color: '#8a2418', fontSize: 11, textDecoration: 'underline', cursor: 'pointer', flexShrink: 0 }}
+      >
+        削除
+      </button>
+    </form>
+  )
+}
