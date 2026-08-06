@@ -52,6 +52,15 @@ export default async function ChatListPage() {
       .is('left_at', null)
     : { data: [] }
 
+  const { data: pendingOutgoing } = roomIds.length > 0
+    ? await supabase
+      .from('chat_room_invitations')
+      .select('room_id')
+      .in('room_id', roomIds)
+      .eq('status', 'pending')
+    : { data: [] }
+  const pendingRoomIds = new Set((pendingOutgoing || []).map((p) => p.room_id))
+
   const membersByRoom = new Map()
   const uniqueUsersByRoom = new Map()
   for (const m of allMembers || []) {
@@ -133,6 +142,7 @@ export default async function ChatListPage() {
       id, title, displayMembers,
       unread: unreadByRoom.get(id) || false,
       unreadOoc: unreadOocByRoom.get(id) || false,
+      pending: pendingRoomIds.has(id),
     }
   })
 
@@ -207,7 +217,18 @@ export default async function ChatListPage() {
             }}
           >
             <div style={{ position: 'relative', flexShrink: 0 }}>
-              {room.displayMembers.length === 1 ? (
+              {room.pending ? (
+                <div style={{
+                  width: 48, height: 48, borderRadius: '50%',
+                  background: '#d8cdb0', border: '1px solid #8a8168',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <circle cx="10" cy="7" r="4" stroke="#8a8168" strokeWidth="1.2" />
+                    <path d="M3 19c0-4 3-7 7-7s7 3 7 7" stroke="#8a8168" strokeWidth="1.2" />
+                  </svg>
+                </div>
+              ) : room.displayMembers.length === 1 ? (
                 <div style={{
                   width: 48, height: 48, borderRadius: '50%', overflow: 'hidden',
                   background: '#211d17', border: '1px solid #211d17',
@@ -244,9 +265,13 @@ export default async function ChatListPage() {
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 15, fontWeight: 700, color: '#211d17', fontFamily: 'Georgia, serif', display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, overflow: 'hidden' }}>
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{room.title || '名前未設定'}</span>
-                {room.title || '名前未設定'}
+                {room.pending && (
+                  <span style={{ fontSize: 9, color: '#8a8168', border: '1px solid #8a8168', padding: '1px 6px', fontFamily: "'BIZ UDPGothic', sans-serif", fontWeight: 700, flexShrink: 0 }}>
+                    承諾待ち
+                  </span>
+                )}
                 {room.unreadOoc && (
-                  <span style={{ fontSize: 9, color: '#4a5580', border: '1px solid #4a5580', padding: '1px 6px', fontFamily: "'BIZ UDPGothic', sans-serif", fontWeight: 700 }}>
+                  <span style={{ fontSize: 9, color: '#4a5580', border: '1px solid #4a5580', padding: '1px 6px', fontFamily: "'BIZ UDPGothic', sans-serif", fontWeight: 700, flexShrink: 0 }}>
                     中の人
                   </span>
                 )}
