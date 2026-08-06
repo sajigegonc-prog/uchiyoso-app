@@ -86,12 +86,6 @@ export default async function ChatListPage() {
         lastMessages[m.room_id] = m.content
         seenForPreview.add(m.room_id)
       }
-    const seenForPreview = new Set()
-    for (const m of msgs || []) {
-      if (!seenForPreview.has(m.room_id) && !m.is_system) {
-        lastMessages[m.room_id] = m.content
-        seenForPreview.add(m.room_id)
-      }
       const existingActivity = lastActivityByRoom.get(m.room_id)
       if (!existingActivity || m.created_at > existingActivity) {
         lastActivityByRoom.set(m.room_id, m.created_at)
