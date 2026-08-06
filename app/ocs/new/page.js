@@ -22,12 +22,12 @@ export default async function NewOCPage() {
           新しいOCを登録
         </div>
         <div style={{ fontSize: 9.5, color: '#8a8168', marginTop: 8, letterSpacing: '.1em' }}>
-          登録数 {count ?? 0} / 5
+          登録数 {count ?? 0} / 10
         </div>
       </div>
-      {(count ?? 0) >= 5 ? (
+      {(count ?? 0) >= 10 ? (
         <p style={{ fontSize: 13, color: '#8a8168', marginTop: 24, maxWidth: 360, textAlign: 'center', fontStyle: 'italic' }}>
-          OCの登録は最大5人までです。新しく登録するには、OC一覧から既存のOCを整理してください。
+          OCの登録は最大10人までです。新しく登録するには、OC一覧から既存のOCを整理してください。
         </p>
       ) : (
         <NewOCFormWithIcon action={addOC} userId={user.id} />
