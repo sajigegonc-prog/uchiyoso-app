@@ -9,12 +9,8 @@ export default async function PublicOCDetailPage({ params }) {
   const { data: oc } = await supabase
     .rpc('get_public_oc_detail', { _token: token, _oc_id: ocId })
     .single()
-  if (!oc) notFound()
 
-  const { data: owner } = await supabase
-    .rpc('get_profile_by_invite_token', { _token: token })
-    .single()
-  const isSelf = owner?.id === user.id
+  if (!oc) notFound()
 
   return (
     <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px 60px' }}>
@@ -63,23 +59,6 @@ export default async function PublicOCDetailPage({ params }) {
         <div style={{ marginTop: 16 }}>
           <div style={{ fontSize: 10, color: '#6b6250', letterSpacing: '.05em' }}>設定・紹介文</div>
           <div style={{ fontSize: 13, color: '#211d17', marginTop: 4, lineHeight: 1.9, whiteSpace: 'pre-wrap' }}>{oc.description}</div>
-        </div>
-      )}
-
-      {!isSelf && owner && (
-        <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <Link
-            href={`/chat/new?friend_oc_id=${oc.id}`}
-            style={{ display: 'block', textAlign: 'center', padding: 13, border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 13.5, letterSpacing: '.03em', textDecoration: 'none' }}
-          >
-            この子とおしゃべりする
-          </Link>
-          <Link
-            href={`/owl/new?to=${oc.id}`}
-            style={{ display: 'block', textAlign: 'center', padding: 13, border: '1px solid #211d17', background: '#fff', color: '#211d17', fontWeight: 700, fontSize: 13.5, letterSpacing: '.03em', textDecoration: 'none' }}
-          >
-            この子にふくろう便を送る
-          </Link>
         </div>
       )}
     </div>
