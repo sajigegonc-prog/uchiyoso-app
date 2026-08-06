@@ -242,7 +242,8 @@ export default async function ChatListPage() {
               )}
             </div>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: '#211d17', fontFamily: 'Georgia, serif', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: '#211d17', fontFamily: 'Georgia, serif', display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, overflow: 'hidden' }}>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{room.title || '名前未設定'}</span>
                 {room.title || '名前未設定'}
                 {room.unreadOoc && (
                   <span style={{ fontSize: 9, color: '#4a5580', border: '1px solid #4a5580', padding: '1px 6px', fontFamily: "'BIZ UDPGothic', sans-serif", fontWeight: 700 }}>
