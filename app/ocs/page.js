@@ -116,7 +116,6 @@ export default async function OCsPage() {
         <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 10 }}>
           マッチングを避けたいお相手
         </div>
-        <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 2, fontStyle: 'italic' }}>(ランダムマッチングは近日公開予定です)</p>
         <form action={addAvoidedPartner} style={{ display: 'flex', gap: 8, marginTop: 10 }}>
           <input
             name="character_name"
@@ -143,7 +142,7 @@ export default async function OCsPage() {
             ))}
           </div>
         )}
-        <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>各一配慮用です。</p>
+        <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>各一配慮などにお使いください。（ランダムマッチングは近日公開予定です）</p>
       </div>
 
       <Link href="/home" style={{ ...lightBackLinkStyle, display: 'block', marginTop: 30, textAlign: 'center', fontSize: 11.5 }}>
