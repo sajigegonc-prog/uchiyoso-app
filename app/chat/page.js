@@ -165,7 +165,7 @@ export default async function ChatListPage() {
           padding: 13, textDecoration: 'none', letterSpacing: '.05em',
         }}
       >
-        + 新しい部屋を作る
+        + 誰かとおしゃべりする！
       </Link>
       <div
         style={{
