@@ -1,11 +1,11 @@
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
+import { redirect, notFound } from 'next/navigation'
+import { createClient } from '@/lib/supabaseServer'
 
 export default async function PublicOCDetailPage({ params }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/')
   const { token, ocId } = params
 
   const { data: oc } = await supabase
