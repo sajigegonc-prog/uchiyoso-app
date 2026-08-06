@@ -4,8 +4,8 @@ import BottomNav from '@/components/BottomNav'
 import PullToRefresh from '@/components/PullToRefresh'
 
 export const metadata = {
-  title: 'ウィザワ向けうちよそ通信クラブ',
-  description: '全うちよそ魔人に捧げます。',
+  title: 'うちよそクラブ',
+  description: '紳士、淑女、そしてゴーストの皆さん、全てのうちよそ魔人に捧げます。',
 }
 
 export default async function RootLayout({ children }) {
