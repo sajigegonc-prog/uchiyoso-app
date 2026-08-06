@@ -74,9 +74,14 @@ export default async function FriendsPage() {
         <Link
           key={f.id}
           href={`/friends/add/${f.invite_token}`}
-          style={{ display: 'block', padding: '12px 2px', borderBottom: '1px solid #211d17', fontSize: 13.5, fontWeight: 700, color: '#211d17', textDecoration: 'none' }}
+          style={{ display: 'block', padding: '12px 2px', borderBottom: '1px solid #211d17', textDecoration: 'none' }}
         >
-          {f.display_name || '名前未設定'}
+          <div style={{ fontSize: 13.5, fontWeight: 700, color: '#211d17' }}>
+            {f.emoji ? `${f.emoji} ` : ''}{f.display_name || '名前未設定'}
+          </div>
+          {f.bio && (
+            <div style={{ fontSize: 11, color: '#8a8168', marginTop: 2, fontStyle: 'italic' }}>{f.bio}</div>
+          )}
         </Link>
       ))}
 
