@@ -20,6 +20,7 @@ import { markChatTutorialSeen, markInviteTutorialSeen } from '../../tutorialActi
 import MarkRoomReadOnMount from './MarkRoomReadOnMount'
 import RoomTitleEditor from './RoomTitleEditor'
 import { updateRoomTitle } from './titleActions'
+import { drawSituation } from './situationActions'
 
 export default async function ChatRoomPage({ params }) {
   const supabase = await createClient()
@@ -242,6 +243,7 @@ export default async function ChatRoomPage({ params }) {
           frogAction={openFrogCard}
           oocMessages={oocMessages || []}
           oocSendAction={sendOocMessage}
+          drawSituationAction={drawSituation}
           hasUnreadOoc={hasUnreadOoc}
         />
       ) : (
