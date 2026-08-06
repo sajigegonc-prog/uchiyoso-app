@@ -8,10 +8,11 @@ export default async function NewOCPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
-  const { count } = await supabase
+    const { count } = await supabase
     .from('ocs')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', user.id)
+    .eq('is_dream_partner', false)
   return (
     <div style={{
       fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh',
