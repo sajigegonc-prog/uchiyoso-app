@@ -24,7 +24,7 @@ export default async function OnboardingCharacterPage() {
           はじめる前に、まずはあなたのOCを<br />1人登録しましょう。
         </p>
       </div>
-      <OCForm action={createFirstOC} />
+      <OCForm action={createFirstOC} userId={user.id} />
       <form action={skipOnboarding}>
         <SubmitButton style={skipLinkStyle} pendingText="処理中…">あとで登録する</SubmitButton>
       </form>
