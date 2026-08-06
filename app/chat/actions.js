@@ -37,8 +37,10 @@ export async function createRoom(formData) {
     }
   }
   if (roomType === 'friend_1on1') {
-    if (friendOcIds.length !== 1) return { error: 'お相手を1人選んでください' }
-    const { data: dup } = await supabase.rpc('room_with_exact_members_exists', { _oc_ids: ocIdsForCheck, _room_type: 'friend_1on1' })
+  if (friendOcIds.length !== 1) return { error: 'お相手を1人選んでください' }
+  const ocIdsForCheck = [ocId, friendOcIds[0]]
+  const { data: dup } = await supabase.rpc('room_with_exact_members_exists', {
+    _oc_ids: ocIdsForCheck, _room_type: 'friend_1on1' })
     if (dup) {
       return { error: '同じメンバー構成のトークルームがすでに存在します。' }
     }
