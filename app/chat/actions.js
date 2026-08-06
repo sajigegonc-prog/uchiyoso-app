@@ -94,7 +94,7 @@ export async function respondToChatInvitation(formData) {
   if (decision === 'accepted' && ocId && roomId) {
     await supabase.from('chat_room_members').insert({ room_id: roomId, oc_id: ocId, user_id: user.id })
     await supabase.from('chat_room_invitations').update({ status: 'accepted' }).eq('id', invitationId).eq('invitee_id', user.id)
-    redirect(`/chat/${roomId}`)
+    redirect(`/chat/${roomId}?welcome=1`)
   } else if (decision === 'declined') {
     await supabase.from('chat_room_invitations').update({ status: 'declined' }).eq('id', invitationId).eq('invitee_id', user.id)
     revalidatePath('/chat')
