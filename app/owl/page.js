@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
 import RealtimeRefresh from '@/components/RealtimeRefresh'
 import { deleteLetter } from './actions'
+import DeleteLetterButton from './DeleteLetterButton'
 
 const VISIBLE_COUNT = 3
 
@@ -80,16 +81,7 @@ export default async function OwlMailPage({ searchParams }) {
             )}
           </div>
         </Link>
-        <form action={deleteLetter}>
-          <input type="hidden" name="letter_id" value={letter.id} />
-          <button
-            type="submit"
-            onClick={(e) => { if (!confirm('この便りを削除しますか？')) e.preventDefault() }}
-            style={{ border: 'none', background: 'none', color: '#8a2418', fontSize: 11, textDecoration: 'underline', cursor: 'pointer', flexShrink: 0 }}
-          >
-            削除
-          </button>
-        </form>
+        <DeleteLetterButtonSmall letterId={letter.id} action={deleteLetter} />
       </div>
     )
   }
