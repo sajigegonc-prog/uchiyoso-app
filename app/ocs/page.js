@@ -8,6 +8,8 @@ import SubmitButton from '@/components/SubmitButton'
 import Image from 'next/image'
 import { updateSelfProfile } from './actions'
 import ProfileMetaForm from './ProfileMetaForm'
+import DisplayNameForm from './DisplayNameForm'
+import { updateDisplayNameLimited } from '../settings/actions'
 
 export default async function OCsPage() {
   const supabase = await createClient()
@@ -20,7 +22,7 @@ export default async function OCsPage() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: true })
 
-  const { data: myProfile } = await supabase.from('profiles').select('emoji, bio').eq('id', user.id).maybeSingle()
+  const { data: myProfile } = await supabase.from('profiles').select('display_name, emoji, bio').eq('id', user.id).maybeSingle()
 
   const { data: avoidedPartners } = await supabase
     .from('avoided_partners')
@@ -102,6 +104,8 @@ export default async function OCsPage() {
         <div style={{ fontSize: 11, letterSpacing: '.15em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6 }}>
           中の人設定
         </div>
+        <p style={{ fontSize: 12, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>表示名</p>
+        <DisplayNameForm action={updateDisplayNameLimited} currentName={myProfile?.display_name || ''} />
         <p style={{ fontSize: 12, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>絵文字・一言プロフィール</p>
         <ProfileMetaForm action={updateSelfProfile} emoji={myProfile?.emoji || ''} bio={myProfile?.bio || ''} />
         <p style={{ fontSize: 12, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>マッチングを避けたいお相手</p>
