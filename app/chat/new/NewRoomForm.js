@@ -200,39 +200,156 @@ const typeBtnStyle = (active) => ({
           )}
 
           {roomType === 'self' && (
-            <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>一緒に参加させるOC</label>
-              {otherOcs.length === 0 && <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic' }}>他に登録済みのOCがありません。</p>}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 8 }}>
-                {otherOcs.map((oc) => (
-                  <label key={oc.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, width: 76, padding: '10px 6px', cursor: 'pointer', border: '1px solid #8a8168', background: '#fff' }}>
-                    <input type="checkbox" checked={extraOcIds.includes(oc.id)} onChange={() => toggleExtraOc(oc.id)} style={{ width: 16, height: 16 }} />
-                    <div style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', background: '#211d17', border: '1px solid #211d17', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f4eee0', fontWeight: 700, fontSize: 13, fontFamily: 'Georgia, serif' }}>
-                      {oc.icon_url ? <img src={oc.icon_url} alt={oc.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : oc.name?.charAt(0)}
-                    </div>
-                    <span style={{ fontSize: 10.5, color: '#211d17', textAlign: 'center', lineHeight: 1.3 }}>{dreamPartner.name}</span>
-                  </label>
-                </div>
-                ))}
-                {dreamPartner && (
-                <div style={{ marginTop: 14 }}>
-                  <div style={{ fontSize: 10, color: '#8a2418', letterSpacing: '.05em', marginBottom: 6 }}>夢相手</div>
-                  <label style={{
-                    display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                    width: 76, padding: '10px 6px', cursor: 'pointer',
-                    border: '1px dashed #8a2418', background: '#fff',
-                  }}>
-                    <input type="checkbox" checked={extraOcIds.includes(dreamPartner.id)} onChange={() => toggleExtraOc(dreamPartner.id)} style={{ width: 16, height: 16 }} />
-                    <div style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', background: '#211d17', border: '1px solid #8a2418', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f4eee0', fontWeight: 700, fontSize: 13, fontFamily: 'Georgia, serif' }}>
-                      {dreamPartner.icon_url ? <img src={dreamPartner.icon_url} alt={dreamPartner.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : dreamPartner.name?.charAt(0)}
-                    </div>
-                    <span style={{ fontSize: 10.5, color: '#211d17', textAlign: 'center', lineHeight: 1.3 }}>{dreamPartner.name}</span>
-                  </label>
-                </div>
-              )}
-              </div>
-            </div>
-          )}
+  <div style={{ marginBottom: 14 }}>
+    <label style={labelStyle}>一緒に参加させるOC</label>
+
+    {otherOcs.length === 0 && (
+      <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic' }}>
+        他に登録済みのOCがありません。
+      </p>
+    )}
+
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 8 }}>
+      {otherOcs.map((oc) => (
+        <label
+          key={oc.id}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 6,
+            width: 76,
+            padding: '10px 6px',
+            cursor: 'pointer',
+            border: '1px solid #8a8168',
+            background: '#fff',
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={extraOcIds.includes(oc.id)}
+            onChange={() => toggleExtraOc(oc.id)}
+            style={{ width: 16, height: 16 }}
+          />
+
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: '50%',
+              overflow: 'hidden',
+              background: '#211d17',
+              border: '1px solid #211d17',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#f4eee0',
+              fontWeight: 700,
+              fontSize: 13,
+              fontFamily: 'Georgia, serif',
+            }}
+          >
+            {oc.icon_url ? (
+              <img
+                src={oc.icon_url}
+                alt={oc.name}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              oc.name?.charAt(0)
+            )}
+          </div>
+
+          <span
+            style={{
+              fontSize: 10.5,
+              color: '#211d17',
+              textAlign: 'center',
+              lineHeight: 1.3,
+            }}
+          >
+            {oc.name}
+          </span>
+        </label>
+      ))}
+    </div>
+
+    {dreamPartner && (
+      <div style={{ marginTop: 14 }}>
+        <div
+          style={{
+            fontSize: 10,
+            color: '#8a2418',
+            letterSpacing: '.05em',
+            marginBottom: 6,
+          }}
+        >
+          夢相手
+        </div>
+
+        <label
+          style={{
+            display: 'inline-flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 6,
+            width: 76,
+            padding: '10px 6px',
+            cursor: 'pointer',
+            border: '1px dashed #8a2418',
+            background: '#fff',
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={extraOcIds.includes(dreamPartner.id)}
+            onChange={() => toggleExtraOc(dreamPartner.id)}
+            style={{ width: 16, height: 16 }}
+          />
+
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: '50%',
+              overflow: 'hidden',
+              background: '#211d17',
+              border: '1px solid #8a2418',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#f4eee0',
+              fontWeight: 700,
+              fontSize: 13,
+              fontFamily: 'Georgia, serif',
+            }}
+          >
+            {dreamPartner.icon_url ? (
+              <img
+                src={dreamPartner.icon_url}
+                alt={dreamPartner.name}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              dreamPartner.name?.charAt(0)
+            )}
+          </div>
+
+          <span
+            style={{
+              fontSize: 10.5,
+              color: '#211d17',
+              textAlign: 'center',
+              lineHeight: 1.3,
+            }}
+          >
+            {dreamPartner.name}
+          </span>
+        </label>
+      </div>
+    )}
+  </div>
+)}
 
           {roomType === 'solo' && (
             <p style={{ fontSize: 11.5, color: '#8a8168', marginBottom: 14, fontStyle: 'italic', lineHeight: 1.8 }}>
