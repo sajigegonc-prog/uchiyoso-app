@@ -65,6 +65,8 @@ export default function OCForm({ action, userId }) {
           const { data } = supabase.storage.from('oc-icons').getPublicUrl(path)
           formData.set('icon_url', `${data.publicUrl}?t=${Date.now()}`)
         }
+      } catch (err) {
+        console.error('画像処理エラー:', err)
       } finally {
         setPendingUpload(false)
       }
