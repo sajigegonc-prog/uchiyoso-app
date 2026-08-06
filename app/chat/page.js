@@ -185,7 +185,7 @@ export default async function ChatListPage() {
           padding: 8, letterSpacing: '.05em', textDecoration: 'none',
         }}
       >
-        ランダムマッチング
+        話したことない友達とおしゃべりしてみる
       </Link>
 
       {invitations && invitations.length > 0 && (
