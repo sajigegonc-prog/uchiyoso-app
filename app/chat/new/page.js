@@ -8,11 +8,18 @@ export default async function NewChatPage({ searchParams }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
-  const { data: ocs } = await supabase
+    const { data: ocs } = await supabase
     .from('ocs')
     .select('id, name, icon_url')
     .eq('user_id', user.id)
+    .eq('is_dream_partner', false)
     .order('created_at', { ascending: true })
+  const { data: dreamPartner } = await supabase
+    .from('ocs')
+    .select('id, name, icon_url')
+    .eq('user_id', user.id)
+    .eq('is_dream_partner', true)
+    .maybeSingle()
   const { data: friendOcs } = await supabase.rpc('list_friend_ocs')
 
   const initialFriendOcId = searchParams?.friend_oc_id
@@ -37,6 +44,7 @@ export default async function NewChatPage({ searchParams }) {
           ocs={ocs}
           friendOcs={friendOcs || []}
           initialFriendOcId={initialFriendOcId}
+          dreamPartner={dreamPartner}
         />
       )}
       <Link href="/chat" style={{ display: 'block', marginTop: 24, marginBottom: 10, padding: '10px 0', textAlign: 'center', fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>
