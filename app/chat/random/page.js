@@ -96,6 +96,7 @@ export default async function RandomMatchPage() {
           <span style={{ fontSize: 11, color: '#8a8168' }}>×</span>
           <RandomMatchOcIcon name={friendOc.name} iconUrl={friendOc.icon_url} house={friendOc.house} ageDiffLabel={ageDiffLabel} />
         </div>
+        <div style={{ fontSize: 9.5, color: '#8a8168', marginBottom: 10 }}>アイコンをタップして、お相手の詳細をご確認ください。</div>
         <div style={{ fontSize: 15, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{myOc.name} × {friendOc.name}</div>
         <div style={{ fontSize: 10.5, color: '#8a8168', marginTop: 8 }}>{pick.place}／{pick.time}</div>
         <div style={{ fontSize: 12.5, color: '#211d17', marginTop: 8, lineHeight: 1.8 }}>{situationText}</div>
