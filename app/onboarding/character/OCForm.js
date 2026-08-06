@@ -1,7 +1,11 @@
 'use client'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
+import Cropper from 'react-easy-crop'
 import { fieldLabelStyle, inputStyle, btnStyle } from '../styles'
 import SubmitButton from '@/components/SubmitButton'
+import { createClient } from '@/lib/supabaseClient'
+import { getCroppedImg } from '../../ocs/[id]/cropImage'
+
 const currentYear = new Date().getFullYear()
 const years = Array.from({ length: 100 }, (_, i) => currentYear - i)
 const months = Array.from({ length: 12 }, (_, i) => i + 1)
@@ -9,18 +13,82 @@ function daysInMonth(year, month) {
   if (!year || !month) return 31
   return new Date(year, month, 0).getDate()
 }
-export default function OCForm({ action }) {
+
+export default function OCForm({ action, userId }) {
   const [ocType, setOcType] = useState('creation')
   const [year, setYear] = useState('')
   const [month, setMonth] = useState('')
   const [day, setDay] = useState('')
-  const birthDate = year && month && day
-    ? `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    : ''
   const days = Array.from({ length: daysInMonth(Number(year), Number(month)) }, (_, i) => i + 1)
   const selectStyle = { ...inputStyle, minWidth: 0 }
+
+  const [imageSrc, setImageSrc] = useState(null)
+  const [crop, setCrop] = useState({ x: 0, y: 0 })
+  const [zoom, setZoom] = useState(1)
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
+  const [pendingUpload, setPendingUpload] = useState(false)
+
+  function onFileChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => setImageSrc(reader.result)
+    reader.readAsDataURL(file)
+  }
+
+  const onCropComplete = useCallback((_, pixels) => {
+    setCroppedAreaPixels(pixels)
+  }, [])
+
+  async function handleSubmit(formData) {
+    if (imageSrc && croppedAreaPixels) {
+      setPendingUpload(true)
+      try {
+        const blob = await getCroppedImg(imageSrc, croppedAreaPixels)
+        const tempId = crypto.randomUUID()
+        const supabase = createClient()
+        const path = `${userId}/${tempId}.jpg`
+        const { error: uploadError } = await supabase.storage
+          .from('oc-icons')
+          .upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
+        if (!uploadError) {
+          const { data } = supabase.storage.from('oc-icons').getPublicUrl(path)
+          formData.set('icon_url', `${data.publicUrl}?t=${Date.now()}`)
+        }
+      } finally {
+        setPendingUpload(false)
+      }
+    }
+    await action(formData)
+  }
+
   return (
-    <form action={action} style={{ width: '100%', maxWidth: 360, textAlign: 'left', marginTop: 8 }}>
+    <form action={handleSubmit} style={{ width: '100%', maxWidth: 360, textAlign: 'left', marginTop: 8 }}>
+      <div style={{ marginBottom: 14 }}>
+        <label style={fieldLabelStyle}>アイコン画像(任意)</label>
+        <input type="file" accept="image/*" onChange={onFileChange} style={{ fontSize: 12.5, color: '#f3e9d8' }} />
+        {imageSrc && (
+          <div style={{ marginTop: 10 }}>
+            <div style={{ position: 'relative', width: '100%', height: 220, background: '#000' }}>
+              <Cropper
+                image={imageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            </div>
+            <input
+              type="range" min={1} max={3} step={0.01} value={zoom}
+              onChange={(e) => setZoom(Number(e.target.value))}
+              style={{ width: '100%', marginTop: 10 }}
+            />
+          </div>
+        )}
+      </div>
       <div style={{ marginBottom: 14 }}>
         <label style={fieldLabelStyle}>キャラクター名</label>
         <input name="name" placeholder="例:ミラ・トウドウ" style={inputStyle} />
@@ -41,13 +109,10 @@ export default function OCForm({ action }) {
         <div style={{ marginBottom: 14 }}>
           <label style={fieldLabelStyle}>お相手(必須)</label>
           <input name="paired_character" placeholder="例:フレッド・ウィーズリー" style={inputStyle} />
-          <p style={{ fontSize: 11.5, color: 'rgba(255,255,255,.5)', marginTop: 6, lineHeight: 1.6 }}>
-            ランダムマッチングで同担のお相手を避けるために使われます。正確にご記入ください。
-          </p>
         </div>
       )}
       <div style={{ marginBottom: 14 }}>
-        <label style={fieldLabelStyle}>寮</label>
+        <label style={fieldLabelStyle}>寮・職業</label>
         <input name="house" placeholder="例:ハッフルパフ" style={inputStyle} />
       </div>
       <div style={{ marginBottom: 14 }}>
@@ -66,13 +131,13 @@ export default function OCForm({ action }) {
             {days.map((d) => <option key={d} value={d}>{d}</option>)}
           </select>
         </div>
-        <input type="hidden" name="birth_date" value={birthDate} />
+        <input type="hidden" name="birth_date" value={year && month && day ? `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}` : ''} />
       </div>
       <div style={{ marginBottom: 14 }}>
         <label style={fieldLabelStyle}>設定・紹介文</label>
         <textarea name="description" placeholder="性格や特徴など自由にどうぞ" style={{ ...inputStyle, minHeight: 80, resize: 'none' }} />
       </div>
-      <SubmitButton style={btnStyle} pendingText="登録中…">登録してはじめる</SubmitButton>
+      <SubmitButton style={btnStyle} pendingText={pendingUpload ? '画像を処理中…' : '登録中…'}>登録してはじめる</SubmitButton>
     </form>
   )
 }
