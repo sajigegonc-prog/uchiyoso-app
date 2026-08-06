@@ -220,25 +220,17 @@ export default async function ChatListPage() {
                   ) : room.displayMembers[0].ocs?.name?.charAt(0)}
                 </div>
               ) : (
-                <div style={{ position: 'relative', width: 48, height: 48 }}>
-                  {room.displayMembers.slice(0, 3).map((m, i) => (
-                    <div
-                      key={m.user_id + '_' + m.oc_id}
-                      style={{
-                        position: 'absolute',
-                        top: i === 0 ? 0 : 14,
-                        left: i === 0 ? 0 : i === 1 ? 20 : 0,
-                        width: 30, height: 30, borderRadius: '50%', overflow: 'hidden',
-                        background: '#211d17', border: '2px solid #f4eee0',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: '#f4eee0', fontWeight: 700, fontSize: 12, fontFamily: 'Georgia, serif',
-                      }}
-                    >
-                      {m.ocs?.icon_url ? (
-                        <Image src={m.ocs.icon_url} alt="" fill sizes="30px" style={{ objectFit: 'cover' }} />
-                      ) : m.ocs?.name?.charAt(0)}
-                    </div>
-                  ))}
+                <div style={{
+                  width: 48, height: 48, borderRadius: '50%',
+                  background: '#211d17', border: '1px solid #211d17',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <svg width="26" height="20" viewBox="0 0 26 20" fill="none">
+                    <circle cx="8" cy="6" r="4" stroke="#f4eee0" strokeWidth="1.2" />
+                    <path d="M1 19c0-4 3-7 7-7s7 3 7 7" stroke="#f4eee0" strokeWidth="1.2" />
+                    <circle cx="18" cy="7" r="3.2" stroke="#f4eee0" strokeWidth="1.2" />
+                    <path d="M13 19c0.3-3.2 2.7-5.5 5.5-5.5 3 0 5.5 2.5 6 5.8" stroke="#f4eee0" strokeWidth="1.2" />
+                  </svg>
                 </div>
               )}
               {(room.unread || room.unreadOoc) && (
