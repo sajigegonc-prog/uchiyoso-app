@@ -21,7 +21,7 @@ import MarkRoomReadOnMount from './MarkRoomReadOnMount'
 import RoomTitleEditor from './RoomTitleEditor'
 import { updateRoomTitle } from './titleActions'
 import { drawSituation } from './situationActions'
-initialOcId={myMembership?.oc_id}
+
 
 export default async function ChatRoomPage({ params }) {
   const supabase = await createClient()
@@ -244,8 +244,8 @@ export default async function ChatRoomPage({ params }) {
           frogAction={openFrogCard}
           oocMessages={oocMessages || []}
           oocSendAction={sendOocMessage}
-          drawSituationAction={drawSituation}
           hasUnreadOoc={hasUnreadOoc}
+          initialOcId={myMembership?.oc_id}
         />
       ) : (
         <p style={{ fontSize: 12, color: '#8a8168', textAlign: 'center', padding: 16, flexShrink: 0, fontStyle: 'italic' }}>あなたはこの部屋のメンバーではありません。</p>
