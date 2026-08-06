@@ -24,6 +24,9 @@ export default async function NewOCPage() {
         <div style={{ fontSize: 9.5, color: '#8a8168', marginTop: 8, letterSpacing: '.1em' }}>
           登録数 {count ?? 0} / 10
         </div>
+        <Link href="/ocs" style={{ display: 'block', marginTop: 24, textAlign: 'center', fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>
+        ← OC一覧に戻る
+      </Link>
       </div>
       {(count ?? 0) >= 10 ? (
         <p style={{ fontSize: 13, color: '#8a8168', marginTop: 24, maxWidth: 360, textAlign: 'center', fontStyle: 'italic' }}>
