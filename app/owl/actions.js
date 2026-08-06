@@ -34,3 +34,15 @@ export async function markLetterRead(formData) {
   }
   revalidatePath('/owl')
 }
+
+export async function deleteLetter(formData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/')
+  const letterId = formData.get('letter_id')?.toString()
+  if (!letterId) return
+  const { error } = await supabase.from('owl_letters').delete().eq('id', letterId)
+  if (error) console.error('手紙削除エラー:', error)
+  revalidatePath('/owl')
+  redirect('/owl')
+}
