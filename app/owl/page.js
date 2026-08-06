@@ -3,7 +3,8 @@ import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
 import RealtimeRefresh from '@/components/RealtimeRefresh'
 import { deleteLetter } from './actions'
-import DeleteLetterButton from './DeleteLetterButton'
+import { DeleteLetterButtonSmall } from './DeleteLetterButton'
+
 
 const VISIBLE_COUNT = 3
 
