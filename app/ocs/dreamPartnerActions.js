@@ -7,10 +7,12 @@ export async function saveDreamPartner(formData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
+
   const id = formData.get('id')?.toString()
   const name = formData.get('name')?.toString().trim()
   const pairedOcId = formData.get('paired_with_oc_id')?.toString()
   const iconUrl = formData.get('icon_url')?.toString()
+
   if (!name) return { error: 'お名前を入力してください' }
   if (!pairedOcId) return { error: 'どのOCのお相手か選んでください' }
 
@@ -26,18 +28,20 @@ export async function saveDreamPartner(formData) {
     return { success: true, id }
   }
 
-  const { data: dreamerCount } = await supabase
+  const { count: dreamerCount } = await supabase
     .from('ocs')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', user.id)
     .eq('oc_type', 'dreamer')
     .eq('is_dream_partner', false)
-  const { data: currentPartners } = await supabase
+
+  const { count: currentPartnersCount } = await supabase
     .from('ocs')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', user.id)
     .eq('is_dream_partner', true)
-  if ((currentPartners?.length || 0) >= (dreamerCount?.length || 0)) {
+
+  if ((currentPartnersCount || 0) >= (dreamerCount || 0)) {
     return { error: '登録できるお相手は、夢主OCの人数分までです。' }
   }
 
