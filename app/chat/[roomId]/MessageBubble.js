@@ -78,9 +78,7 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
             }}>
               {msg.content}
             </div>
-            {msg.edited_at && (
-              <div style={{ fontSize: 9, color: '#8a8168', marginTop: 2, fontStyle: 'italic', textAlign: mine ? 'right' : 'left' }}>(編集済み)</div>
-            )}
+            
           </div>
         )}
         {isOwner && menuOpen && !editing && (
