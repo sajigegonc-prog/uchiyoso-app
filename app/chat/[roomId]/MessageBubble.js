@@ -82,7 +82,8 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
               {detail.birth_date && (
                 <div style={{ marginTop: 10 }}>
                   <div style={{ fontSize: 10, color: '#6b6250' }}>生年月日</div>
-                  <div style={{ fontSize: 13, marginTop: 2 }}>{new Date(detail.birth_date).getMonth() + 1}月{new Date(detail.birth_date).getDate()}日</div>
+                  <div style={{ fontSize: 13, marginTop: 2 }}>{new Date(detail.birth_date).getMonth() + 1}月{new Date(detail.birth_date).getDate()}日
+                <div style={{ fontSize: 13, marginTop: 2 }}>{new Date(detail.birth_date).getFullYear()}年{new Date(detail.birth_date).getMonth() + 1}月{new Date(detail.birth_date).getDate()}日</div></div>
                 </div>
               )}
               {detail.description && (
