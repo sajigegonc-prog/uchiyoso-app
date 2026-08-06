@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
 import { confirmRandomMatch } from './matchActions'
+import RandomMatchOcIcon from './RandomMatchOcIcon'
 
 const DORMS = ['グリフィンドール', 'ハッフルパフ', 'レイブンクロー', 'スリザリン']
 const COMMON_POOL = [
@@ -22,13 +23,20 @@ function yearGroup(birthDate) {
   const d = new Date(birthDate)
   return d.getMonth() + 1 >= 9 ? d.getFullYear() : d.getFullYear() - 1
 }
+function ageLabel(myBirth, otherBirth) {
+  if (!myBirth || !otherBirth) return '年齢は不明です'
+  const diff = (new Date(myBirth) - new Date(otherBirth)) / (365.25 * 24 * 60 * 60 * 1000)
+  const rounded = Math.round(Math.abs(diff))
+  if (rounded === 0) return '同い年です'
+  return diff > 0 ? `あなたより${rounded}歳年下です` : `あなたより${rounded}歳年上です`
+}
 
 export default async function RandomMatchPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
 
-  const { data: myOcs } = await supabase.from('ocs').select('id, name, house, birth_date').eq('user_id', user.id).eq('is_dream_partner', false)
+  const { data: myOcs } = await supabase.from('ocs').select('id, name, house, birth_date, icon_url').eq('user_id', user.id).eq('is_dream_partner', false)
   const { data: friendOcs } = await supabase.rpc('list_friend_ocs')
   const friendOcIds = (friendOcs || []).map((f) => f.oc_id)
   const { data: friendOcDetails } = friendOcIds.length > 0
@@ -74,6 +82,7 @@ export default async function RandomMatchPage() {
   if (sameGrade) pool = pool.concat(GRADE_POOL)
   const pick = pool[Math.floor(Math.random() * pool.length)]
   const situationText = pick.text.replace(/〇〇（あなた）/g, myOc.name).replace(/〇〇（お相手）/g, friendOc.name)
+  const ageDiffLabel = ageLabel(myOc.birth_date, friendOc.birth_date)
 
   return (
     <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px 60px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -82,6 +91,11 @@ export default async function RandomMatchPage() {
         <div style={{ fontSize: 24, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>ランダムマッチング</div>
       </div>
       <div style={{ width: '100%', maxWidth: 360, border: '4px double #211d17', padding: 18, textAlign: 'center', marginTop: 20, background: '#fff' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+          <RandomMatchOcIcon name={myOc.name} iconUrl={myOc.icon_url} house={myOc.house} ageDiffLabel="あなたです" />
+          <span style={{ fontSize: 11, color: '#8a8168' }}>×</span>
+          <RandomMatchOcIcon name={friendOc.name} iconUrl={friendOc.icon_url} house={friendOc.house} ageDiffLabel={ageDiffLabel} />
+        </div>
         <div style={{ fontSize: 15, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{myOc.name} × {friendOc.name}</div>
         <div style={{ fontSize: 10.5, color: '#8a8168', marginTop: 8 }}>{pick.place}／{pick.time}</div>
         <div style={{ fontSize: 12.5, color: '#211d17', marginTop: 8, lineHeight: 1.8 }}>{situationText}</div>
