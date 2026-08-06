@@ -64,3 +64,20 @@ export default async function PublicOCDetailPage({ params }) {
     </div>
   )
 }
+
+<div style={{ display: 'flex', gap: 8, marginTop: 24 }}>
+        <Link href={`/chat/new?friend_oc_id=${oc.id}`} style={{
+          flex: 1, textAlign: 'center', padding: 12,
+          background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 13,
+          textDecoration: 'none', letterSpacing: '.05em',
+        }}>
+          この子とお話する
+        </Link>
+        <Link href={`/owl/new?to=${oc.id}`} style={{
+          flex: 1, textAlign: 'center', padding: 12,
+          border: '1px solid #211d17', color: '#211d17', fontWeight: 700, fontSize: 13,
+          textDecoration: 'none', letterSpacing: '.05em',
+        }}>
+          ふくろう便を送る
+        </Link>
+      </div>
