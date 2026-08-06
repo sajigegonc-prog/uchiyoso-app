@@ -48,3 +48,7 @@ export async function openFrogCard(formData) {
   revalidatePath(`/chat/${roomId}`)
   return { card }
 }
+
+export async function markOocReadWithCount(roomId) {
+  return markOocRead(roomId)
+}
