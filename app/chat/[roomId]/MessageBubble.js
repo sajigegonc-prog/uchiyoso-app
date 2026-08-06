@@ -45,8 +45,13 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
         onClick={async () => {
           if (!msg.sender_oc_id) return
           setShowModal(true)
-          const result = await getOcDetailForRoom(msg.sender_oc_id, roomId)
-          if (result?.oc) setDetail(result.oc)
+          try {
+            const result = await getOcDetailForRoom(msg.sender_oc_id, roomId)
+            if (result?.oc) setDetail(result.oc)
+            else setDetail({ error: result?.error || '取得に失敗しました' })
+          } catch (e) {
+            setDetail({ error: '通信エラーが発生しました' })
+          }
         }}
         style={{
           width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
