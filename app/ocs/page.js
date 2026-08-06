@@ -24,13 +24,21 @@ export default async function OCsPage() {
     .eq('user_id', user.id)
     .eq('is_dream_partner', false)
     .order('created_at', { ascending: true })
-    
-    const { data: dreamPartner } = await supabase
+
+    const { data: dreamPartners } = await supabase
     .from('ocs')
-    .select('id, name, icon_url')
+    .select('id, name, icon_url, paired_with_oc_id')
     .eq('user_id', user.id)
     .eq('is_dream_partner', true)
-    .maybeSingle()
+    .order('created_at', { ascending: true })
+
+    const { data: dreamerOcs } = await supabase
+    .from('ocs')
+    .select('id, name')
+    .eq('user_id', user.id)
+    .eq('is_dream_partner', false)
+    .eq('oc_type', 'dreamer')
+    .order('created_at', { ascending: true })
 
   const { data: myProfile } = await supabase.from('profiles').select('display_name, emoji, bio').eq('id', user.id).maybeSingle()
 
@@ -109,9 +117,10 @@ export default async function OCsPage() {
           + 新しいOCを登録する
         </Link>
       )}
-      
+
       <DreamPartnerSection
-        dreamPartner={dreamPartner}
+        dreamPartners={dreamPartners || []}
+        dreamerOcs={dreamerOcs || []}
         userId={user.id}
         saveAction={saveDreamPartner}
         deleteAction={deleteDreamPartner}
