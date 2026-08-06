@@ -56,6 +56,13 @@ export async function requestDeleteRoom(formData) {
       .update({ left_at: new Date().toISOString() })
       .eq('room_id', roomId)
       .eq('user_id', user.id)
+    const { data: myProfile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+    await supabase.from('room_ooc_messages').insert({
+      room_id: roomId,
+      user_id: user.id,
+      content: `${myProfile?.display_name || '名前未設定'} が退出しました`,
+      is_system: true,
+    })
 
     const { data: remaining } = await supabase
       .from('chat_room_members')
