@@ -21,6 +21,7 @@ import MarkRoomReadOnMount from './MarkRoomReadOnMount'
 import RoomTitleEditor from './RoomTitleEditor'
 import { updateRoomTitle } from './titleActions'
 import { drawSituation } from './situationActions'
+initialOcId={myMembership?.oc_id}
 
 export default async function ChatRoomPage({ params }) {
   const supabase = await createClient()
