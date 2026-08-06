@@ -10,6 +10,14 @@ export async function inviteMoreMembers(formData) {
   const roomId = formData.get('room_id')?.toString()
   const friendOcIds = formData.getAll('friend_oc_ids').map((v) => v.toString()).filter(Boolean)
   if (!roomId || friendOcIds.length === 0) return { error: '招待するOCを選んでください' }
+  const { data: currentCount } = await supabase
+    .from('chat_room_members')
+    .select('user_id', { count: 'exact', head: true })
+    .eq('room_id', roomId)
+    .is('left_at', null)
+  if ((currentCount?.length || 0) + friendOcIds.length > 10) {
+    return { error: 'グループチャットの参加人数は10人までです' }
+  }
 
   const ownerIds = []
   for (const ocId of friendOcIds) {
