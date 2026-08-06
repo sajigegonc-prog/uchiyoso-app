@@ -20,6 +20,7 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
   const inputRef = useRef(null)
   const submittingRef = useRef(false)
   const [mounted, setMounted] = useState(false)
+  const [drawing, setDrawing] = useState(false)
   const now = new Date()
   const timeLabel = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
 
@@ -56,6 +57,12 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
       submittingRef.current = false
       if (inputRef.current) inputRef.current.value = ''
     }, 600)
+  }
+
+  async function handleDraw() {
+    setDrawing(true)
+    await drawAction(roomId)
+    setDrawing(false)
   }
 
   if (!mounted) return null
@@ -105,17 +112,17 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
         paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
       }}>
         <input type="hidden" name="room_id" value={roomId} />
-        <input ref={inputRef} name="content" placeholder="中の人として発言" style={{ flex: 1, border: '1px solid #3a4360', borderRadius: 3, padding: '10px 12px', fontSize: 16, background: '#252b40', color: '#e8eaf5', fontFamily: "'Courier New', monospace" }} />
-      <button
+        <button
           type="button"
-          disabled={pending}
-          onClick={async () => { setPending(true); await drawAction(roomId); setPending(false) }}
+          disabled={drawing}
+          onClick={handleDraw}
           style={{
             flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
-            border: 'none', background: '#3d4d75', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
+            border: 'none', background: drawing ? '#2f3a5c' : '#3d4d75', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
           }}
         >✨</button>
-            <SubmitBtn />
+        <input ref={inputRef} name="content" placeholder="中の人として発言" style={{ flex: 1, border: '1px solid #3a4360', borderRadius: 3, padding: '10px 12px', fontSize: 16, background: '#252b40', color: '#e8eaf5', fontFamily: "'Courier New', monospace" }} />
+        <SubmitBtn />
       </form>
     </div>,
     document.body
