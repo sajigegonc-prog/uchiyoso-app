@@ -17,28 +17,7 @@ async function generateTranscript(supabase, roomId) {
   return lines.join('\n')
 }
 
-export async function requestSceneTransition(roomId) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/')
-  const transcript = await generateTranscript(supabase, roomId)
-  await supabase.from('scene_transition_approvals').delete().eq('room_id', roomId)
-  await supabase.from('chat_rooms').update({
-    transition_requested_at: new Date().toISOString(),
-    transition_requested_by: user.id,
-  }).eq('id', roomId)
-  await supabase.from('scene_transition_approvals').insert({ room_id: roomId, user_id: user.id })
-  revalidatePath(`/chat/${roomId}`)
-  return { transcript }
-}
-
-export async function approveSceneTransition(roomId) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/')
-  const transcript = await generateTranscript(supabase, roomId)
-  await supabase.from('scene_transition_approvals').insert({ room_id: roomId, user_id: user.id })
-
+async function checkAndComplete(supabase, roomId) {
   const { data: activeMembers } = await supabase
     .from('chat_room_members')
     .select('user_id')
@@ -65,6 +44,36 @@ export async function approveSceneTransition(roomId) {
     await supabase.from('scene_transition_approvals').delete().eq('room_id', roomId)
   }
 
+  return allApproved
+}
+
+export async function requestSceneTransition(roomId) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/')
+  const transcript = await generateTranscript(supabase, roomId)
+  await supabase.from('scene_transition_approvals').delete().eq('room_id', roomId)
+  await supabase.from('chat_rooms').update({
+    transition_requested_at: new Date().toISOString(),
+    transition_requested_by: user.id,
+  }).eq('id', roomId)
+  await supabase.from('scene_transition_approvals').insert({ room_id: roomId, user_id: user.id })
+
+  const completed = await checkAndComplete(supabase, roomId)
+
   revalidatePath(`/chat/${roomId}`)
-  return { transcript, completed: allApproved }
+  return { transcript, completed }
+}
+
+export async function approveSceneTransition(roomId) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/')
+  const transcript = await generateTranscript(supabase, roomId)
+  await supabase.from('scene_transition_approvals').insert({ room_id: roomId, user_id: user.id })
+
+  const completed = await checkAndComplete(supabase, roomId)
+
+  revalidatePath(`/chat/${roomId}`)
+  return { transcript, completed }
 }
