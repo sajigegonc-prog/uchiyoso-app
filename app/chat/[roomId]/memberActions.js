@@ -48,7 +48,7 @@ export async function inviteMoreMembers(formData) {
     .eq('room_id', roomId)
     .is('left_at', null)
   const ocIdsForCheck = [...new Set([...(currentOcIds || []).map((m) => m.oc_id), ...friendOcIds])]
-  const { data: dup } = await supabase.rpc('room_with_exact_members_exists', { _oc_ids: ocIdsForCheck, _exclude_room_id: roomId })
+  const { data: dup } = await supabase.rpc('room_with_exact_members_exists', { _oc_ids: ocIdsForCheck, _room_type: 'friend_group', _exclude_room_id: roomId })
   if (dup) {
     return { error: 'その組み合わせだと、既存の別のトークルームとメンバーが完全に一致してしまいます。招待できません。' }
   }
