@@ -1,9 +1,11 @@
 'use client'
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 
 export default function MessageBubble({ msg, mine, isOwner, speakerName, speakerIcon, roomId, editAction, deleteAction }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [editing, setEditing] = useState(false)
+  const [error, setError] = useState(null)
+  const [isPending, startTransition] = useTransition()
 
   if (msg.deleted_at) {
     return (
@@ -14,6 +16,30 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
         </div>
       </div>
     )
+  }
+
+  function handleEditSubmit(formData) {
+    setError(null)
+    startTransition(async () => {
+      const result = await editAction(formData)
+      if (result?.error) {
+        setError(result.error)
+      } else {
+        setEditing(false)
+      }
+    })
+  }
+
+  function handleDelete(formData) {
+    setError(null)
+    startTransition(async () => {
+      const result = await deleteAction(formData)
+      if (result?.error) {
+        setError(result.error)
+      } else {
+        setMenuOpen(false)
+      }
+    })
   }
 
   return (
@@ -30,7 +56,7 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
         {!mine && <div style={{ fontSize: 10.5, color: '#6b6250', marginBottom: 3, fontStyle: 'italic' }}>{speakerName}</div>}
         {editing ? (
           <form
-            action={async (formData) => { await editAction(formData); setEditing(false) }}
+            action={handleEditSubmit}
             style={{ display: 'flex', flexDirection: 'column', gap: 6, width: '100%' }}
           >
             <input type="hidden" name="message_id" value={msg.id} />
@@ -41,9 +67,12 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
               rows={2}
               style={{ fontSize: 14, padding: 8, border: '1px solid #211d17', fontFamily: "'BIZ UDPGothic', sans-serif" }}
             />
+            {error && <p style={{ fontSize: 11, color: '#8a2418' }}>{error}</p>}
             <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-              <button type="button" onClick={() => setEditing(false)} style={{ fontSize: 11, padding: '4px 10px', border: '1px solid #8a8168', background: '#fff', color: '#6b6250', cursor: 'pointer' }}>キャンセル</button>
-              <button type="submit" style={{ fontSize: 11, padding: '4px 10px', border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', cursor: 'pointer' }}>保存</button>
+              <button type="button" onClick={() => { setEditing(false); setError(null) }} style={{ fontSize: 11, padding: '4px 10px', border: '1px solid #8a8168', background: '#fff', color: '#6b6250', cursor: 'pointer' }}>キャンセル</button>
+              <button type="submit" disabled={isPending} style={{ fontSize: 11, padding: '4px 10px', border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', cursor: 'pointer' }}>
+                {isPending ? '保存中…' : '保存'}
+              </button>
             </div>
           </form>
         ) : (
@@ -62,19 +91,26 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
           </div>
         )}
         {isOwner && menuOpen && !editing && (
-          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-            <button type="button" onClick={() => { setEditing(true); setMenuOpen(false) }} style={{ fontSize: 10.5, color: '#6b6250', background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer' }}>編集</button>
-            <form action={deleteAction}>
-              <input type="hidden" name="message_id" value={msg.id} />
-              <input type="hidden" name="room_id" value={roomId} />
-              <button
-                type="submit"
-                onClick={(e) => { if (!confirm('このメッセージを削除しますか？')) e.preventDefault() }}
-                style={{ fontSize: 10.5, color: '#8a2418', background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer' }}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', gap: 4, marginTop: 4 }}>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button type="button" onClick={() => setEditing(true)} style={{ fontSize: 10.5, color: '#6b6250', background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer' }}>編集</button>
+              <form
+                action={(formData) => {
+                  if (confirm('このメッセージを削除しますか？')) handleDelete(formData)
+                }}
               >
-                削除
-              </button>
-            </form>
+                <input type="hidden" name="message_id" value={msg.id} />
+                <input type="hidden" name="room_id" value={roomId} />
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  style={{ fontSize: 10.5, color: '#8a2418', background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer' }}
+                >
+                  {isPending ? '削除中…' : '削除'}
+                </button>
+              </form>
+            </div>
+            {error && <p style={{ fontSize: 10.5, color: '#8a2418' }}>{error}</p>}
           </div>
         )}
       </div>
