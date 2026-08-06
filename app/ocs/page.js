@@ -101,18 +101,21 @@ export default async function OCsPage() {
       )}
 
       <div style={{ marginTop: 32 }}>
-        <div style={{ fontSize: 11, letterSpacing: '.15em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6 }}>
+        <div style={{ fontSize: 15, fontWeight: 700, color: '#211d17', fontFamily: 'Georgia, serif', borderBottom: '3px double #211d17', paddingBottom: 8 }}>
           中の人設定
         </div>
         <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 10 }}>
         表示名
         </div>
         <DisplayNameForm action={updateDisplayNameLimited} currentName={myProfile?.display_name || ''} />
-        <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 22 }}>
+        <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 10 }}>
           絵文字・一言プロフィール
         </div>
         <ProfileMetaForm action={updateSelfProfile} emoji={myProfile?.emoji || ''} bio={myProfile?.bio || ''} />
-        <p style={{ fontSize: 12, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>マッチングを避けたいお相手</p>
+        <DisplayNameForm action={updateDisplayNameLimited} currentName={myProfile?.display_name || ''} />
+        <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 10 }}>
+          マッチングを避けたいお相手
+        </div>
         <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 2, fontStyle: 'italic' }}>(ランダムマッチングは近日公開予定です)</p>
         <form action={addAvoidedPartner} style={{ display: 'flex', gap: 8, marginTop: 10 }}>
           <input
