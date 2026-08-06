@@ -1,9 +1,11 @@
 'use client'
 import { useState, useTransition } from 'react'
+import OcInfoModal from '@/components/OcInfoModal'
+import { getOcDetailForRoom } from './ocPreviewActions'
 
 export default function MessageBubble({ msg, mine, isOwner, speakerName, speakerIcon, roomId, editAction, deleteAction }) {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [editing, setEditing] = useState(false)
+  const [detail, setDetail] = useState(null)
+  const [showModal, setShowModal] = useState(false)
   const [error, setError] = useState(null)
   const [isPending, startTransition] = useTransition()
 
@@ -37,14 +39,34 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
 
   return (
     <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexDirection: mine ? 'row-reverse' : 'row' }}>
-      <div style={{
-        width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
-        background: '#211d17', border: '1px solid #211d17',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: '#f4eee0', fontWeight: 700, fontSize: 12, fontFamily: 'Georgia, serif',
-      }}>
+      <div
+        onClick={async () => {
+          if (!msg.sender_oc_id) return
+          setShowModal(true)
+          const result = await getOcDetailForRoom(msg.sender_oc_id, roomId)
+          if (result?.oc) setDetail(result.oc)
+        }}
+        style={{
+          width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
+          background: '#211d17', border: '1px solid #211d17',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#f4eee0', fontWeight: 700, fontSize: 12, fontFamily: 'Georgia, serif',
+          cursor: msg.sender_oc_id ? 'pointer' : 'default',
+        }}
+      >
         {speakerIcon ? <img src={speakerIcon} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (speakerName || '?').charAt(0)}
       </div>
+      {showModal && (
+        <OcInfoModal onClose={() => { setShowModal(false); setDetail(null) }}>
+          {!detail ? <p style={{ fontSize: 12.5, color: '#8a8168' }}>読み込み中…</p> : (
+            <>
+              <div style={{ fontSize: 17, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{detail.name}</div>
+              <div style={{ fontSize: 11, color: '#8a8168', marginTop: 4 }}>{detail.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{detail.house ? ` ・ ${detail.house}` : ''}</div>
+              {detail.description && <p style={{ fontSize: 12.5, marginTop: 12, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{detail.description}</p>}
+            </>
+          )}
+        </OcInfoModal>
+      )}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', maxWidth: '72%' }}>
         {!mine && <div style={{ fontSize: 10.5, color: '#6b6250', marginBottom: 3, fontStyle: 'italic' }}>{speakerName}</div>}
         {editing ? (
