@@ -27,3 +27,11 @@ export async function markInviteTutorialSeen() {
   await supabase.from('profiles').update({ seen_invite_tutorial: true }).eq('id', user.id)
   revalidatePath('/chat')
 }
+
+export async function markUpdate1TutorialSeen() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  await supabase.from('profiles').update({ seen_update1_tutorial: true }).eq('id', user.id)
+  revalidatePath('/chat')
+}
