@@ -77,9 +77,15 @@ export default async function ChatListPage() {
   if (roomIds.length > 0) {
     const { data: msgs } = await supabase
       .from('messages')
-      .select('room_id, content, sender_oc_id, is_system, created_at')
+      .select('room_id, content, sender_oc_id, is_system, created_at, deleted_at')
       .in('room_id', roomIds)
       .order('created_at', { ascending: false })
+    const seenForPreview = new Set()
+    for (const m of msgs || []) {
+      if (!seenForPreview.has(m.room_id) && !m.is_system && !m.deleted_at) {
+        lastMessages[m.room_id] = m.content
+        seenForPreview.add(m.room_id)
+      }
     const seenForPreview = new Set()
     for (const m of msgs || []) {
       if (!seenForPreview.has(m.room_id) && !m.is_system) {
