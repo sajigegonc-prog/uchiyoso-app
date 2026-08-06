@@ -12,6 +12,7 @@ export async function createFirstOC(formData) {
   const house = formData.get('house')?.toString().trim()
   const birthDate = formData.get('birth_date')?.toString()
   const description = formData.get('description')?.toString().trim()
+  const iconUrl = formData.get('icon_url')?.toString()
   if (name) {
     await supabase.from('ocs').insert({
       user_id: user.id,
@@ -21,6 +22,7 @@ export async function createFirstOC(formData) {
       house: house || null,
       birth_date: birthDate || null,
       description: description || null,
+      icon_url: iconUrl || null,
     })
   }
   await supabase.from('profiles').update({ onboarding_completed: true }).eq('id', user.id)
