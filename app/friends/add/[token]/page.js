@@ -49,6 +49,9 @@ export default async function ProfilePage({ params }) {
         }}>
           {(owner.display_name || '?').charAt(0)}
         </div>
+          <Link href="/friends" style={{ display: 'block', marginTop: 24, textAlign: 'center', fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>
+        ← 友達一覧に戻る
+      </Link>
       </div>
       <div style={{ fontSize: 17, fontWeight: 700, textAlign: 'center', marginTop: 10, fontFamily: 'Georgia, serif', color: '#211d17' }}>
         {owner.display_name || '名前未設定'}
