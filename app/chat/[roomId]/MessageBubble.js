@@ -8,14 +8,7 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
   const [isPending, startTransition] = useTransition()
 
   if (msg.deleted_at) {
-    return (
-      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexDirection: mine ? 'row-reverse' : 'row' }}>
-        <div style={{ width: 30, height: 30, flexShrink: 0 }} />
-        <div style={{ fontSize: 12, color: '#8a8168', fontStyle: 'italic', padding: '9px 13px' }}>
-          （メッセージは削除されました）
-        </div>
-      </div>
-    )
+    return null
   }
 
   function handleEditSubmit(formData) {
