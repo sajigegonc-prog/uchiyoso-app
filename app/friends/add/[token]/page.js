@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import { sendFriendRequestByToken, unfriendUser } from '../../actions'
 import Link from 'next/link'
@@ -6,7 +5,6 @@ import Link from 'next/link'
 export default async function ProfilePage({ params }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/')
   const { token } = params
   const { data: owner } = await supabase
     .rpc('get_profile_by_invite_token', { _token: token })
@@ -20,11 +18,11 @@ export default async function ProfilePage({ params }) {
     )
   }
 
-  const isSelf = owner.id === user.id
+  const isSelf = user && owner.id === user.id
   const { data: ocs } = await supabase.rpc('get_public_ocs_by_token', { _token: token })
 
   let friendshipStatus = null
-  if (!isSelf) {
+  if (user && !isSelf) {
     const { data: existing } = await supabase
       .from('friendships')
       .select('id, status')
@@ -86,7 +84,16 @@ export default async function ProfilePage({ params }) {
         </Link>
       ))}
 
-      {!isSelf && friendshipStatus === 'accepted' && (
+      {!user && (
+        <Link
+          href="/"
+          style={{ display: 'block', marginTop: 24, textAlign: 'center', padding: 13, border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 14, letterSpacing: '.05em', textDecoration: 'none' }}
+        >
+          ログインしてフレンド申請を送る
+        </Link>
+      )}
+
+      {user && !isSelf && friendshipStatus === 'accepted' && (
         <form action={unfriendUser} style={{ marginTop: 24 }}>
           <input type="hidden" name="other_id" value={owner.id} />
           <input type="hidden" name="token" value={token} />
@@ -99,13 +106,13 @@ export default async function ProfilePage({ params }) {
         </form>
       )}
 
-      {!isSelf && friendshipStatus === 'pending' && (
+      {user && !isSelf && friendshipStatus === 'pending' && (
         <p style={{ fontSize: 12.5, color: '#8a8168', marginTop: 24, textAlign: 'center', fontStyle: 'italic' }}>
           申請中です。相手の承認をお待ちください。
         </p>
       )}
 
-      {!isSelf && !friendshipStatus && (
+      {user && !isSelf && !friendshipStatus && (
         <form action={sendFriendRequestByToken} style={{ marginTop: 24 }}>
           <input type="hidden" name="token" value={token} />
           <button
@@ -117,9 +124,11 @@ export default async function ProfilePage({ params }) {
         </form>
       )}
 
-      <Link href="/friends" style={{ display: 'block', marginTop: 24, marginBottom: 10, padding: '10px 0', textAlign: 'center', fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>
-        ← 友達一覧に戻る
-      </Link>
+      {user && (
+        <Link href="/friends" style={{ display: 'block', marginTop: 24, marginBottom: 10, padding: '10px 0', textAlign: 'center', fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>
+          ← 友達一覧に戻る
+        </Link>
+      )}
     </div>
   )
 }
