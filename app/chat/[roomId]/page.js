@@ -186,9 +186,11 @@ export default async function ChatRoomPage({ params }) {
             {room.time_period && <span>時間帯: {room.time_period}</span>}
           </div>
         )}
-        <p style={{ fontSize: 9.5, opacity: .7, marginTop: 5, color: '#8a8168' }}>
-          変更は「/場所 ○○」「/時間帯 ○○」と発言すると反映されます
-        </p>
+        {!(room.location && room.time_period) && (
+          <p style={{ fontSize: 9.5, opacity: .7, marginTop: 5, color: '#8a8168' }}>
+            変更は「/場所 ○○」「/時間帯 ○○」と発言すると反映されます
+          </p>
+        )}
       </div>
       <div style={{
         flex: 1, minHeight: 0, overflowY: 'auto', padding: '16px 16px 16px', display: 'flex', flexDirection: 'column', gap: 12,
