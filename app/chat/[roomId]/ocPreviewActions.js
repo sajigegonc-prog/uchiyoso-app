@@ -7,7 +7,7 @@ export async function getOcDetailForRoom(ocId, roomId) {
   if (!user) return { error: 'ログインしていません' }
   const { data: memberships, error: memErr } = await supabase
     .from('chat_room_members')
-    .select('id')
+    .select('room_id')
     .eq('room_id', roomId)
     .eq('user_id', user.id)
     .limit(1)
