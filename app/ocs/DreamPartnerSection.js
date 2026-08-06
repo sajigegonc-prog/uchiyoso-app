@@ -93,7 +93,7 @@ export default function DreamPartnerSection({ dreamPartner, userId, saveAction, 
           </button>
         </div>
         <p style={{ fontSize: 10, color: '#8a8168', fontStyle: 'italic' }}>
-          お相手はあなただけに表示され、他の人からは見えません。
+          お相手はあなただけに表示され、他の人からは見えません。お相手とおしゃべりしたいときは、うちの子同士でおしゃべりモードを選択してください。
         </p>
       </div>
     )
@@ -161,7 +161,7 @@ export default function DreamPartnerSection({ dreamPartner, userId, saveAction, 
         </div>
       )}
       <p style={{ fontSize: 10, color: '#8a8168', marginTop: 8, fontStyle: 'italic' }}>
-        お相手はあなただけに表示され、他の人からは見えません。
+        お相手はあなただけに表示され、他の人からは見えません。お相手とおしゃべりしたいときは、うちの子同士でおしゃべりモードを選択してください。
       </p>
     </div>
   )
