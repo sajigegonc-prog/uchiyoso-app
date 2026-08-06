@@ -6,6 +6,7 @@ import { addAvoidedPartner } from './actions'
 import AvoidedPartnerTag from './AvoidedPartnerTag'
 import SubmitButton from '@/components/SubmitButton'
 import Image from 'next/image'
+import { updateSelfProfile } from './actions'
 
 export default async function OCsPage() {
   const supabase = await createClient()
@@ -17,6 +18,8 @@ export default async function OCsPage() {
     .select('id, name, oc_type, house, icon_url')
     .eq('user_id', user.id)
     .order('created_at', { ascending: true })
+
+  const { data: myProfile } = await supabase.from('profiles').select('emoji, bio').eq('id', user.id).maybeSingle()
 
   const { data: avoidedPartners } = await supabase
     .from('avoided_partners')
@@ -98,6 +101,26 @@ export default async function OCsPage() {
         <div style={{ fontSize: 11, letterSpacing: '.15em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6 }}>
           中の人設定
         </div>
+        <p style={{ fontSize: 12, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>絵文字・一言プロフィール</p>
+        <form action={updateSelfProfile} style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+          <input
+            name="emoji"
+            defaultValue={myProfile?.emoji || ''}
+            placeholder="絵文字"
+            maxLength={4}
+            style={{ width: 60, padding: '10px 8px', fontSize: 16, textAlign: 'center', background: '#fff', border: '1px solid #211d17', color: '#211d17' }}
+          />
+          <input
+            name="bio"
+            defaultValue={myProfile?.bio || ''}
+            placeholder="一言プロフィール(60字まで)"
+            maxLength={60}
+            style={{ flex: 1, padding: '10px 12px', fontSize: 13, background: '#fff', border: '1px solid #211d17', color: '#211d17' }}
+          />
+          <button type="submit" style={{ flexShrink: 0, padding: '10px 14px', border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
+            保存
+          </button>
+        </form>
         <p style={{ fontSize: 12, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>マッチングを避けたいお相手</p>
         <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 2, fontStyle: 'italic' }}>(ランダムマッチングは近日公開予定です)</p>
         <form action={addAvoidedPartner} style={{ display: 'flex', gap: 8, marginTop: 10 }}>
