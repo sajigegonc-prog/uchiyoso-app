@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 
 function parseTranscript(text) {
   const lines = text.split('\n').map((l) => l.trim()).filter(Boolean)
@@ -23,37 +23,18 @@ function parseTranscript(text) {
 export default function ReplayClient({ myOcs }) {
   const [raw, setRaw] = useState('')
   const [parsed, setParsed] = useState(null)
-  const [mineSpeaker, setMineSpeaker] = useState('')
-
-  const speakers = useMemo(() => {
-    if (!parsed) return []
-    const set = new Set()
-    for (const line of parsed) {
-      if (!line.isSystem) set.add(line.speaker)
-    }
-    return Array.from(set)
-  }, [parsed])
 
   function ocFor(speakerName) {
     return myOcs.find((oc) => oc.name === speakerName)
   }
 
   function handleParse() {
-    const result = parseTranscript(raw)
-    setParsed(result)
-    const hasMarked = result.some((l) => !l.isSystem && l.isMine)
-    if (!hasMarked) {
-      const firstSpeaker = result.find((l) => !l.isSystem)?.speaker
-      setMineSpeaker(firstSpeaker || '')
-    } else {
-      setMineSpeaker('')
-    }
+    setParsed(parseTranscript(raw))
   }
 
   function handleReset() {
     setParsed(null)
     setRaw('')
-    setMineSpeaker('')
   }
 
   return (
@@ -85,29 +66,15 @@ export default function ReplayClient({ myOcs }) {
         </>
       ) : (
         <>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
-            <label style={{ fontSize: 11, color: '#6b6250', letterSpacing: '.05em' }}>あなたの発言(右側に表示)</label>
-            <select
-              value={mineSpeaker}
-              onChange={(e) => setMineSpeaker(e.target.value)}
-              style={{ padding: '6px 10px', fontSize: 12.5, border: '1px solid #211d17', background: '#fff', color: '#211d17' }}
-            >
-              <option value="">指定しない</option>
-              {speakers.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
             <button
               type="button"
               onClick={handleReset}
-              style={{ marginLeft: 'auto', fontSize: 11, color: '#6b6250', background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer' }}
+              style={{ fontSize: 11, color: '#6b6250', background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer' }}
             >
               クリアして貼り直す
             </button>
           </div>
-          <p style={{ fontSize: 10, color: '#8a8168', marginTop: 4, marginBottom: 12, fontStyle: 'italic' }}>
-            ★の付いた発言は、あなたのキャラとして自動で右側に表示されます。
-          </p>
 
           <div style={{
             background: '#eee1cb', border: '1px solid #211d17', padding: '18px 14px',
@@ -124,7 +91,7 @@ export default function ReplayClient({ myOcs }) {
                   </div>
                 )
               }
-              const mine = line.isMine || (mineSpeaker && line.speaker === mineSpeaker)
+              const mine = line.isMine
               const oc = ocFor(line.speaker)
               return (
                 <div key={i} style={{
