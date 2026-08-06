@@ -10,6 +10,8 @@ import { updateSelfProfile } from './actions'
 import ProfileMetaForm from './ProfileMetaForm'
 import DisplayNameForm from './DisplayNameForm'
 import { updateDisplayNameLimited } from '../settings/actions'
+import DreamPartnerSection from './DreamPartnerSection'
+import { saveDreamPartner, deleteDreamPartner } from './dreamPartnerActions'
 
 export default async function OCsPage() {
   const supabase = await createClient()
@@ -21,6 +23,13 @@ export default async function OCsPage() {
     .select('id, name, oc_type, house, icon_url')
     .eq('user_id', user.id)
     .order('created_at', { ascending: true })
+    
+  const { data: dreamPartner } = await supabase
+    .from('dream_partners')
+    .select('id, name, icon_url')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
 
   const { data: myProfile } = await supabase.from('profiles').select('display_name, emoji, bio').eq('id', user.id).maybeSingle()
 
@@ -99,6 +108,13 @@ export default async function OCsPage() {
           + 新しいOCを登録する
         </Link>
       )}
+      
+      <DreamPartnerSection
+        dreamPartner={dreamPartner}
+        userId={user.id}
+        saveAction={saveDreamPartner}
+        deleteAction={deleteDreamPartner}
+      />
 
       <div style={{ marginTop: 32 }}>
         <div style={{ fontSize: 15, fontWeight: 700, color: '#211d17', fontFamily: 'Georgia, serif', borderBottom: '3px double #211d17', paddingBottom: 8 }}>
