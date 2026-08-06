@@ -49,7 +49,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
   }
   const { data: members } = await supabase
     .from('chat_room_members')
-    .select('user_id, oc_id, ocs(name, icon_url, house, oc_type, description), left_at, ooc_last_read_at')
+    .select('user_id, oc_id, ocs(name, icon_url, house, oc_type, description, birth_date), left_at, ooc_last_read_at')
     .eq('room_id', roomId)
   const { data: allFriendOcs } = await supabase.rpc('list_friend_ocs')
   const currentMemberUserIds = new Set((members || []).filter((m) => !m.left_at).map((m) => m.user_id))
@@ -235,9 +235,18 @@ export default async function ChatRoomPage({ params, searchParams }) {
       </div>
 
         {searchParams?.welcome === '1' && (() => {
+        const mine = (members || []).find((m) => m.user_id === user.id)
         const other = (members || []).find((m) => m.user_id !== user.id)
         if (!other) return null
-        return <WelcomePartnerModal oc={{ ...other.ocs, roomId: room.id }} />
+        const myBirth = mine?.ocs?.birth_date
+        const otherBirth = other.ocs?.birth_date
+        let ageDiffLabel = '年齢は不明です'
+        if (myBirth && otherBirth) {
+          const diff = (new Date(myBirth) - new Date(otherBirth)) / (365.25 * 24 * 60 * 60 * 1000)
+          const rounded = Math.round(Math.abs(diff))
+          ageDiffLabel = rounded === 0 ? '同い年です' : diff > 0 ? `あなたより${rounded}歳年下です` : `あなたより${rounded}歳年上です`
+        }
+        return <WelcomePartnerModal oc={other.ocs} roomId={room.id} ageDiffLabel={ageDiffLabel} />
       })()}
       {myOcs.length > 0 ? (
         <MessageForm
