@@ -35,7 +35,7 @@ export default async function OCsPage() {
           OC一覧
         </div>
         <div style={{ fontSize: 9.5, color: '#8a8168', marginTop: 8, letterSpacing: '.1em' }}>
-          登録数 {ocs?.length ?? 0} / 5
+          登録数 {ocs?.length ?? 0} / 10
         </div>
       </div>
 
@@ -80,7 +80,7 @@ export default async function OCsPage() {
         </div>
       )}
 
-      {(ocs?.length ?? 0) < 5 && (
+      {(ocs?.length ?? 0) < 10 && (
         <Link
           href="/ocs/new"
           style={{
