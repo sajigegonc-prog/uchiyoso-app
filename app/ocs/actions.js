@@ -51,3 +51,14 @@ export async function removeAvoidedPartner(formData) {
   }
   revalidatePath('/ocs')
 }
+
+export async function updateSelfProfile(formData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/')
+  const emoji = formData.get('emoji')?.toString().trim().slice(0, 4)
+  const bio = formData.get('bio')?.toString().trim().slice(0, 60)
+  await supabase.from('profiles').update({ emoji: emoji || null, bio: bio || null }).eq('id', user.id)
+  revalidatePath('/ocs')
+  revalidatePath('/friends')
+}
