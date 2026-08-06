@@ -112,7 +112,6 @@ export default async function OCsPage() {
           絵文字・一言プロフィール
         </div>
         <ProfileMetaForm action={updateSelfProfile} emoji={myProfile?.emoji || ''} bio={myProfile?.bio || ''} />
-        <DisplayNameForm action={updateDisplayNameLimited} currentName={myProfile?.display_name || ''} />
         <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 10 }}>
           マッチングを避けたいお相手
         </div>
