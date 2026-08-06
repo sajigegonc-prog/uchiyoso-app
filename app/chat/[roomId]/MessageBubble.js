@@ -4,6 +4,8 @@ import OcInfoModal from '@/components/OcInfoModal'
 import { getOcDetailForRoom } from './ocPreviewActions'
 
 export default function MessageBubble({ msg, mine, isOwner, speakerName, speakerIcon, roomId, editAction, deleteAction }) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [editing, setEditing] = useState(false)
   const [detail, setDetail] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const [error, setError] = useState(null)
@@ -100,7 +102,6 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
             }}>
               {msg.content}
             </div>
-            
           </div>
         )}
         {isOwner && menuOpen && !editing && (
