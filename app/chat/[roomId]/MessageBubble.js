@@ -65,7 +65,9 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
       </div>
       {showModal && (
         <OcInfoModal onClose={() => { setShowModal(false); setDetail(null) }}>
-          {!detail ? <p style={{ fontSize: 12.5, color: '#8a8168' }}>読み込み中…</p> : (
+          {!detail ? <p style={{ fontSize: 12.5, color: '#8a8168' }}>読み込み中…</p> : detail.error ? (
+            <p style={{ fontSize: 12.5, color: '#8a2418' }}>エラー: {detail.error}</p>
+          ) : (
             <>
               <div style={{ fontSize: 17, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{detail.name}</div>
               <div style={{ fontSize: 11, color: '#8a8168', marginTop: 4 }}>{detail.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{detail.house ? ` ・ ${detail.house}` : ''}</div>
@@ -87,6 +89,10 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
                   <p style={{ fontSize: 12.5, marginTop: 4, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{detail.description}</p>
                 </div>
               )}
+            </>
+          )}
+        </OcInfoModal>
+      )}
             </>
           )}
         </OcInfoModal>
