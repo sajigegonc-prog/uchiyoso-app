@@ -4,12 +4,21 @@ import Link from 'next/link'
 import InvitationRow from './InvitationRow'
 import { respondToChatInvitation } from './actions'
 import RealtimeRefresh from '@/components/AutoRefresh'
+import CoachMark from '@/components/CoachMark'
+import { markUpdate1TutorialSeen } from '../tutorialActions'
 import Image from 'next/image'
 
 export default async function ChatListPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
+
+  const { data: tutorialProfile } = await supabase
+    .from('profiles')
+    .select('seen_update1_tutorial')
+    .eq('id', user.id)
+    .maybeSingle()
+  const showUpdate1Tutorial = !tutorialProfile?.seen_update1_tutorial
 
   const { data: memberships } = await supabase
     .from('chat_room_members')
@@ -160,6 +169,16 @@ export default async function ChatListPage() {
       padding: '24px 20px 110px',
     }}>
       <RealtimeRefresh tables={['messages', 'room_ooc_messages', 'chat_room_invitations', 'chat_room_members']} fallbackMs={15000} />
+      {showUpdate1Tutorial && (
+        <CoachMark
+          steps={[
+            { targetId: 'coach-random-btn', text: '友達の中からランダムでお相手が決まる新機能です。まだ話したことのない友達と、シチュエーション付きでお話を始められます。' },
+            { text: '中の人チャットに、シチュエーションガチャ(✨ボタン)が追加されました。押すと場所や時間帯がランダムに決まり、そのまま部屋に反映されます。' },
+            { text: 'チャット部屋のタイトル部分をタップすると、名前を自由に変更できるようになりました。' },
+          ]}
+          onFinish={markUpdate1TutorialSeen}
+        />
+      )}
       <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
         <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO GAZETTE</div>
         <div style={{ fontSize: 26, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>
@@ -178,6 +197,7 @@ export default async function ChatListPage() {
         + 誰かとおしゃべりする！
       </Link>
       <Link
+        id="coach-random-btn"
         href="/chat/random"
         style={{
           display: 'block', textAlign: 'center', marginTop: 10,
