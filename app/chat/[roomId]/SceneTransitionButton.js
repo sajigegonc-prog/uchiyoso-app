@@ -35,12 +35,15 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
     return (
       <div style={{ position: 'fixed', inset: 0, background: 'rgba(33,29,23,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 120 }}>
         <div style={{ background: '#f4eee0', border: '1px solid #211d17', padding: 20, maxWidth: 340, width: '90%', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#211d17', fontFamily: 'Georgia, serif' }}>
-            {completed ? '場面転換が完了しました' : 'ログをコピーしてください'}
-          </div>
-          <p style={{ fontSize: 11, color: '#8a2418', marginTop: 8, lineHeight: 1.7 }}>
-            このログはこの場でのみ表示され、データベースには保存されません。再発行はできませんので、必ずコピーして保存してください。
-          </p>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#211d17', fontFamily: 'Georgia, serif' }}>
+              {completed ? '場面転換が完了しました' : 'ログをコピーしてください'}
+            </div>
+            <p style={{ fontSize: 11, color: '#8a2418', marginTop: 8, lineHeight: 1.7 }}>
+              このログはこの場でのみ表示され、データベースには保存されません。再発行はできませんので、必ずコピーして保存してください。
+            </p>
+            <p style={{ fontSize: 10.5, color: '#6b6250', marginTop: 6, lineHeight: 1.7, fontStyle: 'italic' }}>
+              ホーム画面の「過去のおしゃべりを思い出す」に貼ると、いつでも見返せます。★の付いた発言があなたのキャラです。
+            </p>
           <textarea
             readOnly
             value={transcript}
