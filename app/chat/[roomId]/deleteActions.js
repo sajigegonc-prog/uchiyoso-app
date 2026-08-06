@@ -8,86 +8,48 @@ async function fullyDeleteRoom(supabase, roomId) {
   await supabase.from('chat_room_npcs').delete().eq('room_id', roomId)
   await supabase.from('room_ooc_messages').delete().eq('room_id', roomId)
   await supabase.from('chat_room_invitations').delete().eq('room_id', roomId)
+  await supabase.from('scene_transition_approvals').delete().eq('room_id', roomId)
   await supabase.from('chat_room_members').delete().eq('room_id', roomId)
   await supabase.from('chat_rooms').delete().eq('id', roomId)
 }
 
-export async function requestDeleteRoom(formData) {
+export async function confirmLeaveOrDelete(formData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
   const roomId = formData.get('room_id')?.toString()
   if (!roomId) redirect('/chat')
 
-  const { data: room } = await supabase
-    .from('chat_rooms')
-    .select('pending_deletion_by')
-    .eq('id', roomId)
-    .maybeSingle()
+  await supabase
+    .from('chat_room_members')
+    .update({ left_at: new Date().toISOString() })
+    .eq('room_id', roomId)
+    .eq('user_id', user.id)
 
-  const { data: activeMembers } = await supabase
+  const { data: remainingMembers } = await supabase
     .from('chat_room_members')
     .select('user_id')
     .eq('room_id', roomId)
     .is('left_at', null)
+  const remainingUnique = new Set((remainingMembers || []).map((m) => m.user_id))
 
-  const uniqueUserIds = new Set((activeMembers || []).map((m) => m.user_id))
-
-  if (uniqueUserIds.size <= 1) {
-    // うちの子同士(自分1人だけの部屋) → 相互確認不要、即削除
+  if (remainingUnique.size === 0) {
     await fullyDeleteRoom(supabase, roomId)
-  } else if (uniqueUserIds.size === 2) {
-    // 1:1(2人の別ユーザー) → 相互確認方式
-    await supabase
-      .from('chat_room_members')
-      .update({ left_at: new Date().toISOString() })
-      .eq('room_id', roomId)
-      .eq('user_id', user.id)
-
-    if (room?.pending_deletion_by && room.pending_deletion_by !== user.id) {
-      await fullyDeleteRoom(supabase, roomId)
-    } else {
-      await supabase.from('chat_rooms').update({ pending_deletion_by: user.id }).eq('id', roomId)
-    }
-  } else {
-    // グループ(3人以上) → 自分だけ退出、最後の1人になったら削除
-    await supabase
-      .from('chat_room_members')
-      .update({ left_at: new Date().toISOString() })
-      .eq('room_id', roomId)
-      .eq('user_id', user.id)
-    const { data: myProfile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
-    await supabase.from('room_ooc_messages').insert({
-      room_id: roomId,
-      user_id: user.id,
-      content: `${myProfile?.display_name || '名前未設定'} が退出しました`,
-      is_system: true,
-    })
-
-    const { data: remaining } = await supabase
-      .from('chat_room_members')
-      .select('user_id')
-      .eq('room_id', roomId)
-      .is('left_at', null)
-    const remainingUniqueUsers = new Set((remaining || []).map((m) => m.user_id))
-    if (remainingUniqueUsers.size === 0) {
-      await fullyDeleteRoom(supabase, roomId)
-    }
+  } else if (remainingUnique.size === 1) {
+    await supabase.from('chat_rooms').update({ pending_deletion_by: user.id }).eq('id', roomId)
   }
 
   revalidatePath('/chat')
   redirect('/chat')
 }
 
-export async function acknowledgeDeletion(formData) {
+export async function acknowledgeFinalDeletion(formData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
   const roomId = formData.get('room_id')?.toString()
   if (!roomId) redirect('/chat')
-
   await fullyDeleteRoom(supabase, roomId)
-
   revalidatePath('/chat')
   redirect('/chat')
 }
