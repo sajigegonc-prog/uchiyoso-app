@@ -37,8 +37,8 @@ export default async function HomePage() {
         <CoachMark
                     steps={[
             { text: 'ここがあなたのホーム画面です。届いた便りは、ここに速報として並びます。' },
-            { targetId: 'coach-replay-link', text: '場面転換で発行したログを貼ると、チャット画面風に再現して見返せます。' },
             { targetId: 'coach-bottomnav', text: 'ここから遊べます。' },
+            { targetId: 'coach-replay-link', text: '場面転換で発行したログを貼ると、チャット画面風に再現して見返せます。' },
           ]}
       <div style={{
         fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh',
