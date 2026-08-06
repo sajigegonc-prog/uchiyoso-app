@@ -1,10 +1,20 @@
 'use client'
 import { useState, useCallback } from 'react'
 import Cropper from 'react-easy-crop'
-import { fieldLabelStyle, inputStyle, btnStyle } from '../styles'
 import SubmitButton from '@/components/SubmitButton'
 import { createClient } from '@/lib/supabaseClient'
 import { getCroppedImg } from '../../ocs/[id]/cropImage'
+const fieldLabelStyle = { fontSize: 11, color: '#a39a80', display: 'block', marginBottom: 6, letterSpacing: '.05em' }
+const inputStyle = {
+  width: '100%', padding: '11px 13px', fontSize: 15,
+  background: 'rgba(255,255,255,.06)', border: '1px solid #a39a80', color: '#f4eee0',
+  boxSizing: 'border-box', fontFamily: "'BIZ UDPGothic', sans-serif",
+}
+const btnStyle = {
+  width: '100%', padding: 12, border: '1px solid #f4eee0',
+  fontSize: 13, fontWeight: 700, cursor: 'pointer', marginTop: 20,
+  background: '#f4eee0', color: '#211d17', letterSpacing: '.05em',
+}
 
 const currentYear = new Date().getFullYear()
 const years = Array.from({ length: 100 }, (_, i) => currentYear - i)
