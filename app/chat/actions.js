@@ -53,6 +53,7 @@ export async function createRoom(formData) {
       time_period: timePeriod || null,
       primary_oc_id: ocId,
       title: roomType === 'friend_group' && title ? title : null,
+      room_type: roomType,
     })
     .select('id')
     .single()
