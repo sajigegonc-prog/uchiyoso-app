@@ -16,7 +16,7 @@ function SubmitBtn() {
   )
 }
 
-export default function OocPanel({ roomId, myUserId, messages, sendAction, onClose }) {
+export default function OocPanel({ roomId, myUserId, messages, sendAction, onClose, drawAction }) {
   const inputRef = useRef(null)
   const submittingRef = useRef(false)
   const [mounted, setMounted] = useState(false)
@@ -106,7 +106,16 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
       }}>
         <input type="hidden" name="room_id" value={roomId} />
         <input ref={inputRef} name="content" placeholder="中の人として発言" style={{ flex: 1, border: '1px solid #3a4360', borderRadius: 3, padding: '10px 12px', fontSize: 16, background: '#252b40', color: '#e8eaf5', fontFamily: "'Courier New', monospace" }} />
-        <SubmitBtn />
+      <button
+          type="button"
+          disabled={pending}
+          onClick={async () => { setPending(true); await drawAction(roomId); setPending(false) }}
+          style={{
+            flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
+            border: 'none', background: '#3d4d75', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
+          }}
+        >✨</button>
+            <SubmitBtn />
       </form>
     </div>,
     document.body
