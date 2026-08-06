@@ -47,7 +47,7 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
 
   useEffect(() => {
     markOocRead(roomId)
-  }, [roomId])
+  }, [roomId, messages?.length])
 
   function handleSubmit(e) {
     if (submittingRef.current) { e.preventDefault(); return }
