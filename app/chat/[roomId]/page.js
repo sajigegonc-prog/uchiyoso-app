@@ -4,12 +4,13 @@ import Link from 'next/link'
 import { sendMessage } from './actions'
 import { addNpc, deleteNpc } from './npcActions'
 import { sendOocMessage, openFrogCard } from './oocActions'
-import { requestDeleteRoom, acknowledgeDeletion } from './deleteActions'
+import { confirmLeaveOrDelete, acknowledgeFinalDeletion } from './deleteActions'
 import { editMessage, deleteMessage } from './messageActions'
 import { inviteMoreMembers } from './memberActions'
 import MessageForm from './MessageForm'
-import DeletionNotice from './DeletionNotice'
+import FinalDeletionNotice from './FinalDeletionNotice'
 import DeleteRoomButton from './DeleteRoomButton'
+import { buildTranscriptText } from './transcriptUtil'
 import AddMemberButton from './AddMemberButton'
 import MessageBubble from './MessageBubble'
 import RealtimeRefresh from '@/components/RealtimeRefresh'
@@ -117,7 +118,8 @@ export default async function ChatRoomPage({ params }) {
       .maybeSingle()
     alreadyApprovedTransition = !!myApproval
   }
-  const showDeletionNotice = !isSelfRoom && room.pending_deletion_by && room.pending_deletion_by !== user.id && !myMembership?.left_at
+  const myTranscriptPreview = buildTranscriptText(messages, myOcIdSet)
+  const showFinalNotice = room.pending_deletion_by && room.pending_deletion_by !== user.id && !myMembership?.left_at
   const deleteButtonLabel = isGroup ? '退出' : '削除'
   const { data: latestOocMsg } = await supabase
     .from('room_ooc_messages')
@@ -160,8 +162,8 @@ export default async function ChatRoomPage({ params }) {
           onFinish={markInviteTutorialSeen}
         />
       )}
-      {showDeletionNotice && (
-        <DeletionNotice roomId={room.id} action={acknowledgeDeletion} />
+      {showFinalNotice && (
+        <FinalDeletionNotice roomId={room.id} action={acknowledgeFinalDeletion} transcript={myTranscriptPreview} />
       )}
       <div style={{ background: '#f4eee0', padding: '14px 18px', flexShrink: 0, borderBottom: '4px double #211d17' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -174,7 +176,7 @@ export default async function ChatRoomPage({ params }) {
               requestedByName={requestedByName}
             />
             {isGroup && <AddMemberButton roomId={room.id} action={inviteMoreMembers} friendOcs={invitableFriendOcs} />}
-            <DeleteRoomButton roomId={room.id} label={deleteButtonLabel} action={requestDeleteRoom} />
+            <DeleteRoomButton roomId={room.id} label={deleteButtonLabel} action={confirmLeaveOrDelete} transcript={myTranscriptPreview} />
           </div>
         </div>
         <div style={{ fontSize: 17, fontWeight: 700, marginTop: 8, color: '#211d17', fontFamily: 'Georgia, serif' }}>
