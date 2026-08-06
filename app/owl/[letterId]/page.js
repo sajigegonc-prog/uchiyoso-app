@@ -2,6 +2,7 @@ import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
 import MarkReadOnMount from './MarkReadOnMount'
+import { deleteLetter } from '../actions'
 
 export default async function LetterDetailPage({ params }) {
   const supabase = await createClient()
@@ -85,6 +86,20 @@ export default async function LetterDetailPage({ params }) {
             返事を出す
           </Link>
         )}
+          <form action={deleteLetter} style={{ marginTop: 12, width: '100%', maxWidth: 380 }}>
+        <input type="hidden" name="letter_id" value={letter.id} />
+        <button
+          type="submit"
+          onClick={(e) => { if (!confirm('この便りを削除しますか？')) e.preventDefault() }}
+          style={{
+            display: 'block', width: '100%', textAlign: 'center',
+            background: 'none', color: '#c9a876', fontWeight: 700, fontSize: 12.5,
+            border: '1px solid #c9a876', padding: 11, cursor: 'pointer', textDecoration: 'underline',
+          }}
+        >
+          この便りを削除する
+        </button>
+      </form>
       </div>
     </>
   )
