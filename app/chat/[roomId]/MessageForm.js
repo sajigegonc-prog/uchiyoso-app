@@ -18,7 +18,7 @@ function ClearOnDone({ inputRef, onClear }) {
 const LINE_HEIGHT = 20
 const MAX_LINES = 5
 
-export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, addNpcAction, deleteNpcAction, frogAction, oocMessages, oocSendAction, hasUnreadOoc }) {
+export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, addNpcAction, deleteNpcAction, frogAction, oocMessages, oocSendAction, hasUnreadOoc, drawSituationAction }) {
   const inputRef = useRef(null)
   const [open, setOpen] = useState(false)
   const [oocOpen, setOocOpen] = useState(false)
@@ -42,7 +42,7 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
   return (
     <div style={{ position: 'relative', flexShrink: 0, background: '#fff', borderTop: '1px solid #211d17' }}>
       {oocOpen && (
-        <OocPanel roomId={roomId} myUserId={myUserId} messages={oocMessages} sendAction={oocSendAction} onClose={() => setOocOpen(false)} />
+        <OocPanel roomId={roomId} myUserId={myUserId} messages={oocMessages} sendAction={oocSendAction} onClose={() => setOocOpen(false)} drawAction={drawSituationAction} />
       )}
 
       {open && (
