@@ -32,7 +32,6 @@ export default async function OCsPage() {
     .eq('is_dream_partner', true)
     .maybeSingle()
 
-
   const { data: myProfile } = await supabase.from('profiles').select('display_name, emoji, bio').eq('id', user.id).maybeSingle()
 
   const { data: avoidedPartners } = await supabase
