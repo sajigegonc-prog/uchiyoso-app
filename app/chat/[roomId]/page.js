@@ -30,7 +30,7 @@ export default async function ChatRoomPage({ params }) {
     .maybeSingle()
   const { data: room } = await supabase
     .from('chat_rooms')
-    .select('id, location, time_period, primary_oc_id, pending_deletion_by, deleted_at, title, transition_requested_at, transition_requested_by')
+    .select('id, location, time_period, primary_oc_id, pending_deletion_by, deleted_at, title, transition_requested_at, transition_requested_by, room_type')
     .eq('id', roomId)
     .maybeSingle()
   if (!room) {
@@ -89,7 +89,7 @@ export default async function ChatRoomPage({ params }) {
   const activeMembers = (members || []).filter((m) => !m.left_at)
   const uniqueUserCount = new Set(activeMembers.map((m) => m.user_id)).size
   const isSelfRoom = uniqueUserCount <= 1
-  const isGroup = uniqueUserCount > 2
+  const isGroup = room.room_type === 'friend_group'
   const inviteVisible = isGroup
   const showFullTutorial = !tutorialProfile?.seen_chat_tutorial
   const showInviteOnlyTutorial = !showFullTutorial && inviteVisible && !tutorialProfile?.seen_invite_tutorial
@@ -129,11 +129,12 @@ export default async function ChatRoomPage({ params }) {
       display: 'flex', flexDirection: 'column', overflow: 'hidden',
     }}>
       <RealtimeRefresh tables={['messages', 'room_ooc_messages', 'chat_room_members', 'chat_room_invitations']} fallbackMs={15000} />
-      <MarkRoomReadOnMount roomId={room.id} />
+      <MarkRoomReadOnMount roomId={room.id} messageCount={messages?.length || 0} />
       {showFullTutorial && (
         <CoachMark
           steps={[
             { targetId: 'coach-speaker-btn', text: 'タップすると話すキャラを切り替えられます。NPCの追加もここから。' },
+            { text: '自分の発言をタップすると、編集や削除ができます。' },
             { targetId: 'coach-frog-btn', text: '気になったら開けてみて。中身はお楽しみです。' },
             { targetId: 'coach-ooc-btn', text: 'キャラではなく、中の人同士でこっそり話せる場所です。' },
             { targetId: 'coach-scene-btn', text: '会話が一区切りついたら、ここで次の場面に切り替えられます。' },
