@@ -18,16 +18,18 @@ export default async function OCsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
 
-  const { data: ocs } = await supabase
+    const { data: ocs } = await supabase
     .from('ocs')
     .select('id, name, oc_type, house, icon_url')
     .eq('user_id', user.id)
+    .eq('is_dream_partner', false)
     .order('created_at', { ascending: true })
     
-  const { data: dreamPartner } = await supabase
-    .from('dream_partners')
+    const { data: dreamPartner } = await supabase
+    .from('ocs')
     .select('id, name, icon_url')
     .eq('user_id', user.id)
+    .eq('is_dream_partner', true)
     .maybeSingle()
 
 
