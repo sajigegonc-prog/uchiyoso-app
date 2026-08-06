@@ -80,9 +80,17 @@ export default async function ChatRoomPage({ params }) {
     ...m,
     senderName: oocNameMap.get(m.user_id) || '名前未設定',
   }))
-  const myOcs = (members || [])
+  let myOcs = (members || [])
     .filter((m) => m.user_id === user.id)
     .map((m) => ({ id: m.oc_id, name: m.ocs?.name }))
+  if (room.room_type === 'friend_1on1') {
+    const { data: allMyOcs } = await supabase
+      .from('ocs')
+      .select('id, name')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: true })
+    myOcs = (allMyOcs || []).map((oc) => ({ id: oc.id, name: oc.name }))
+  }
   const myOcIdSet = new Set(myOcs.map((oc) => oc.id))
   const myNpcs = (npcs || []).filter((n) => n.created_by === user.id).map((n) => n.id)
   const memberNames = (members || []).map((m) => m.ocs?.name).filter(Boolean)
