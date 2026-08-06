@@ -25,12 +25,12 @@ export default async function NewChatPage({ searchParams }) {
       <div style={{ width: '100%', maxWidth: 360, textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
         <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO GAZETTE</div>
         <div style={{ fontSize: 24, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>
-          新しい部屋を作る
+          誰かとおしゃべりする！
         </div>
       </div>
       {(!ocs || ocs.length === 0) ? (
         <p style={{ fontSize: 13, color: '#8a8168', marginTop: 24, maxWidth: 360, textAlign: 'center', fontStyle: 'italic' }}>
-          チャットを作るには、まずOCを1人登録してください。
+          おしゃべりするには、まずOCを1人登録してください。
         </p>
       ) : (
         <NewRoomForm
@@ -40,7 +40,7 @@ export default async function NewChatPage({ searchParams }) {
         />
       )}
       <Link href="/chat" style={{ display: 'block', marginTop: 24, marginBottom: 10, padding: '10px 0', textAlign: 'center', fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>
-        ← チャット一覧に戻る
+        ← おしゃべり一覧に戻る
       </Link>
     </div>
   )
