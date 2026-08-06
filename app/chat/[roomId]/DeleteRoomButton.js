@@ -1,8 +1,14 @@
 'use client'
 import { useState } from 'react'
 
-export default function DeleteRoomButton({ roomId, label, action }) {
+export default function DeleteRoomButton({ roomId, label, action, transcript }) {
   const [confirming, setConfirming] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  function handleCopy() {
+    navigator.clipboard.writeText(transcript || '')
+    setCopied(true)
+  }
 
   return (
     <>
@@ -17,19 +23,36 @@ export default function DeleteRoomButton({ roomId, label, action }) {
 
       {confirming && (
         <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(36,26,16,.6)',
+          position: 'fixed', inset: 0, background: 'rgba(33,29,23,.6)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110,
         }}>
-          <div style={{ background: '#fbf5e9', borderRadius: 3, padding: 22, maxWidth: 300, textAlign: 'center' }}>
-            <p style={{ fontSize: 14, color: '#241a10', lineHeight: 1.8 }}>
-              {label}しますか？<br />
-              <span style={{ fontSize: 11.5, color: '#8b7355' }}>この操作は取り消せません。</span>
+          <div style={{ background: '#f4eee0', border: '1px solid #211d17', padding: 20, maxWidth: 340, width: '90%', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#211d17', fontFamily: 'Georgia, serif' }}>
+              おしゃべりをやめますか？
+            </div>
+            <p style={{ fontSize: 11, color: '#8a2418', marginTop: 8, lineHeight: 1.7 }}>
+              このルームはこの後消去され、元に戻せません。ログはこの場でのみ表示され、保存されません。
             </p>
-            <div style={{ display: 'flex', gap: 8, marginTop: 18 }}>
+            <p style={{ fontSize: 10.5, color: '#6b6250', marginTop: 6, lineHeight: 1.7, fontStyle: 'italic' }}>
+              下のログをコピーし、ホーム画面の「過去のおしゃべりを思い出す」に貼ると、後から見返せます。★の付いた発言があなたのキャラです。
+            </p>
+            <textarea
+              readOnly
+              value={transcript || ''}
+              style={{ marginTop: 10, flex: 1, minHeight: 140, fontSize: 12, padding: 10, border: '1px solid #8a8168', background: '#fff', color: '#211d17', resize: 'none' }}
+            />
+            <button
+              type="button"
+              onClick={handleCopy}
+              style={{ marginTop: 10, padding: 9, border: '1px solid #211d17', background: '#fff', color: '#211d17', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}
+            >
+              {copied ? 'コピーしました' : 'ログをコピーする'}
+            </button>
+            <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
               <button
                 type="button"
                 onClick={() => setConfirming(false)}
-                style={{ flex: 1, padding: 10, borderRadius: 3, border: '2px solid #d8c7ac', background: '#fff', color: '#8b7355', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}
+                style={{ flex: 1, padding: 10, border: '1px solid #8a8168', background: '#fff', color: '#6b6250', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}
               >
                 キャンセル
               </button>
@@ -37,9 +60,9 @@ export default function DeleteRoomButton({ roomId, label, action }) {
                 <input type="hidden" name="room_id" value={roomId} />
                 <button
                   type="submit"
-                  style={{ width: '100%', padding: 10, borderRadius: 3, border: 'none', background: '#8b5a2b', color: '#f3e9d8', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}
+                  style={{ width: '100%', padding: 10, border: '1px solid #8a2418', background: '#8a2418', color: '#f4eee0', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}
                 >
-                  はい
+                  はい、やめる
                 </button>
               </form>
             </div>
