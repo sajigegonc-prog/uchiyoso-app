@@ -78,6 +78,6 @@ export default async function PublicOCDetailPage({ params }) {
           border: '1px solid #211d17', color: '#211d17', fontWeight: 700, fontSize: 13,
           textDecoration: 'none', letterSpacing: '.05em',
         }}>
-          ふくろう便を送る
+          この子にふくろう便を送る
         </Link>
       </div>
