@@ -213,7 +213,8 @@ const typeBtnStyle = (active) => ({
                     <span style={{ fontSize: 10.5, color: '#211d17', textAlign: 'center', lineHeight: 1.3 }}>{dreamPartner.name}</span>
                   </label>
                 </div>
-              {dreamPartner && (
+                ))}
+                {dreamPartner && (
                 <div style={{ marginTop: 14 }}>
                   <div style={{ fontSize: 10, color: '#8a2418', letterSpacing: '.05em', marginBottom: 6 }}>夢相手</div>
                   <label style={{
@@ -225,10 +226,10 @@ const typeBtnStyle = (active) => ({
                     <div style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', background: '#211d17', border: '1px solid #8a2418', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f4eee0', fontWeight: 700, fontSize: 13, fontFamily: 'Georgia, serif' }}>
                       {dreamPartner.icon_url ? <img src={dreamPartner.icon_url} alt={dreamPartner.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : dreamPartner.name?.charAt(0)}
                     </div>
-              )}
-                    <span style={{ fontSize: 10.5, color: '#211d17', textAlign: 'center', lineHeight: 1.3 }}>{oc.name}</span>
+                    <span style={{ fontSize: 10.5, color: '#211d17', textAlign: 'center', lineHeight: 1.3 }}>{dreamPartner.name}</span>
                   </label>
-                ))}
+                </div>
+              )}
               </div>
             </div>
           )}
