@@ -1,8 +1,6 @@
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
-import { redirect, notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabaseServer'
 
 export default async function PublicOCDetailPage({ params }) {
   const supabase = await createClient()
