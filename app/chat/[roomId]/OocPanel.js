@@ -40,11 +40,16 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
     document.body.style.position = 'fixed'
     document.body.style.width = '100%'
     document.body.style.top = `-${scrollY}px`
-    requestAnimationFrame(() => {
-      const el = document.getElementById('ooc-messages-scroll')
-      if (el) el.scrollTop = el.scrollHeight
-    })
+    function scrollToBottom() {
+      const el = document.getElementById('ooc-bottom-anchor')
+      if (el) el.scrollIntoView({ block: 'end' })
+    }
+    scrollToBottom()
+    const t1 = setTimeout(scrollToBottom, 100)
+    const t2 = setTimeout(scrollToBottom, 400)
     return () => {
+      clearTimeout(t1)
+      clearTimeout(t2)
       document.body.style.overflow = originalBodyOverflow
       document.documentElement.style.overflow = originalHtmlOverflow
       document.body.style.position = originalPosition
@@ -138,6 +143,7 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
               </div>
             )
           })}
+          <div id="ooc-bottom-anchor" />
         </div>
       </div>
 
