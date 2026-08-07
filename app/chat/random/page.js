@@ -145,6 +145,16 @@ export default async function RandomMatchPage() {
         <input type="hidden" name="location" value={pick.place} />
         <input type="hidden" name="time_period" value={pick.time} />
         <input type="hidden" name="situation_text" value={situationText} />
+        <label style={{ fontSize: 11, color: '#6b6250', display: 'block', marginBottom: 5 }}>一言メモ(任意)</label>
+        <textarea
+          name="note"
+          placeholder="お相手への一言があれば書いてください"
+          style={{ width: '100%', minHeight: 56, padding: 10, fontSize: 12.5, border: '1px solid #211d17', background: '#fff', color: '#211d17', resize: 'none', boxSizing: 'border-box', fontFamily: "'BIZ UDPGothic', sans-serif" }}
+        />
+        <p style={{ fontSize: 10, color: '#8a8168', marginTop: 6, marginBottom: 14, lineHeight: 1.7, fontStyle: 'italic' }}>
+          例: 先生と生徒で立場が違うので、まず中の人チャットですり合わせしてからやりましょう！<br />
+          例: 初対面という設定で大丈夫です。緊張しつつ挨拶する感じから始められたら
+        </p>
         <button type="submit" style={{ width: '100%', padding: 13, background: '#211d17', color: '#f4eee0', border: 'none', fontWeight: 700, fontSize: 13 }}>このお部屋を作る</button>
       </form>
       
