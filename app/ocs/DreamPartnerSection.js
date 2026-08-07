@@ -170,7 +170,7 @@ export default function DreamPartnerSection({ dreamPartners, dreamerOcs, userId,
       )}
 
       <p style={{ fontSize: 10, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>
-        お相手はあなただけに表示され、他の人からは見えません。登録できる人数は夢主OCの人数分までです。
+        お相手はあなただけに表示され、他の人からは見えません。登録できる人数は夢主OCの人数分までです。おしゃべりは「うちの子同士でおしゃべりする」から可能です。
       </p>
     </div>
   )
