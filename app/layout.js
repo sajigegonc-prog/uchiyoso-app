@@ -21,6 +21,7 @@ export default async function RootLayout({ children }) {
     <html lang="ja">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
         <style>{`
           *, *::before, *::after { box-sizing: border-box; }
           html, body { max-width: 100%; overflow-x: hidden; overscroll-behavior-x: none; }
