@@ -20,6 +20,16 @@ function parseTranscript(text) {
   })
 }
 
+function renderWithBold(text) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+      return <b key={i}>{part.slice(2, -2)}</b>
+    }
+    return part
+  })
+}
+
 export default function ReplayClient({ myOcs, allKnownOcs }) {
   const [raw, setRaw] = useState('')
   const [parsed, setParsed] = useState(null)
@@ -117,7 +127,7 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
                       background: mine ? '#211d17' : '#fff', color: mine ? '#f4eee0' : '#211d17',
                       border: '1px solid #211d17',
                     }}>
-                      {line.content}
+                      {renderWithBold(line.content)}
                     </div>
                   </div>
                 </div>
