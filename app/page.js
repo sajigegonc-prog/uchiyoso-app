@@ -1,10 +1,16 @@
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabaseServer'
 import LoginButton from './LoginButton'
 
 export const metadata = {
   title: 'うちよそクラブ',
 }
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) redirect('/home')
+
   return (
     <div style={{
       minHeight: '100vh', background: '#211d17',
