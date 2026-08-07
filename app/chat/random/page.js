@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
 import { confirmRandomMatch } from './matchActions'
 import RandomMatchOcIcon from './RandomMatchOcIcon'
+export const dynamic = 'force-dynamic'
 
 const DORMS = ['グリフィンドール', 'ハッフルパフ', 'レイブンクロー', 'スリザリン']
 
@@ -85,8 +86,18 @@ export default async function RandomMatchPage() {
     )
   }
 
+  const MAX_PLAUSIBLE_AGE_GAP = 60
+  function ageGapYears(a, b) {
+    if (!a || !b) return 0
+    return Math.abs((new Date(a) - new Date(b)) / (365.25 * 24 * 60 * 60 * 1000))
+  }
+
   const myOc = myOcs[Math.floor(Math.random() * myOcs.length)]
-  const friendOc = eligibleFriendOcs[Math.floor(Math.random() * eligibleFriendOcs.length)]
+  const plausibleFriendOcs = eligibleFriendOcs.filter(
+    (f) => ageGapYears(myOc.birth_date, f.birth_date) <= MAX_PLAUSIBLE_AGE_GAP
+  )
+  const candidatePool = plausibleFriendOcs.length > 0 ? plausibleFriendOcs : eligibleFriendOcs
+  const friendOc = candidatePool[Math.floor(Math.random() * candidatePool.length)]
 
   const isStudent = (oc) => DORMS.includes(oc?.house)
   const sameHouse = isStudent(myOc) && isStudent(friendOc) && myOc.house === friendOc.house
