@@ -3,6 +3,7 @@ import { useState } from 'react'
 import SubmitButton from '@/components/SubmitButton'
 
 const currentYear = new Date().getFullYear()
+const HOUSES = ['グリフィンドール', 'ハッフルパフ', 'レイブンクロー', 'スリザリン']
 const years = Array.from({ length: 300 }, (_, i) => currentYear - i)
 const months = Array.from({ length: 12 }, (_, i) => i + 1)
 function daysInMonth(year, month) {
@@ -24,6 +25,9 @@ const btnStyle = {
 
 export default function EditOCForm({ oc, action }) {
   const [ocType, setOcType] = useState(oc.oc_type || 'creation')
+  const initialHouse = HOUSES.includes(oc.house) ? oc.house : (oc.house ? 'その他' : '')
+  const [house, setHouse] = useState(initialHouse)
+  const [customHouse, setCustomHouse] = useState(initialHouse === 'その他' ? oc.house : '')
   const initial = oc.birth_date ? oc.birth_date.split('-') : ['', '', '']
   const [year, setYear] = useState(initial[0] || '')
   const [month, setMonth] = useState(initial[1] ? String(Number(initial[1])) : '')
@@ -56,7 +60,20 @@ export default function EditOCForm({ oc, action }) {
       )}
       <div style={{ marginBottom: 14 }}>
         <label style={labelStyle}>寮・職業</label>
-        <input name="house" defaultValue={oc.house || ''} style={inputStyle} />
+        <select value={house} onChange={(e) => setHouse(e.target.value)} style={inputStyle}>
+          <option value="">選んでください</option>
+          {HOUSES.map((h) => <option key={h} value={h}>{h}</option>)}
+          <option value="その他">その他(自由記入)</option>
+        </select>
+        {house === 'その他' && (
+          <input
+            value={customHouse}
+            onChange={(e) => setCustomHouse(e.target.value)}
+            placeholder="例:魔法史担当教授"
+            style={{ ...inputStyle, marginTop: 8 }}
+          />
+        )}
+        <input type="hidden" name="house" value={house === 'その他' ? customHouse : house} />
       </div>
       <div style={{ marginBottom: 14 }}>
         <label style={labelStyle}>生年月日</label>
