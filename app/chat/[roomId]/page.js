@@ -5,7 +5,7 @@ import { sendMessage } from './actions'
 import { addNpc, deleteNpc } from './npcActions'
 import { sendOocMessage, openFrogCard } from './oocActions'
 import { confirmLeaveOrDelete, acknowledgeFinalDeletion } from './deleteActions'
-import { editMessage, deleteMessage } from './messageActions'
+import { editMessage, deleteMessage, reorderMessage } from './messageActions'
 import { inviteMoreMembers } from './memberActions'
 import MessageForm from './MessageForm'
 import FinalDeletionNotice from './FinalDeletionNotice'
@@ -250,7 +250,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
           const speakerName = msg.ocs?.name || msg.chat_room_npcs?.name
           const speakerIcon = msg.ocs?.icon_url || null
           return (
-            <MessageBubble
+                        <MessageBubble
               key={msg.id}
               msg={msg}
               mine={mine}
@@ -260,6 +260,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
               roomId={room.id}
               editAction={editMessage}
               deleteAction={deleteMessage}
+              reorderAction={reorderMessage}
             />
           )
         })}
