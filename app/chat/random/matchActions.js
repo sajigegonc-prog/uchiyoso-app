@@ -23,8 +23,10 @@ export async function confirmRandomMatch(formData) {
   if (result?.error) return result
 
   const supabase = await createClient()
-  await supabase.from('messages').insert({
-    room_id: result.id, is_system: true, content: `【ランダムマッチング】${situationText}`,
-  })
+  const header = location && timePeriod ? `${location}／${timePeriod}` : (location || timePeriod || null)
+  const rows = []
+  if (header) rows.push({ room_id: result.id, is_system: true, content: header })
+  if (situationText) rows.push({ room_id: result.id, is_system: true, content: situationText })
+  if (rows.length > 0) await supabase.from('messages').insert(rows)
   redirect(`/chat/${result.id}`)
 }
