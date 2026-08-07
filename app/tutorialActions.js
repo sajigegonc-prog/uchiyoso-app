@@ -44,3 +44,11 @@ export async function markOocGachaTutorialSeen() {
   await supabase.from('profiles').update({ seen_ooc_gacha_tutorial: true }).eq('id', user.id)
   revalidatePath('/chat/[roomId]', 'page')
 }
+
+export async function markFeatureSeen(featureKey) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  await supabase.from('feature_tutorials_seen').upsert({ user_id: user.id, feature_key: featureKey, seen_at: new Date().toISOString() })
+  revalidatePath('/chat/[roomId]', 'page')
+}
