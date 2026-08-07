@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 
-export default function SituationPicker({ myOcName, friendOcName, gachaPick, noteExamples, confirmAction }) {
+export default function SituationPicker({ myOcId, friendOcId, gachaPick, noteExamples, confirmAction }) {
   const [mode, setMode] = useState('gacha')
   const [customPlace, setCustomPlace] = useState('')
   const [customTime, setCustomTime] = useState('')
@@ -39,7 +39,8 @@ export default function SituationPicker({ myOcName, friendOcName, gachaPick, not
       )}
 
       <form action={confirmAction} style={{ marginTop: 16 }}>
-        <input type="hidden" name="my_oc_id" value="" data-role="my_oc_id" />
+        <input type="hidden" name="my_oc_id" value={myOcId} />
+        <input type="hidden" name="friend_oc_id" value={friendOcId} />
         <input type="hidden" name="location" value={mode === 'gacha' ? gachaPick.place : customPlace} />
         <input type="hidden" name="time_period" value={mode === 'gacha' ? gachaPick.time : customTime} />
         <input type="hidden" name="situation_text" value={mode === 'gacha' ? gachaPick.text : customText} />
