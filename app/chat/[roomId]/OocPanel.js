@@ -143,14 +143,16 @@ const { typerNames, sendTyping } = useTypingChannel(`typing-ooc-${roomId}`, myUs
           <p style={{ fontSize: 12.5, color: '#7a82a0', textAlign: 'center', marginTop: 20, fontFamily: "'Courier New', monospace" }}>まだメッセージがありません。</p>
         )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {messages && messages.map((msg) => {
+          {messages && messages.map((msg, idx) => {
             const mine = msg.user_id === myUserId
             if (msg.is_system) {
               return <div key={msg.id} style={{ textAlign: 'center', fontSize: 11.5, color: '#8a92b5', whiteSpace: 'pre-wrap', fontFamily: "'Courier New', monospace", padding: '4px 0' }}>{msg.content}</div>
             }
+            const prevMsg = messages[idx - 1]
+            const showName = !prevMsg || prevMsg.is_system || prevMsg.user_id !== msg.user_id
             return (
               <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start' }}>
-                <div style={{ fontSize: 10, color: '#7a82a0', marginBottom: 2, fontFamily: "'Courier New', monospace" }}>{msg.senderName}</div>
+                {showName && <div style={{ fontSize: 10, color: '#7a82a0', marginBottom: 2, fontFamily: "'Courier New', monospace" }}>{msg.senderName}</div>}
                 <div style={{ maxWidth: '75%', padding: '9px 13px', borderRadius: 3, fontSize: 14, lineHeight: 1.5, background: mine ? '#4a5580' : '#252b40', color: '#e8eaf5', border: '1px solid #3a4360' }}>
                   {msg.content}
                 </div>
