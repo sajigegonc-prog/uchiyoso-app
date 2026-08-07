@@ -94,6 +94,11 @@ export async function respondToChatInvitation(formData) {
   if (decision === 'accepted' && ocId && roomId) {
     await supabase.from('chat_room_members').insert({ room_id: roomId, oc_id: ocId, user_id: user.id })
     await supabase.from('chat_room_invitations').update({ status: 'accepted' }).eq('id', invitationId).eq('invitee_id', user.id)
+    const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+    await supabase.from('room_ooc_messages').insert({
+      room_id: roomId, user_id: user.id, is_system: true, log_type: 'member_join',
+      content: `${profile?.display_name || '名前未設定'}さんが入室しました`,
+    })
     redirect(`/chat/${roomId}?welcome=1`)
   } else if (decision === 'declined') {
     await supabase.from('chat_room_invitations').update({ status: 'declined' }).eq('id', invitationId).eq('invitee_id', user.id)
