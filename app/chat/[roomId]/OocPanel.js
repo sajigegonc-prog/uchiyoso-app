@@ -115,7 +115,7 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
         </div>
       </div>
 
-      <form action={sendAction} onSubmit={handleSubmit} style={{
+      <form id="ooc-input-row" action={sendAction} onSubmit={handleSubmit} style={{
         flexShrink: 0, display: 'flex', gap: 8, padding: '12px 16px',
         background: '#12151f', borderTop: '1px solid #3a4360',
         paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
