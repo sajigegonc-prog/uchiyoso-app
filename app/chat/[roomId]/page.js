@@ -14,7 +14,6 @@ import { buildTranscriptText } from './transcriptUtil'
 import AddMemberButton from './AddMemberButton'
 import MessageBubble from './MessageBubble'
 import RealtimeRefresh from '@/components/RealtimeRefresh'
-import SceneTransitionButton from './SceneTransitionButton'
 import CoachMark from '@/components/CoachMark'
 import { markChatTutorialSeen, markInviteTutorialSeen } from '../../tutorialActions'
 import MarkRoomReadOnMount from './MarkRoomReadOnMount'
@@ -55,7 +54,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
   const currentMemberUserIds = new Set((members || []).filter((m) => !m.left_at).map((m) => m.user_id))
   const { data: pendingInvites } = await supabase
     .from('chat_room_invitations')
-    .select('invitee_id')
+    .select('invitee_id, invitee_oc_id, ocs:invitee_oc_id(name, icon_url)')
     .eq('room_id', roomId)
     .eq('status', 'pending')
   const pendingUserIds = new Set((pendingInvites || []).map((p) => p.invitee_id))
@@ -174,12 +173,6 @@ export default async function ChatRoomPage({ params, searchParams }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <Link href="/chat" style={{ fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>← 一覧に戻る</Link>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-            <SceneTransitionButton
-              roomId={room.id}
-              pending={!!room.transition_requested_at}
-              alreadyApproved={alreadyApprovedTransition}
-              requestedByName={requestedByName}
-            />
             {isGroup && <AddMemberButton roomId={room.id} action={inviteMoreMembers} friendOcs={invitableFriendOcs} />}
             <DeleteRoomButton roomId={room.id} label={deleteButtonLabel} action={confirmLeaveOrDelete} transcript={myTranscriptPreview} />
           </div>
@@ -262,6 +255,13 @@ export default async function ChatRoomPage({ params, searchParams }) {
           oocSendAction={sendOocMessage}
           hasUnreadOoc={hasUnreadOoc}
           initialOcId={myMembership?.oc_id}
+          sceneProps={{
+            pending: !!room.transition_requested_at,
+            alreadyApproved: alreadyApprovedTransition,
+            requestedByName,
+          }}
+          roomMembers={activeMembers.map((m) => ({ id: m.oc_id, name: m.ocs?.name, icon_url: m.ocs?.icon_url }))}
+          pendingMembers={(pendingInvites || []).map((p) => ({ id: p.invitee_oc_id, name: p.ocs?.name, icon_url: p.ocs?.icon_url }))}
         />
       ) : (
         <p style={{ fontSize: 12, color: '#8a8168', textAlign: 'center', padding: 16, flexShrink: 0, fontStyle: 'italic' }}>あなたはこの部屋のメンバーではありません。</p>
