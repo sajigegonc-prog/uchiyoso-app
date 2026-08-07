@@ -40,6 +40,10 @@ async function checkAndComplete(supabase, roomId) {
 
   if (allApproved) {
     await supabase.from('messages').delete().eq('room_id', roomId)
+    await supabase.from('room_ooc_messages').insert({
+      room_id: roomId, user_id: null, is_system: true, log_type: 'scene_transition',
+      content: '場面転換が完了しました',
+    })
     await supabase.from('chat_rooms').update({
       location: null,
       time_period: null,
@@ -63,6 +67,11 @@ export async function requestSceneTransition(roomId) {
     transition_requested_by: user.id,
   }).eq('id', roomId)
   await supabase.from('scene_transition_approvals').insert({ room_id: roomId, user_id: user.id })
+  const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+  await supabase.from('room_ooc_messages').insert({
+    room_id: roomId, user_id: user.id, is_system: true, log_type: 'scene_transition',
+    content: `${profile?.display_name || '名前未設定'}さんが場面転換を申請しました`,
+  })
 
   const completed = await checkAndComplete(supabase, roomId)
 
