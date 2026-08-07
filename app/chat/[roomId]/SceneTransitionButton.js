@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { requestSceneTransition, approveSceneTransition } from './transitionActions'
 
-export default function SceneTransitionButton({ roomId, pending, alreadyApproved, requestedByName }) {
+export default function SceneTransitionButton({ roomId, pending, alreadyApproved, requestedByName, hasUnread }) {
   const [confirming, setConfirming] = useState(false)
   const [busy, setBusy] = useState(false)
   const [transcript, setTranscript] = useState(null)
@@ -85,8 +85,11 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
   return (
     <>
       <button id="coach-scene-btn" type="button" onClick={() => setConfirming(true)}
-        style={{ fontSize: 12.5, color: '#211d17', background: '#fff', border: '1px solid #211d17', borderRadius: 4, padding: '0 14px', height: 36, cursor: 'pointer' }}>
+        style={{ position: 'relative', fontSize: 12.5, color: '#211d17', background: '#fff', border: '1px solid #211d17', borderRadius: 4, padding: '0 14px', height: 36, cursor: 'pointer' }}>
         場面転換
+        {hasUnread && (
+          <span style={{ position: 'absolute', top: -3, right: -3, width: 8, height: 8, borderRadius: '50%', background: '#8a2418', border: '1px solid #f4eee0' }} />
+        )}
       </button>
       {confirming && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(33,29,23,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110 }}>
