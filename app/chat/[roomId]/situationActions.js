@@ -26,40 +26,55 @@ function yearGroup(birthDate) {
   return m >= 9 ? d.getFullYear() : d.getFullYear() - 1
 }
 
+function buildPool(ocA, ocB) {
+  const isStudent = (oc) => DORMS.includes(oc?.house)
+  const sameHouse = isStudent(ocA) && isStudent(ocB) && ocA.house === ocB.house
+  const g1 = yearGroup(ocA?.birth_date)
+  const g2 = yearGroup(ocB?.birth_date)
+  const gap = g1 != null && g2 != null ? Math.abs(g1 - g2) : 99
+  const sameGrade = isStudent(ocA) && isStudent(ocB) && gap === 0
+
+  let pool = [...COMMON_POOL]
+  if (sameHouse && gap <= 6) pool = pool.concat(HOUSE_POOL)
+  if (sameGrade) pool = pool.concat(GRADE_POOL)
+  return pool
+}
+
 export async function drawSituation(roomId) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
 
+  const { data: room } = await supabase.from('chat_rooms').select('room_type').eq('id', roomId).maybeSingle()
   const { data: members } = await supabase
     .from('chat_room_members')
     .select('user_id, ocs(name, house, birth_date)')
     .eq('room_id', roomId)
     .is('left_at', null)
-  if (!members || members.length !== 2) return { error: 'このガチャは1対1の部屋でのみ使えます' }
 
-  const mine = members.find((m) => m.user_id === user.id)
-  const other = members.find((m) => m.user_id !== user.id)
-  if (!mine || !other) return { error: '判定に失敗しました' }
+  let ocA, ocB
+  if (room?.room_type === 'self') {
+    if (!members || members.length !== 2) return { error: 'このガチャは、部屋にいるキャラクターがちょうど2人の時だけ使えます' }
+    const shuffled = [...members].sort(() => Math.random() - 0.5)
+    ocA = shuffled[0].ocs
+    ocB = shuffled[1].ocs
+  } else {
+    if (!members || members.length !== 2) return { error: 'このガチャは1対1の部屋でのみ使えます' }
+    const mine = members.find((m) => m.user_id === user.id)
+    const other = members.find((m) => m.user_id !== user.id)
+    if (!mine || !other) return { error: '判定に失敗しました' }
+    ocA = mine.ocs
+    ocB = other.ocs
+  }
 
-  const isStudent = (oc) => DORMS.includes(oc?.house)
-  const sameHouse = isStudent(mine.ocs) && isStudent(other.ocs) && mine.ocs.house === other.ocs.house
-  const g1 = yearGroup(mine.ocs?.birth_date)
-  const g2 = yearGroup(other.ocs?.birth_date)
-  const gradeGap = g1 != null && g2 != null ? Math.abs(g1 - g2) : 99
-  const sameGrade = isStudent(mine.ocs) && isStudent(other.ocs) && gradeGap === 0
-
-  let pool = [...COMMON_POOL]
-  if (sameHouse && gradeGap <= 6) pool = pool.concat(HOUSE_POOL)
-  if (sameGrade) pool = pool.concat(GRADE_POOL)
-
+  const pool = buildPool(ocA, ocB)
   const pick = pool[Math.floor(Math.random() * pool.length)]
   const text = pick.text
-    .replace(/〇〇（申請した側）/g, mine.ocs?.name || '???')
-    .replace(/〇〇（申請された側）/g, other.ocs?.name || '???')
+    .replace(/〇〇（申請した側）/g, ocA?.name || '???')
+    .replace(/〇〇（申請された側）/g, ocB?.name || '???')
 
   await supabase.from('room_ooc_messages').insert({
-    room_id: roomId, user_id: user.id, is_system: true,
+    room_id: roomId, user_id: user.id, is_system: true, log_type: 'situation_gacha',
     content: `【シチュエーションガチャ】${pick.place}／${pick.time}\n${text}`,
   })
   await supabase.from('chat_rooms').update({ location: pick.place, time_period: pick.time }).eq('id', roomId)
