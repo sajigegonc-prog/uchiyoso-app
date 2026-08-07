@@ -236,7 +236,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
         {(!messages || messages.length === 0) && (
           <p style={{ fontSize: 12.5, color: '#8a8168', textAlign: 'center', marginTop: 20, fontStyle: 'italic' }}>まだメッセージがありません。</p>
         )}
-        {messages && messages.map((msg) => {
+        {messages && messages.map((msg, idx) => {
           if (msg.is_system) {
             return (
               <div key={msg.id} style={{ textAlign: 'center', fontSize: 11, color: '#8a8168', fontStyle: 'italic' }}>
@@ -250,8 +250,12 @@ export default async function ChatRoomPage({ params, searchParams }) {
           const isOwner = msg.sender_oc_id ? myOcIdSet.has(msg.sender_oc_id) : myNpcs.includes(msg.sender_npc_id)
           const speakerName = msg.ocs?.name || msg.chat_room_npcs?.name
           const speakerIcon = msg.ocs?.icon_url || null
+          const prevMsg = messages[idx - 1]
+          const prevKey = prevMsg && !prevMsg.is_system ? (prevMsg.sender_oc_id || prevMsg.sender_npc_id || null) : null
+          const currentKey = msg.sender_oc_id || msg.sender_npc_id || null
+          const showSpeakerName = prevKey !== currentKey
           return (
-                        <MessageBubble
+            <MessageBubble
               key={msg.id}
               msg={msg}
               mine={mine}
@@ -262,6 +266,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
               editAction={editMessage}
               deleteAction={deleteMessage}
               reorderAction={reorderMessage}
+              showSpeakerName={showSpeakerName}
             />
           )
         })}
