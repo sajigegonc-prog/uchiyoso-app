@@ -17,11 +17,14 @@ function SubmitBtn() {
   )
 }
 
-export default function OocPanel({ roomId, myUserId, messages, sendAction, onClose, drawAction, showGachaTutorial, markGachaTutorialSeenAction }) {
+export default function OocPanel({ roomId, myUserId, messages, sendAction, onClose, drawAction, showGachaTutorial, markGachaTutorialSeenAction, logAction }) {
   const inputRef = useRef(null)
   const submittingRef = useRef(false)
   const [mounted, setMounted] = useState(false)
   const [drawing, setDrawing] = useState(false)
+  const [logConfirming, setLogConfirming] = useState(false)
+  const [logTranscript, setLogTranscript] = useState(null)
+  const [logCopied, setLogCopied] = useState(false)
   const now = new Date()
   const timeLabel = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
 
@@ -66,6 +69,17 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
     setDrawing(false)
   }
 
+  async function handleShowLog() {
+    const result = await logAction(roomId)
+    setLogTranscript(result?.transcript || '')
+    setLogConfirming(false)
+  }
+
+  function handleCopyLog() {
+    navigator.clipboard.writeText(logTranscript || '')
+    setLogCopied(true)
+  }
+
   if (!mounted) return null
 
   return createPortal(
@@ -78,6 +92,7 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
         <CoachMark
           steps={[
             { targetId: 'coach-ooc-gacha-btn', text: 'シチュエーションガチャです。押すと場所や時間帯がランダムに決まり、そのまま部屋に反映されます。' },
+            { targetId: 'coach-ooc-log-btn', text: '場面転換や退出をしなくても、今のログをいつでも書き出せます。書き出したログはホームの「過去のおしゃべりを思い出す」に貼ると、後から見返せます。' },
           ]}
           onFinish={markGachaTutorialSeenAction}
         />
@@ -131,9 +146,46 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
             border: 'none', background: drawing ? '#2f3a5c' : '#3d4d75', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
           }}
         >✨</button>
+        <button
+          id="coach-ooc-log-btn"
+          type="button"
+          onClick={() => setLogConfirming(true)}
+          style={{
+            flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
+            border: 'none', background: '#2f3a5c', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
+          }}
+          aria-label="ログを書き出す"
+        >📋</button>
         <input ref={inputRef} name="content" placeholder="中の人として発言" style={{ flex: 1, border: '1px solid #3a4360', borderRadius: 3, padding: '10px 12px', fontSize: 16, background: '#252b40', color: '#e8eaf5', fontFamily: "'Courier New', monospace" }} />
         <SubmitBtn />
       </form>
+
+      {logConfirming && (
+        <div onClick={() => setLogConfirming(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: '#12151f', border: '1px solid #3a4360', borderRadius: 4, padding: 18, maxWidth: 300 }}>
+            <p style={{ fontSize: 13, color: '#e4e8f2', marginBottom: 6 }}>現在のログを書き出しますか？</p>
+            <p style={{ fontSize: 11, color: '#8a92b5', lineHeight: 1.7, marginBottom: 14 }}>場面転換や退出をしなくても、今の会話ログをいつでもコピーできます。</p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button type="button" onClick={() => setLogConfirming(false)} style={{ flex: 1, padding: 9, background: 'none', border: '1px solid #3a4360', color: '#8a92b5', borderRadius: 3, fontSize: 12 }}>キャンセル</button>
+              <button type="button" onClick={handleShowLog} style={{ flex: 1, padding: 9, background: '#4a5580', border: 'none', color: '#e8eaf5', borderRadius: 3, fontSize: 12 }}>ログを表示</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {logTranscript !== null && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ background: '#12151f', border: '1px solid #3a4360', borderRadius: 4, padding: 18, maxWidth: 340, width: '90%', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+            <p style={{ fontSize: 13, color: '#e4e8f2', marginBottom: 6 }}>現在のログ</p>
+            <p style={{ fontSize: 10.5, color: '#8a92b5', lineHeight: 1.7, marginBottom: 8 }}>ホームの「過去のおしゃべりを思い出す」に貼ると、いつでも見返せます。★の付いた発言があなたのキャラです。</p>
+            <textarea readOnly value={logTranscript} style={{ flex: 1, minHeight: 160, fontSize: 12, padding: 10, border: '1px solid #3a4360', background: '#252b40', color: '#e8eaf5', resize: 'none', borderRadius: 3 }} />
+            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+              <button type="button" onClick={() => { setLogTranscript(null); setLogCopied(false) }} style={{ flex: 1, padding: 9, background: 'none', border: '1px solid #3a4360', color: '#8a92b5', borderRadius: 3, fontSize: 12 }}>閉じる</button>
+              <button type="button" onClick={handleCopyLog} style={{ flex: 1, padding: 9, background: '#4a5580', border: 'none', color: '#e8eaf5', borderRadius: 3, fontSize: 12 }}>{logCopied ? 'コピーしました' : 'コピーする'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>,
     document.body
   )
