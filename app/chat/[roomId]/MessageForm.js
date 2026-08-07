@@ -3,7 +3,7 @@ import { useRef, useState, useEffect } from 'react'
 import { useFormStatus } from 'react-dom'
 import FrogChocolateButton from './FrogChocolateButton'
 import SceneTransitionButton from './SceneTransitionButton'
-import RoomMembersButton from './RoomMembersButton'
+import DeleteRoomButton from './DeleteRoomButton'
 import OocPanel from './OocPanel'
 
 function ClearOnDone({ inputRef, onClear }) {
@@ -23,7 +23,7 @@ const MAX_LINES = 5
 export default function MessageForm({
   action, roomId, myOcs, npcs, myUserId, addNpcAction, deleteNpcAction, frogAction,
   oocMessages, oocSendAction, hasUnreadOoc, drawSituationAction, initialOcId,
-  sceneProps, roomMembers, pendingMembers,
+  sceneProps, deleteLabel, deleteAction, transcript,
 }) {
   const inputRef = useRef(null)
   const [open, setOpen] = useState(false)
@@ -125,11 +125,15 @@ export default function MessageForm({
         </div>
       )}
 
-      {extrasOpen && (
-        <div style={{
-          display: 'flex', gap: 8, alignItems: 'center', padding: '10px 12px',
-          background: 'rgba(244,238,224,.88)', borderBottom: '1px solid #211d17', flexWrap: 'wrap',
-        }}>
+      <div style={{
+        maxHeight: extrasOpen ? 120 : 0,
+        opacity: extrasOpen ? 1 : 0,
+        overflow: 'hidden',
+        transition: 'max-height .4s cubic-bezier(.4,0,.2,1), opacity .3s ease',
+        background: 'rgba(244,238,224,.88)',
+        borderBottom: extrasOpen ? '1px solid #211d17' : 'none',
+      }}>
+        <div style={{ display: 'flex', gap: 14, alignItems: 'center', padding: '12px', flexWrap: 'wrap' }}>
           <FrogChocolateButton roomId={roomId} action={frogAction} speakerName={speaker.name} />
           <SceneTransitionButton
             roomId={roomId}
@@ -137,29 +141,29 @@ export default function MessageForm({
             alreadyApproved={sceneProps?.alreadyApproved}
             requestedByName={sceneProps?.requestedByName}
           />
-          <RoomMembersButton members={roomMembers || []} pendingMembers={pendingMembers || []} />
           <button
             id="coach-ooc-btn"
             type="button"
             onClick={() => setOocOpen(true)}
             style={{
-              position: 'relative', flexShrink: 0, width: 36, height: 36, borderRadius: '50%',
-              border: '1px solid #211d17', background: '#f4eee0', color: '#211d17',
-              fontSize: 15, cursor: 'pointer',
+              position: 'relative', fontSize: 12.5, color: '#6b6250', background: 'none',
+              border: 'none', cursor: 'pointer', textDecoration: 'underline', height: 36,
             }}
-            aria-label="中の人チャットへ"
           >
-            💬
+            中の人チャットへ
             {hasUnreadOoc && (
               <span style={{
-                position: 'absolute', top: -3, right: -3,
-                width: 8, height: 8, borderRadius: '50%',
-                background: '#8a2418', border: '1px solid #f4eee0',
+                position: 'absolute', top: -2, right: -10,
+                width: 7, height: 7, borderRadius: '50%',
+                background: '#8a2418',
               }} />
             )}
           </button>
+          <div style={{ marginLeft: 'auto' }}>
+            <DeleteRoomButton roomId={roomId} label={deleteLabel} action={deleteAction} transcript={transcript} />
+          </div>
         </div>
-      )}
+      </div>
 
       <form
         action={action}
@@ -211,9 +215,11 @@ export default function MessageForm({
           style={{
             position: 'relative', flexShrink: 0, width: 28, height: 36, border: 'none', background: 'none',
             color: '#6b6250', fontSize: 13, cursor: 'pointer', marginBottom: 2,
+            transition: 'transform .3s ease',
+            transform: extrasOpen ? 'rotate(0deg)' : 'rotate(180deg)',
           }}
         >
-          {extrasOpen ? '▼' : '▲'}
+          ▼
           {!extrasOpen && hasUnreadOoc && (
             <span style={{
               position: 'absolute', top: 4, right: 2,
