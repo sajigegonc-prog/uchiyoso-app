@@ -81,3 +81,26 @@ export async function deleteMessage(formData) {
   revalidatePath(`/chat/${roomId}`)
   return { success: true }
 }
+
+export async function reorderMessage(formData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/')
+  const messageId = formData.get('message_id')?.toString()
+  const roomId = formData.get('room_id')?.toString()
+  const direction = formData.get('direction')?.toString()
+  if (!messageId || !roomId || !direction) return { error: '情報が不足しています' }
+
+  const { error } = await supabase.rpc('swap_message_order', {
+    _room_id: roomId,
+    _message_id: messageId,
+    _direction: direction,
+  })
+  if (error) {
+    console.error('並び替えエラー:', error)
+    return { error: error.message || '並び替えに失敗しました' }
+  }
+
+  revalidatePath(`/chat/${roomId}`)
+  return { success: true }
+}
