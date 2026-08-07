@@ -22,7 +22,7 @@ export async function sendMessage(formData) {
     await supabase.from('room_setting_logs').insert({ room_id: roomId, field: 'location', value: newLocation, changed_by: user.id })
     await supabase.from('messages').insert({
       room_id: roomId,
-      content: `📍 場所が変更されました → ${newLocation}`,
+      content: newLocation,
       is_system: true,
     })
     revalidatePath(`/chat/${roomId}`)
@@ -34,7 +34,7 @@ export async function sendMessage(formData) {
     await supabase.from('room_setting_logs').insert({ room_id: roomId, field: 'time_period', value: newTime, changed_by: user.id })
     await supabase.from('messages').insert({
       room_id: roomId,
-      content: `🕐 時間帯が変更されました → ${newTime}`,
+      content: newTime,
       is_system: true,
     })
     revalidatePath(`/chat/${roomId}`)
