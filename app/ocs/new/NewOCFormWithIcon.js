@@ -7,7 +7,7 @@ import { getCroppedImg } from '../[id]/cropImage'
 import { updateOcIcon } from '../[id]/actions'
 
 const currentYear = new Date().getFullYear()
-const years = Array.from({ length: 100 }, (_, i) => currentYear - i)
+const years = Array.from({ length: 300 }, (_, i) => currentYear - i)
 const months = Array.from({ length: 12 }, (_, i) => i + 1)
 function daysInMonth(year, month) {
   if (!year || !month) return 31
