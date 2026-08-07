@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabaseServer'
 import { respondToFriendRequest } from './actions'
 import Link from 'next/link'
+import CopyLinkButton from './CopyLinkButton'
 
 export default async function FriendsPage() {
   const supabase = await createClient()
@@ -38,6 +39,18 @@ export default async function FriendsPage() {
       <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 6, fontStyle: 'italic' }}>
         このリンクをSNS等で共有できます。相手がここから申請を送り、あなたが承認すると友達になります。
       </p>
+      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+        <Link
+          href={`/friends/add/${profile?.invite_token}`}
+          style={{
+            flex: 1, textAlign: 'center', padding: 9, border: '1px solid #8a8168',
+            color: '#6b6250', fontSize: 11.5, textDecoration: 'none',
+          }}
+        >
+          プロフィールを見る
+        </Link>
+        <CopyLinkButton text={profileUrl} />
+      </div>
 
       {incoming && incoming.length > 0 && (
         <>
