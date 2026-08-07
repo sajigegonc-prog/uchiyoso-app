@@ -11,7 +11,7 @@ export async function createRoom(formData) {
   const location = formData.get('location')?.toString().trim()
   const timePeriod = formData.get('time_period')?.toString().trim()
   const roomType = formData.get('room_type')?.toString()
-  const title = formData.get('title')?.toString().trim()
+  const note = formData.get('note')?.toString().trim()
   const friendOcIds = formData.getAll('friend_oc_ids').map((v) => v.toString()).filter(Boolean)
   const extraOcIds = formData.getAll('extra_oc_ids').map((v) => v.toString()).filter(Boolean)
   if (!ocId) return { error: '話すOCを選択してください' }
@@ -75,7 +75,7 @@ export async function createRoom(formData) {
       const { data: friendOc } = await supabase.from('ocs').select('user_id').eq('id', friendOcId).maybeSingle()
       if (friendOc) {
         await supabase.from('chat_room_invitations').insert({
-          room_id: room.id, inviter_id: user.id, invitee_id: friendOc.user_id, invitee_oc_id: friendOcId,
+          room_id: room.id, inviter_id: user.id, invitee_id: friendOc.user_id, invitee_oc_id: friendOcId, note: note || null,
         })
       }
     }
