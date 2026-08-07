@@ -17,7 +17,7 @@ function SubmitBtn() {
   )
 }
 
-export default function OocPanel({ roomId, myUserId, messages, sendAction, onClose, drawAction, showGachaTutorial, markGachaTutorialSeenAction, logAction }) {
+export default function OocPanel({ roomId, myUserId, messages, sendAction, onClose, drawAction, showGachaTutorial, markGachaTutorialSeenAction, logAction, showLogTutorial, markLogTutorialSeenAction }) {
   const inputRef = useRef(null)
   const submittingRef = useRef(false)
   const [mounted, setMounted] = useState(false)
@@ -92,9 +92,16 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
         <CoachMark
           steps={[
             { targetId: 'coach-ooc-gacha-btn', text: 'シチュエーションガチャです。押すと場所や時間帯がランダムに決まり、そのまま部屋に反映されます。' },
-            { targetId: 'coach-ooc-log-btn', text: '場面転換や退出をしなくても、今のログをいつでも書き出せます。書き出したログはホームの「過去のおしゃべりを思い出す」に貼ると、後から見返せます。' },
           ]}
           onFinish={markGachaTutorialSeenAction}
+        />
+      )}
+      {!showGachaTutorial && showLogTutorial && (
+        <CoachMark
+          steps={[
+            { targetId: 'coach-ooc-log-btn', text: '場面転換や退出をしなくても、今のログをいつでも書き出せます。書き出したログはホームの「過去のおしゃべりを思い出す」に貼ると、後から見返せます。' },
+          ]}
+          onFinish={markLogTutorialSeenAction}
         />
       )}
       <div style={{ background: '#12151f', color: '#c7ccdd', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0, borderBottom: '1px solid #3a4360' }}>
