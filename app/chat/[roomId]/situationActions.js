@@ -48,4 +48,127 @@ function buildPool(ocA, ocB) {
   const g1 = yearGroup(ocA?.birth_date)
   const g2 = yearGroup(ocB?.birth_date)
   const gap = g1 != null && g2 != null ? Math.abs(g1 - g2) : 99
-  const
+  const bothStudents = isStudent(ocA) && isStudent(ocB)
+  const contemporaneous = !bothStudents || gap <= 6
+  const sameHouse = bothStudents && ocA.house === ocB.house
+  const sameGrade = bothStudents && gap === 0
+
+  let pool = contemporaneous ? [...COMMON_POOL] : []
+  if (sameHouse && contemporaneous) {
+    pool = pool.concat(HOUSE_POOL)
+    pool = pool.concat(HOUSE_SPECIFIC_POOL.filter((item) => item.house === ocA.house))
+  }
+  if (sameGrade) pool = pool.concat(GRADE_POOL)
+  pool = pool.filter((item) => !item.excludeIf || !item.excludeIf(ocA, ocB))
+  if (pool.length === 0) pool = COMMON_POOL
+  return pool
+}
+
+async function getPairOcs(supabase, roomId, userId) {
+  const { data: room } = await supabase.from('chat_rooms').select('room_type').eq('id', roomId).maybeSingle()
+  const { data: members } = await supabase
+    .from('chat_room_members')
+    .select('user_id, ocs(name, house, birth_date)')
+    .eq('room_id', roomId)
+    .is('left_at', null)
+  if (!members || members.length < 2) return { error: 'この機能は2人以上いる部屋で使えます' }
+  if (room?.room_type === 'self') {
+    const shuffled = [...members].sort(() => Math.random() - 0.5)
+    return { ocA: shuffled[0].ocs, ocB: shuffled[1].ocs, room }
+  }
+  const mine = members.find((m) => m.user_id === userId)
+  const other = members.find((m) => m.user_id !== userId)
+  if (!mine || !other) return { error: '判定に失敗しました' }
+  return { ocA: mine.ocs, ocB: other.ocs, room }
+}
+
+export async function drawSituation(roomId) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/')
+  const { ocA, ocB, error } = await getPairOcs(supabase, roomId, user.id)
+  if (error) return { error }
+  const pool = buildPool(ocA, ocB)
+  const pick = pool[Math.floor(Math.random() * pool.length)]
+  const text = pick.text
+    .replace(/〇〇（申請した側）/g, ocA?.name || '???')
+    .replace(/〇〇（申請された側）/g, ocB?.name || '???')
+  return { place: pick.place, time: pick.time, text }
+}
+
+async function postSituationMessages(supabase, roomId, place, time, text) {
+  const header = place && time ? `${place}／${time}` : (place || time || null)
+  const rows = []
+  if (header) rows.push({ room_id: roomId, content: header, is_system: true })
+  rows.push({ room_id: roomId, content: text, is_system: true })
+  await supabase.from('messages').insert(rows)
+  await supabase.from('chat_rooms').update({
+    location: place || null,
+    time_period: time || null,
+  }).eq('id', roomId)
+}
+
+export async function proposeSituation(roomId, place, time, text) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/')
+  if (!text || !text.trim()) return { error: 'シチュエーションを入力してください' }
+
+  const { data: members } = await supabase
+    .from('chat_room_members')
+    .select('user_id')
+    .eq('room_id', roomId)
+    .is('left_at', null)
+  const uniqueUsers = new Set((members || []).map((m) => m.user_id))
+  const isSelfRoom = uniqueUsers.size <= 1
+
+  if (isSelfRoom) {
+    await postSituationMessages(supabase, roomId, place, time, text)
+    revalidatePath(`/chat/${roomId}`)
+    return { success: true, posted: true }
+  }
+
+  const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+  await supabase.from('chat_rooms').update({
+    pending_situation_place: place || null,
+    pending_situation_time: time || null,
+    pending_situation_text: text,
+    pending_situation_by: user.id,
+  }).eq('id', roomId)
+  await supabase.from('room_ooc_messages').insert({
+    room_id: roomId, user_id: user.id, is_system: true, log_type: 'situation_proposal',
+    content: `${profile?.display_name || '名前未設定'}さんがシチュエーションを提案しました`,
+  })
+  revalidatePath(`/chat/${roomId}`)
+  return { success: true, posted: false }
+}
+
+export async function respondToSituation(roomId, decision) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/')
+  const { data: room } = await supabase
+    .from('chat_rooms')
+    .select('pending_situation_place, pending_situation_time, pending_situation_text, pending_situation_by')
+    .eq('id', roomId)
+    .maybeSingle()
+  if (!room?.pending_situation_by) return { error: '提案が見つかりません' }
+
+  if (decision === 'approve') {
+    await postSituationMessages(supabase, roomId, room.pending_situation_place, room.pending_situation_time, room.pending_situation_text)
+    await supabase.from('room_ooc_messages').insert({
+      room_id: roomId, user_id: user.id, is_system: true, log_type: 'situation_result',
+      content: 'シチュエーションが採用されました',
+    })
+  } else {
+    await supabase.from('room_ooc_messages').insert({
+      room_id: roomId, user_id: user.id, is_system: true, log_type: 'situation_result',
+      content: 'このシチュエーションはキャンセルされました',
+    })
+  }
+  await supabase.from('chat_rooms').update({
+    pending_situation_place: null, pending_situation_time: null, pending_situation_text: null, pending_situation_by: null,
+  }).eq('id', roomId)
+  revalidatePath(`/chat/${roomId}`)
+  return { success: true }
+}
