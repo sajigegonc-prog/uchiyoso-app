@@ -23,7 +23,7 @@ const MAX_LINES = 5
 
 export default function MessageForm({
   action, roomId, myOcs, npcs, myUserId, addNpcAction, deleteNpcAction, frogAction,
-  oocMessages, oocSendAction, hasUnreadOoc, drawSituationAction, initialOcId,
+  oocMessages, oocSendAction, hasUnreadOoc, drawSituationAction, proposeSituationAction, respondSituationAction, pendingSituation, initialOcId,
   sceneProps, deleteLabel, deleteAction, transcript, hasUnreadFrog, hasUnreadScene,
   showGachaTutorial, markGachaTutorialSeenAction, logAction, showLogTutorial, markLogTutorialSeenAction,
 }) {
@@ -67,7 +67,9 @@ export default function MessageForm({
       {oocOpen && (
         <OocPanel
           roomId={roomId} myUserId={myUserId} messages={oocMessages} sendAction={oocSendAction}
-          onClose={() => setOocOpen(false)} drawAction={drawSituationAction}
+          onClose={() => setOocOpen(false)}
+          drawAction={drawSituationAction} proposeAction={proposeSituationAction} respondAction={respondSituationAction}
+          pendingSituation={pendingSituation}
           showGachaTutorial={showGachaTutorial} markGachaTutorialSeenAction={markGachaTutorialSeenAction}
           logAction={logAction}
           showLogTutorial={showLogTutorial} markLogTutorialSeenAction={markLogTutorialSeenAction}
