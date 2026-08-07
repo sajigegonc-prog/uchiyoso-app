@@ -20,6 +20,7 @@ import MarkRoomReadOnMount from './MarkRoomReadOnMount'
 import RoomTitleEditor from './RoomTitleEditor'
 import { updateRoomTitle } from './titleActions'
 import { drawSituation } from './situationActions'
+import { exportRoomLog } from './logActions'
 import WelcomePartnerModal from './WelcomePartnerModal'
 
 
@@ -284,6 +285,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
           hasUnreadScene={hasUnreadScene}
           showGachaTutorial={!tutorialProfile?.seen_ooc_gacha_tutorial}
           markGachaTutorialSeenAction={markOocGachaTutorialSeen}
+          logAction={exportRoomLog}
           sceneProps={{
             pending: !!room.transition_requested_at,
             alreadyApproved: alreadyApprovedTransition,
