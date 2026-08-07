@@ -49,7 +49,7 @@ export default async function HomePage() {
         padding: '24px 20px 100px',
       }}>
         <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
-          <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO GAZETTE</div>
+          <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO CLUB</div>
           <div style={{ fontSize: 28, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>
             ホーム
           </div>
