@@ -21,7 +21,7 @@ import AutoScrollBottom from './AutoScrollBottom'
 import TypingBubble from '@/components/TypingBubble'
 import RoomTitleEditor from './RoomTitleEditor'
 import { updateRoomTitle } from './titleActions'
-import { drawSituation } from './situationActions'
+import { drawSituation, proposeSituation, respondToSituation } from './situationActions'
 import { exportRoomLog } from './logActions'
 import WelcomePartnerModal from './WelcomePartnerModal'
 
@@ -43,7 +43,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
   const showLogTutorial = !seenFeatureKeys.has('ooc_log_button')
   const { data: room } = await supabase
     .from('chat_rooms')
-    .select('id, location, time_period, primary_oc_id, pending_deletion_by, deleted_at, title, transition_requested_at, transition_requested_by, room_type')
+    .select('id, location, time_period, primary_oc_id, pending_deletion_by, deleted_at, title, transition_requested_at, transition_requested_by, room_type, pending_situation_place, pending_situation_time, pending_situation_text, pending_situation_by')
     .eq('id', roomId)
     .maybeSingle()
   if (!room) {
@@ -303,6 +303,14 @@ export default async function ChatRoomPage({ params, searchParams }) {
           hasUnreadOoc={hasUnreadOoc}
           initialOcId={myMembership?.oc_id}
           drawSituationAction={drawSituation}
+          proposeSituationAction={proposeSituation}
+          respondSituationAction={respondToSituation}
+          pendingSituation={room.pending_situation_by ? {
+            place: room.pending_situation_place,
+            time: room.pending_situation_time,
+            text: room.pending_situation_text,
+            by: room.pending_situation_by,
+          } : null}
           sceneProps={{
             pending: !!room.transition_requested_at,
             alreadyApproved: alreadyApprovedTransition,
