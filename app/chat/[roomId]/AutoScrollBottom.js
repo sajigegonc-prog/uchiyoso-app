@@ -3,8 +3,10 @@ import { useEffect } from 'react'
 
 export default function AutoScrollBottom({ targetId }) {
   useEffect(() => {
-    const el = document.getElementById(targetId)
-    if (el) el.scrollTop = el.scrollHeight
+    requestAnimationFrame(() => {
+      const el = document.getElementById(targetId)
+      if (el) el.scrollTop = el.scrollHeight
+    })
   }, [targetId])
   return null
 }
