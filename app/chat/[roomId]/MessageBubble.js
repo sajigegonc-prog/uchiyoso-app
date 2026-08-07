@@ -12,7 +12,7 @@ function renderWithBold(text) {
     return part
   })
 }
-export default function MessageBubble({ msg, mine, isOwner, speakerName, speakerIcon, roomId, editAction, deleteAction, reorderAction }) {
+export default function MessageBubble({ msg, mine, isOwner, speakerName, speakerIcon, roomId, editAction, deleteAction, reorderAction, showSpeakerName = true }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [editing, setEditing] = useState(false)
   const [detail, setDetail] = useState(null)
@@ -117,7 +117,7 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
         </OcInfoModal>
       )}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', maxWidth: '72%' }}>
-        {!mine && <div style={{ fontSize: 10.5, color: '#6b6250', marginBottom: 3, fontStyle: 'italic' }}>{speakerName}</div>}
+        {!mine && showSpeakerName && <div style={{ fontSize: 10.5, color: '#6b6250', marginBottom: 3, fontStyle: 'italic' }}>{speakerName}</div>}
         {editing ? (
           <form
             action={handleEditSubmit}
