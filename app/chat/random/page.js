@@ -100,14 +100,16 @@ export default async function RandomMatchPage() {
   const friendOc = candidatePool[Math.floor(Math.random() * candidatePool.length)]
 
   const isStudent = (oc) => DORMS.includes(oc?.house)
-  const sameHouse = isStudent(myOc) && isStudent(friendOc) && myOc.house === friendOc.house
   const g1 = yearGroup(myOc.birth_date)
   const g2 = yearGroup(friendOc.birth_date)
   const gap = g1 != null && g2 != null ? Math.abs(g1 - g2) : 99
-  const sameGrade = isStudent(myOc) && isStudent(friendOc) && gap === 0
+  const bothStudents = isStudent(myOc) && isStudent(friendOc)
+  const contemporaneous = !bothStudents || gap <= 6
+  const sameHouse = bothStudents && myOc.house === friendOc.house
+  const sameGrade = bothStudents && gap === 0
 
-  let pool = [...COMMON_POOL]
-  if (sameHouse && gap <= 6) {
+  let pool = contemporaneous ? [...COMMON_POOL] : []
+  if (sameHouse && contemporaneous) {
     pool = pool.concat(HOUSE_POOL)
     pool = pool.concat(HOUSE_SPECIFIC_POOL.filter((item) => item.house === myOc.house))
   }
