@@ -103,6 +103,8 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
               }
               const mine = line.isMine
               const oc = ocFor(line.speaker)
+              const prevLine = parsed[i - 1]
+              const showName = !prevLine || prevLine.isSystem || prevLine.speaker !== line.speaker
               return (
                 <div key={i} style={{
                   display: 'flex', gap: 8, alignItems: 'flex-end',
@@ -119,7 +121,7 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
                     ) : (line.speaker || '?').charAt(0)}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', maxWidth: '72%' }}>
-                    {!mine && (
+                    {!mine && showName && (
                       <div style={{ fontSize: 10.5, color: '#6b6250', marginBottom: 3, fontStyle: 'italic' }}>{line.speaker}</div>
                     )}
                     <div style={{
