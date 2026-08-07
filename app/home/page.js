@@ -25,10 +25,11 @@ export default async function HomePage() {
   const today = new Date()
   const dateline = today.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })
 
-  const noticeItems = [
+    const noticeItems = [
     notifications.chat && { href: '/chat', text: 'あなたに話しかけた人がいるようです' },
     notifications.owl && { href: '/owl', text: 'あなたの部屋にフクロウが来ています' },
     notifications.matching && { href: '/chat', text: 'あなたと偶然すれ違った方がいるようです' },
+    notifications.friends && { href: '/friends', text: '誰かがあなたと友達になりたがっています' },
   ].filter(Boolean)
 
   return (
