@@ -100,6 +100,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
       .from('ocs')
       .select('id, name')
       .eq('user_id', user.id)
+      .eq('is_dream_partner', false)
       .order('created_at', { ascending: true })
     myOcs = (allMyOcs || []).map((oc) => ({ id: oc.id, name: oc.name }))
   } else if (room.room_type === 'self') {
