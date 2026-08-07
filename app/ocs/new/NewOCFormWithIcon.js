@@ -7,6 +7,7 @@ import { getCroppedImg } from '../[id]/cropImage'
 import { updateOcIcon } from '../[id]/actions'
 
 const currentYear = new Date().getFullYear()
+const HOUSES = ['グリフィンドール', 'ハッフルパフ', 'レイブンクロー', 'スリザリン']
 const years = Array.from({ length: 300 }, (_, i) => currentYear - i)
 const months = Array.from({ length: 12 }, (_, i) => i + 1)
 function daysInMonth(year, month) {
@@ -33,6 +34,8 @@ export default function NewOCFormWithIcon({ action, userId }) {
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [ocType, setOcType] = useState('creation')
+  const [house, setHouse] = useState('')
+  const [customHouse, setCustomHouse] = useState('')
   const [year, setYear] = useState('')
   const [month, setMonth] = useState('')
   const [day, setDay] = useState('')
@@ -122,7 +125,20 @@ export default function NewOCFormWithIcon({ action, userId }) {
           )}
           <div style={{ marginBottom: 14 }}>
             <label style={labelStyle}>寮・職業</label>
-            <input name="house" placeholder="例:ハッフルパフ" style={inputStyle} />
+            <select value={house} onChange={(e) => setHouse(e.target.value)} style={inputStyle}>
+              <option value="">選んでください</option>
+              {HOUSES.map((h) => <option key={h} value={h}>{h}</option>)}
+              <option value="その他">その他(自由記入)</option>
+            </select>
+            {house === 'その他' && (
+              <input
+                value={customHouse}
+                onChange={(e) => setCustomHouse(e.target.value)}
+                placeholder="例:魔法史担当教授"
+                style={{ ...inputStyle, marginTop: 8 }}
+              />
+            )}
+            <input type="hidden" name="house" value={house === 'その他' ? customHouse : house} />
           </div>
           <div style={{ marginBottom: 14 }}>
             <label style={labelStyle}>生年月日</label>
