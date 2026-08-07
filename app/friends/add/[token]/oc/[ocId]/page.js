@@ -9,7 +9,7 @@ export default async function PublicOCDetailPage({ params }) {
     .single()
   if (!oc) notFound()
   return (
-    <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px 60px' }}>
+    <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px 100px' }}>
       <Link href={`/friends/add/${token}`} style={{ fontSize: 11, color: '#6b6250', textDecoration: 'none' }}>← プロフィールに戻る</Link>
       <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17', marginTop: 12 }}>
         <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO GAZETTE</div>
