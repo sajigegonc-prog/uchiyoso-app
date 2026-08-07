@@ -41,6 +41,13 @@ export default async function RootLayout({ children }) {
               height: calc(100vh - 76px) !important;
               height: calc(100dvh - 76px) !important;
             }
+            #ooc-input-row {
+              padding-top: 16px !important;
+              padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+            }
+            #ooc-input-row input {
+              height: 44px !important;
+            }
           }
           .app-shell {
             min-height: 100vh;
