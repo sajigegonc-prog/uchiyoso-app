@@ -281,6 +281,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
           oocSendAction={sendOocMessage}
           hasUnreadOoc={hasUnreadOoc}
           initialOcId={myMembership?.oc_id}
+          drawSituationAction={drawSituation}
           sceneProps={{
             pending: !!room.transition_requested_at,
             alreadyApproved: alreadyApprovedTransition,
