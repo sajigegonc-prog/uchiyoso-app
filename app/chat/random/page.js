@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
 import { confirmRandomMatch } from './matchActions'
 import RandomMatchOcIcon from './RandomMatchOcIcon'
+
 export const dynamic = 'force-dynamic'
 
 const DORMS = ['グリフィンドール', 'ハッフルパフ', 'レイブンクロー', 'スリザリン']
@@ -137,7 +138,7 @@ export default async function RandomMatchPage() {
         <div style={{ fontSize: 10.5, color: '#8a8168', marginTop: 8 }}>{pick.place}／{pick.time}</div>
         <div style={{ fontSize: 12.5, color: '#211d17', marginTop: 8, lineHeight: 1.8 }}>{situationText}</div>
       </div>
-     <form action={confirmRandomMatch} style={{ width: '100%', maxWidth: 360, marginTop: 16 }}>
+      <form action={confirmRandomMatch} style={{ width: '100%', maxWidth: 360, marginTop: 16 }}>
         <input type="hidden" name="my_oc_id" value={myOc.id} />
         <input type="hidden" name="friend_oc_id" value={friendOc.id} />
         <input type="hidden" name="location" value={pick.place} />
@@ -145,7 +146,8 @@ export default async function RandomMatchPage() {
         <input type="hidden" name="situation_text" value={situationText} />
         <button type="submit" style={{ width: '100%', padding: 13, background: '#211d17', color: '#f4eee0', border: 'none', fontWeight: 700, fontSize: 13 }}>このお部屋を作る</button>
       </form>
-      href="/chat/random"
+      
+        href="/chat/random"
         style={{
           display: 'block', width: '100%', maxWidth: 360, marginTop: 10, padding: 13,
           background: '#4a5580', color: '#f4eee0', border: 'none', fontWeight: 700, fontSize: 13,
