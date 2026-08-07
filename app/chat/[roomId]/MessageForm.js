@@ -28,6 +28,8 @@ export default function MessageForm({
   showGachaTutorial, markGachaTutorialSeenAction, logAction, showLogTutorial, markLogTutorialSeenAction,
 }) {
   const inputRef = useRef(null)
+  const lastSentRef = useRef(0)
+  const [cooldown, setCooldown] = useState(false)
   const { sendTyping } = useTypingChannel(`typing-${roomId}`, myUserId)
   const [open, setOpen] = useState(false)
   const [oocOpen, setOocOpen] = useState(false)
@@ -45,6 +47,17 @@ export default function MessageForm({
     el.style.height = Math.min(el.scrollHeight, maxHeight) + 'px'
   }
 
+  function handleFormSubmit(e) {
+    const now = Date.now()
+    if (now - lastSentRef.current < 2000) {
+      e.preventDefault()
+      return
+    }
+    lastSentRef.current = now
+    setCooldown(true)
+    setTimeout(() => setCooldown(false), 2000)
+  }
+  
   useEffect(() => {
     autoResize()
   }, [])
@@ -177,6 +190,7 @@ export default function MessageForm({
 
       <form
         action={action}
+        onSubmit={handleFormSubmit}
         style={{ display: 'flex', gap: 6, alignItems: 'flex-end', padding: '10px 12px', paddingBottom: 'calc(10px + env(safe-area-inset-bottom))' }}
       >
         <input type="hidden" name="room_id" value={roomId} />
@@ -210,10 +224,11 @@ export default function MessageForm({
         />
         <button
           type="submit"
+          disabled={cooldown}
           style={{
             flexShrink: 0, border: '1px solid #211d17', padding: '8px 12px',
-            background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 13,
-            marginBottom: 2,
+            background: cooldown ? '#8a8168' : '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 13,
+            marginBottom: 2, cursor: cooldown ? 'default' : 'pointer',
           }}
         >
           送信
