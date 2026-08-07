@@ -21,18 +21,32 @@ function SubmitBtn({ cooldown }) {
   )
 }
 
-export default function OocPanel({ roomId, myUserId, messages, sendAction, onClose, drawAction, showGachaTutorial, markGachaTutorialSeenAction, logAction, showLogTutorial, markLogTutorialSeenAction }) {
+export default function OocPanel({
+  roomId, myUserId, messages, sendAction, onClose,
+  drawAction, proposeAction, respondAction, pendingSituation,
+  showGachaTutorial, markGachaTutorialSeenAction, logAction, showLogTutorial, markLogTutorialSeenAction,
+}) {
   const inputRef = useRef(null)
   const submittingRef = useRef(false)
   const lastSentRef = useRef(0)
   const [cooldown, setCooldown] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [drawing, setDrawing] = useState(false)
   const [logConfirming, setLogConfirming] = useState(false)
   const [logTranscript, setLogTranscript] = useState(null)
   const [logCopied, setLogCopied] = useState(false)
-const { typerNames, sendTyping } = useTypingChannel(`typing-ooc-${roomId}`, myUserId)
+  const { typerNames, sendTyping } = useTypingChannel(`typing-ooc-${roomId}`, myUserId)
   const keyboardOffset = useKeyboardOffset()
+
+  const [situationOpen, setSituationOpen] = useState(false)
+  const [situationMode, setSituationMode] = useState('gacha')
+  const [drawResult, setDrawResult] = useState(null)
+  const [drawing, setDrawing] = useState(false)
+  const [customPlace, setCustomPlace] = useState('')
+  const [customTime, setCustomTime] = useState('')
+  const [customText, setCustomText] = useState('')
+  const [proposing, setProposing] = useState(false)
+  const [respondPending, setRespondPending] = useState(false)
+
   const LINE_HEIGHT = 20
   const MAX_LINES = 5
   function autoResize() {
@@ -54,19 +68,17 @@ const { typerNames, sendTyping } = useTypingChannel(`typing-ooc-${roomId}`, myUs
     scrollToBottom()
     const t1 = setTimeout(scrollToBottom, 100)
     const t2 = setTimeout(scrollToBottom, 400)
-    return () => {
-      clearTimeout(t1)
-      clearTimeout(t2)
-    }
+    return () => { clearTimeout(t1); clearTimeout(t2) }
   }, [])
+
   useEffect(() => {
     markOocRead(roomId)
   }, [roomId, messages?.length])
 
   function handleSubmit(e) {
-    const now = Date.now()
-    if (submittingRef.current || now - lastSentRef.current < 2000) { e.preventDefault(); return }
-    lastSentRef.current = now
+    const nowTs = Date.now()
+    if (submittingRef.current || nowTs - lastSentRef.current < 2000) { e.preventDefault(); return }
+    lastSentRef.current = nowTs
     submittingRef.current = true
     setCooldown(true)
     setTimeout(() => setCooldown(false), 2000)
@@ -83,10 +95,36 @@ const { typerNames, sendTyping } = useTypingChannel(`typing-ooc-${roomId}`, myUs
     }
   }
 
+  function openGacha() {
+    setSituationMode('gacha')
+    setSituationOpen(true)
+    handleDraw()
+  }
+  function openCustom() {
+    setSituationMode('custom')
+    setCustomPlace(''); setCustomTime(''); setCustomText('')
+    setSituationOpen(true)
+  }
   async function handleDraw() {
     setDrawing(true)
-    await drawAction(roomId)
+    const result = await drawAction(roomId)
+    setDrawResult(result?.error ? null : result)
     setDrawing(false)
+  }
+  async function handleAdopt() {
+    const payload = situationMode === 'gacha'
+      ? drawResult
+      : { place: customPlace, time: customTime, text: customText }
+    if (!payload?.text) return
+    setProposing(true)
+    await proposeAction(roomId, payload.place, payload.time, payload.text)
+    setProposing(false)
+    setSituationOpen(false)
+  }
+  async function handleRespond(decision) {
+    setRespondPending(true)
+    await respondAction(roomId, decision)
+    setRespondPending(false)
   }
 
   async function handleShowLog() {
@@ -94,13 +132,15 @@ const { typerNames, sendTyping } = useTypingChannel(`typing-ooc-${roomId}`, myUs
     setLogTranscript(result?.transcript || '')
     setLogConfirming(false)
   }
-
   function handleCopyLog() {
     navigator.clipboard.writeText(logTranscript || '')
     setLogCopied(true)
   }
 
   if (!mounted) return null
+
+  const isProposer = pendingSituation?.by === myUserId
+  const hasPending = !!pendingSituation?.by
 
   return createPortal(
     <div style={{
@@ -112,7 +152,7 @@ const { typerNames, sendTyping } = useTypingChannel(`typing-ooc-${roomId}`, myUs
       {showGachaTutorial && (
         <CoachMark
           steps={[
-            { targetId: 'coach-ooc-gacha-btn', text: 'シチュエーションガチャです。押すと場所や時間帯がランダムに決まり、そのまま部屋に反映されます。' },
+            { targetId: 'coach-ooc-gacha-btn', text: 'シチュエーションガチャです。結果を確認してから採用するか選べます。' },
           ]}
           onFinish={markGachaTutorialSeenAction}
         />
@@ -162,6 +202,25 @@ const { typerNames, sendTyping } = useTypingChannel(`typing-ooc-${roomId}`, myUs
         </div>
       </div>
 
+      {hasPending && (
+        <div style={{ flexShrink: 0, background: '#252b40', borderTop: '1px solid #4a5580', padding: '10px 16px' }}>
+          <div style={{ fontSize: 9.5, color: '#7a82a0', marginBottom: 5, fontFamily: "'Courier New', monospace" }}>提案中のシチュエーション</div>
+          <div style={{ fontSize: 11.5, color: '#e4e8f2', lineHeight: 1.6, marginBottom: 8 }}>
+            {pendingSituation.place && pendingSituation.time ? `${pendingSituation.place}／${pendingSituation.time}` : (pendingSituation.place || pendingSituation.time)}
+            {(pendingSituation.place || pendingSituation.time) && <br />}
+            {pendingSituation.text}
+          </div>
+          {isProposer ? (
+            <p style={{ fontSize: 10.5, color: '#8a92b5', fontStyle: 'italic' }}>相手の判断を待っています</p>
+          ) : (
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button type="button" disabled={respondPending} onClick={() => handleRespond('reject')} style={{ flex: 1, padding: 8, background: 'none', border: '1px solid #5a6a8a', color: '#b8c0da', fontSize: 11.5, cursor: 'pointer' }}>不採用</button>
+              <button type="button" disabled={respondPending} onClick={() => handleRespond('approve')} style={{ flex: 1, padding: 8, background: '#4a5580', border: 'none', color: '#e8eaf5', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>採用</button>
+            </div>
+          )}
+        </div>
+      )}
+
       <form id="ooc-input-row" action={sendAction} onSubmit={handleSubmit} style={{
         flexShrink: 0, display: 'flex', gap: 8, padding: '12px 16px',
         background: '#12151f', borderTop: '1px solid #3a4360',
@@ -171,13 +230,21 @@ const { typerNames, sendTyping } = useTypingChannel(`typing-ooc-${roomId}`, myUs
         <button
           id="coach-ooc-gacha-btn"
           type="button"
-          disabled={drawing}
-          onClick={handleDraw}
+          onClick={openGacha}
           style={{
             flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
-            border: 'none', background: drawing ? '#2f3a5c' : '#3d4d75', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
+            border: 'none', background: '#3d4d75', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
           }}
         >✨</button>
+        <button
+          type="button"
+          onClick={openCustom}
+          style={{
+            flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
+            border: 'none', background: '#2f3a5c', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
+          }}
+          aria-label="シチュエーションを自由記入"
+        >✏️</button>
         <button
           id="coach-ooc-log-btn"
           type="button"
@@ -204,6 +271,42 @@ const { typerNames, sendTyping } = useTypingChannel(`typing-ooc-${roomId}`, myUs
         />
         <SubmitBtn cooldown={cooldown} />
       </form>
+
+      {situationOpen && (
+        <div onClick={() => setSituationOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: '#1c2133', border: '1px solid #3a4360', borderRadius: 4, padding: 18, maxWidth: 300, width: '90%' }}>
+            {situationMode === 'gacha' ? (
+              <div style={{ background: '#252b40', border: '1px solid #3a4360', padding: 14 }}>
+                {drawing || !drawResult ? (
+                  <p style={{ fontSize: 12, color: '#8a92b5', textAlign: 'center', padding: 20 }}>{drawing ? '抽選中…' : '結果がありません'}</p>
+                ) : (
+                  <>
+                    <div style={{ fontSize: 10, color: '#7a82a0', marginBottom: 6, display: 'flex', gap: 8 }}>
+                      <span>{drawResult.place}</span><span>・</span><span>{drawResult.time}</span>
+                    </div>
+                    <div style={{ fontSize: 12.5, color: '#e4e8f2', lineHeight: 1.7 }}>{drawResult.text}</div>
+                  </>
+                )}
+                <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>
+                  <button type="button" disabled={drawing} onClick={handleDraw} style={{ flex: 1, padding: 9, background: 'none', border: '1px solid #5a6a8a', color: '#b8c0da', fontSize: 11.5, cursor: 'pointer' }}>もう一回</button>
+                  <button type="button" disabled={drawing || proposing || !drawResult} onClick={handleAdopt} style={{ flex: 1, padding: 9, background: '#4a5580', border: 'none', color: '#e8eaf5', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>{proposing ? '…' : '採用'}</button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div style={{ fontSize: 10.5, color: '#8a92b5', marginBottom: 5 }}>場所(任意)</div>
+                <input value={customPlace} onChange={(e) => setCustomPlace(e.target.value)} placeholder="例:天文台" style={{ width: '100%', padding: 8, fontSize: 12.5, border: '1px solid #3a4360', background: '#252b40', color: '#e8eaf5', boxSizing: 'border-box' }} />
+                <div style={{ fontSize: 10.5, color: '#8a92b5', margin: '10px 0 5px' }}>時間帯(任意)</div>
+                <input value={customTime} onChange={(e) => setCustomTime(e.target.value)} placeholder="例:夜" style={{ width: '100%', padding: 8, fontSize: 12.5, border: '1px solid #3a4360', background: '#252b40', color: '#e8eaf5', boxSizing: 'border-box' }} />
+                <div style={{ fontSize: 10.5, color: '#8a92b5', margin: '10px 0 5px' }}>シチュエーション</div>
+                <textarea value={customText} onChange={(e) => setCustomText(e.target.value)} placeholder="自由に書いてください" style={{ width: '100%', minHeight: 70, padding: 8, fontSize: 12.5, border: '1px solid #3a4360', background: '#252b40', color: '#e8eaf5', resize: 'none', boxSizing: 'border-box' }} />
+                <button type="button" disabled={proposing || !customText.trim()} onClick={handleAdopt} style={{ display: 'block', width: '100%', marginTop: 12, padding: 9, background: '#4a5580', border: 'none', color: '#e8eaf5', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>{proposing ? '…' : '採用'}</button>
+              </div>
+            )}
+            <button type="button" onClick={() => setSituationOpen(false)} style={{ display: 'block', width: '100%', marginTop: 10, background: 'none', border: 'none', color: '#7a82a0', fontSize: 10.5, textDecoration: 'underline', cursor: 'pointer' }}>やっぱりやめておく</button>
+          </div>
+        </div>
+      )}
 
       {logConfirming && (
         <div onClick={() => setLogConfirming(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
