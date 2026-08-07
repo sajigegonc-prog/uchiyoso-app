@@ -6,6 +6,7 @@ import { markOocRead } from './oocActions'
 import CoachMark from '@/components/CoachMark'
 import useTypingChannel from '@/lib/useTypingChannel'
 import TypingDots from '@/components/TypingDots'
+import useKeyboardOffset from '@/components/useKeyboardOffset'
 
 function SubmitBtn() {
   const { pending } = useFormStatus()
@@ -27,7 +28,8 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
   const [logConfirming, setLogConfirming] = useState(false)
   const [logTranscript, setLogTranscript] = useState(null)
   const [logCopied, setLogCopied] = useState(false)
-  const { typerNames, sendTyping } = useTypingChannel(`typing-ooc-${roomId}`, myUserId)
+const { typerNames, sendTyping } = useTypingChannel(`typing-ooc-${roomId}`, myUserId)
+  const keyboardOffset = useKeyboardOffset()
   const LINE_HEIGHT = 20
   const MAX_LINES = 5
   function autoResize() {
@@ -107,6 +109,7 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
       position: 'fixed', inset: 0, background: '#1c2133', zIndex: 90,
       display: 'flex', flexDirection: 'column',
       height: '100dvh',
+      paddingBottom: keyboardOffset,
     }}>
       {showGachaTutorial && (
         <CoachMark
