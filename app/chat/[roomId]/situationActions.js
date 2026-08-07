@@ -45,19 +45,22 @@ function yearGroup(birthDate) {
 
 function buildPool(ocA, ocB) {
   const isStudent = (oc) => DORMS.includes(oc?.house)
-  const sameHouse = isStudent(ocA) && isStudent(ocB) && ocA.house === ocB.house
   const g1 = yearGroup(ocA?.birth_date)
   const g2 = yearGroup(ocB?.birth_date)
   const gap = g1 != null && g2 != null ? Math.abs(g1 - g2) : 99
-  const sameGrade = isStudent(ocA) && isStudent(ocB) && gap === 0
+  const bothStudents = isStudent(ocA) && isStudent(ocB)
+  const contemporaneous = !bothStudents || gap <= 6
+  const sameHouse = bothStudents && ocA.house === ocB.house
+  const sameGrade = bothStudents && gap === 0
 
-  let pool = [...COMMON_POOL]
-  if (sameHouse && gap <= 6) {
+  let pool = contemporaneous ? [...COMMON_POOL] : []
+  if (sameHouse && contemporaneous) {
     pool = pool.concat(HOUSE_POOL)
     pool = pool.concat(HOUSE_SPECIFIC_POOL.filter((item) => item.house === ocA.house))
   }
   if (sameGrade) pool = pool.concat(GRADE_POOL)
-  return pool.filter((item) => !item.excludeIf || !item.excludeIf(ocA, ocB))
+  pool = pool.filter((item) => !item.excludeIf || !item.excludeIf(ocA, ocB))
+  return pool
 }
 
 export async function drawSituation(roomId) {
