@@ -177,7 +177,7 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
           }}
           aria-label="ログを書き出す"
         >📋</button>
-        <input ref={inputRef} name="content" placeholder="中の人として発言" onChange={() => sendTyping('中の人')} style={{ flex: 1, border: '1px solid #3a4360', borderRadius: 3, padding: '10px 12px', fontSize, background: '#252b40', color: '#e8eaf5', fontFamily: "'Courier New', monospace" }} />
+        <input ref={inputRef} name="content" placeholder="中の人として発言" onChange={() => sendTyping('中の人')} style={{ flex: 1, border: '1px solid #3a4360', borderRadius: 3, padding: '10px 12px', fontSize: 16, background: '#252b40', color: '#e8eaf5', fontFamily: "'Courier New', monospace" }} />
         <SubmitBtn />
       </form>
 
