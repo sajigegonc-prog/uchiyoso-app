@@ -160,6 +160,7 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
   async function openImageModal() {
     setImageModalOpen(true)
     setActivePage(0)
+    window.scrollTo({ top: 0, behavior: 'auto' })
     if (!iconsReady) await preloadIcons()
   }
 
@@ -225,7 +226,7 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
               type="button"
               onClick={openImageModal}
               style={{
-                display: 'block', width: '100%', marginTop: 14, padding: 13,
+                display: 'block', width: '100%', marginTop: 14, marginBottom: 20, padding: 16,
                 border: '1px solid #211d17', background: '#211d17', color: '#f4eee0',
                 fontWeight: 700, fontSize: 14, letterSpacing: '.05em', cursor: 'pointer',
               }}
