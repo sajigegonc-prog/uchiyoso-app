@@ -24,6 +24,7 @@ export default function MessageForm({
   action, roomId, myOcs, npcs, myUserId, addNpcAction, deleteNpcAction, frogAction,
   oocMessages, oocSendAction, hasUnreadOoc, drawSituationAction, initialOcId,
   sceneProps, deleteLabel, deleteAction, transcript, hasUnreadFrog, hasUnreadScene,
+  showGachaTutorial, markGachaTutorialSeenAction,
 }) {
   const inputRef = useRef(null)
   const [open, setOpen] = useState(false)
@@ -49,7 +50,11 @@ export default function MessageForm({
   return (
     <div style={{ position: 'relative', flexShrink: 0, background: '#fff', borderTop: '1px solid #211d17' }}>
       {oocOpen && (
-        <OocPanel roomId={roomId} myUserId={myUserId} messages={oocMessages} sendAction={oocSendAction} onClose={() => setOocOpen(false)} drawAction={drawSituationAction} />
+        <OocPanel
+          roomId={roomId} myUserId={myUserId} messages={oocMessages} sendAction={oocSendAction}
+          onClose={() => setOocOpen(false)} drawAction={drawSituationAction}
+          showGachaTutorial={showGachaTutorial} markGachaTutorialSeenAction={markGachaTutorialSeenAction}
+        />
       )}
 
       {open && (
