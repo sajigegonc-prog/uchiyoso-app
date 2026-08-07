@@ -67,12 +67,17 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
 
   if (pending) {
     if (alreadyApproved) {
-      return <span style={{ fontSize: 10.5, color: '#8a8168', fontStyle: 'italic' }}>場面転換：承諾待ち</span>
+      return (
+        <button type="button" disabled
+          style={{ padding: '0 16px', height: 36, background: '#d8cdb0', border: '1px solid #8a8168', color: '#6b6250', fontSize: 12.5, borderRadius: 4 }}>
+          場面転換：承諾待ち…
+        </button>
+      )
     }
     return (
       <button type="button" onClick={handleApprove} disabled={busy}
-        style={{ fontSize: 10.5, color: '#8a2418', background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer' }}>
-        {busy ? '処理中…' : `場面転換に承諾する(${requestedByName || '発案者'})`}
+        style={{ padding: '0 16px', height: 36, background: '#211d17', border: '1px solid #211d17', color: '#f4eee0', fontSize: 12.5, fontWeight: 700, borderRadius: 4, cursor: 'pointer' }}>
+        {busy ? '処理中…' : '場面転換に承諾する'}
       </button>
     )
   }
