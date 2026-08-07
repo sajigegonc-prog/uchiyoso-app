@@ -173,7 +173,6 @@ export default async function ChatListPage() {
         <CoachMark
           steps={[
             { targetId: 'coach-random-btn', text: '友達の中からランダムでお相手が決まる新機能です。まだ話したことのない友達と、シチュエーション付きでお話を始められます。' },
-            { text: '中の人チャットに、シチュエーションガチャ(✨ボタン)が追加されました。押すと場所や時間帯がランダムに決まり、そのまま部屋に反映されます。' },
             { text: 'チャット部屋のタイトル部分をタップすると、名前を自由に変更できるようになりました。' },
           ]}
           onFinish={markUpdate1TutorialSeen}
