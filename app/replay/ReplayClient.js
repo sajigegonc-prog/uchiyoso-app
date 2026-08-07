@@ -236,3 +236,71 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
 
           <div style={{ position: 'fixed', top: -9999, left: -9999, pointerEvents: 'none' }}>
             {chunks.map((chunk, pageIndex) => (
+              <div
+                key={pageIndex}
+                ref={(el) => { captureRefs.current[pageIndex] = el }}
+                style={{ width: 360, background: '#eee1cb', padding: '18px 14px 22px', fontFamily: "'BIZ UDPGothic', sans-serif" }}
+              >
+                <div style={{ textAlign: 'center', fontSize: 10, letterSpacing: '.3em', color: '#8a8168', marginBottom: 14 }}>THE UCHIYOSO CLUB</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {chunk.map((line, i) => {
+                    const globalIndex = pageIndex * LINES_PER_IMAGE + i
+                    const prevLine = parsed[globalIndex - 1]
+                    const showName = !prevLine || prevLine.isSystem || prevLine.speaker !== line.speaker
+                    const oc = ocFor(line.speaker)
+                    return <ChatLine key={i} line={line} oc={oc} showName={showName} iconDataUrl={oc?.icon_url ? iconDataUrls[oc.icon_url] : null} />
+                  })}
+                </div>
+                <div style={{ textAlign: 'center', fontSize: 9, color: '#a89b7a', marginTop: 10, letterSpacing: '.1em' }}>
+                  {pageIndex + 1} / {chunks.length}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {imageModalOpen && (
+            <div
+              onClick={() => setImageModalOpen(false)}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(33,29,23,.85)', zIndex: 200, display: 'flex', flexDirection: 'column', padding: '18px 14px', overflowY: 'auto' }}
+            >
+              <div onClick={(e) => e.stopPropagation()}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <span style={{ color: '#f4eee0', fontSize: 12, letterSpacing: '.1em' }}>画像プレビュー（全{chunks.length}枚）</span>
+                  <button type="button" onClick={() => setImageModalOpen(false)} style={{ background: 'none', border: 'none', color: '#cbb98a', fontSize: 18, cursor: 'pointer' }}>×</button>
+                </div>
+                {chunks.length > 1 && (
+                  <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
+                    {chunks.map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setActivePage(i)}
+                        style={{
+                          padding: '4px 10px', fontSize: 10.5, cursor: 'pointer',
+                          border: `1px solid ${activePage === i ? '#f4eee0' : '#6b6250'}`,
+                          background: activePage === i ? '#f4eee0' : 'transparent',
+                          color: activePage === i ? '#211d17' : '#cbb98a',
+                        }}
+                      >
+                        {i + 1}枚目
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {generatedImages[activePage] ? (
+                  <img src={generatedImages[activePage]} alt={`${activePage + 1}枚目`} style={{ width: '100%', border: '1px solid #211d17' }} />
+                ) : (
+                  <p style={{ color: '#cbb98a', fontSize: 12, textAlign: 'center', padding: 30 }}>{generating || !iconsReady ? '生成中…' : '準備しています…'}</p>
+                )}
+                <p style={{ textAlign: 'center', fontSize: 10, color: '#cbb98a', marginTop: 14, lineHeight: 1.8 }}>
+                  画像を<b style={{ color: '#f4eee0' }}>長押し</b>して「写真に保存」を選んでください<br />
+                  （自動保存は行われません）
+                </p>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
