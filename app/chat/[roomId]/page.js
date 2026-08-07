@@ -161,7 +161,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
     }}>
       <RealtimeRefresh tables={['messages', 'room_ooc_messages', 'chat_room_members', 'chat_room_invitations']} fallbackMs={15000} />
       <MarkRoomReadOnMount roomId={room.id} messageCount={messages?.length || 0} />
-      <AutoScrollBottom targetId="messages-scroll" />
+      <AutoScrollBottom anchorId="messages-bottom-anchor" />
       {showFullTutorial && (
         <CoachMark
           steps={[
@@ -250,6 +250,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
             />
           )
         })}
+        <div id="messages-bottom-anchor" />
       </div>
 
         {searchParams?.welcome === '1' && (() => {
