@@ -40,8 +40,10 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
     document.body.style.position = 'fixed'
     document.body.style.width = '100%'
     document.body.style.top = `-${scrollY}px`
-    const el = document.getElementById('ooc-messages-scroll')
-    if (el) el.scrollTop = el.scrollHeight
+    requestAnimationFrame(() => {
+      const el = document.getElementById('ooc-messages-scroll')
+      if (el) el.scrollTop = el.scrollHeight
+    })
     return () => {
       document.body.style.overflow = originalBodyOverflow
       document.documentElement.style.overflow = originalHtmlOverflow
