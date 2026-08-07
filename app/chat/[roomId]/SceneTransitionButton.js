@@ -80,9 +80,8 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
   return (
     <>
       <button id="coach-scene-btn" type="button" onClick={() => setConfirming(true)}
-        style={{ flexShrink: 0, width: 36, height: 36, borderRadius: '50%', border: '1px solid #211d17', background: '#f4eee0', fontSize: 15, cursor: 'pointer' }}
-        aria-label="場面転換">
-        🎬
+        style={{ fontSize: 12.5, color: '#6b6250', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', height: 36 }}>
+        場面転換
       </button>
       {confirming && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(33,29,23,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110 }}>
