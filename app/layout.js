@@ -37,6 +37,10 @@ export default async function RootLayout({ children }) {
             #coach-bottomnav span {
               font-size: 12.5px !important;
             }
+            .chat-room-height {
+              height: calc(100vh - 76px) !important;
+              height: calc(100dvh - 76px) !important;
+            }
           }
           .app-shell {
             min-height: 100vh;
