@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 
-export default function FrogChocolateButton({ roomId, action, speakerName }) {
+export default function FrogChocolateButton({ roomId, action, speakerName, hasUnread }) {
   const [confirming, setConfirming] = useState(false)
   const [pending, setPending] = useState(false)
   const [result, setResult] = useState(null)
@@ -27,13 +27,16 @@ export default function FrogChocolateButton({ roomId, action, speakerName }) {
         type="button"
         onClick={() => setConfirming(true)}
         style={{
-          flexShrink: 0, width: 36, height: 36, borderRadius: '50%',
+          position: 'relative', flexShrink: 0, width: 36, height: 36, borderRadius: '50%',
           border: '1px solid #211d17', background: '#f4eee0',
           fontSize: 15, cursor: 'pointer', marginBottom: 2,
         }}
         aria-label="蛙チョコを開ける"
       >
         🐸
+        {hasUnread && (
+          <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, borderRadius: '50%', background: '#8a2418', border: '1px solid #f4eee0' }} />
+        )}
       </button>
 
       {confirming && (
