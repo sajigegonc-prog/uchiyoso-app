@@ -8,7 +8,7 @@ export default function RoomTitleEditor({ roomId, title, fallback, action }) {
 
   if (!editing) {
     return (
-      <div onClick={() => { setValue(title || ''); setEditing(true) }} style={{
+      <div id="coach-title-btn" onClick={() => { setValue(title || ''); setEditing(true) }} style={{
         fontSize: 17, fontWeight: 700, marginTop: 8, color: '#211d17', fontFamily: 'Georgia, serif',
         cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
       }}>
