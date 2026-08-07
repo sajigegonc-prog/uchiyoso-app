@@ -4,6 +4,12 @@ export default function InvitationRow({ invitation, action }) {
       <div style={{ fontSize: 13, color: '#211d17', lineHeight: 1.7 }}>
         {invitation.inviter_name || '名前未設定'}さん宅の{invitation.inviter_oc_name || '名前未設定'}が、{invitation.invitee_oc_name || 'あなたのOC'}と話したがっています
       </div>
+      {invitation.note && (
+        <div style={{ background: '#f4eee0', border: '1px dashed #8a8168', padding: '8px 10px', marginTop: 8 }}>
+          <div style={{ fontSize: 9.5, color: '#8a8168', letterSpacing: '.05em', marginBottom: 3 }}>一言メモ</div>
+          <div style={{ fontSize: 12, color: '#211d17', lineHeight: 1.7 }}>{invitation.note}</div>
+        </div>
+      )}
       <form action={action} style={{ marginTop: 10, display: 'flex', gap: 8 }}>
         <input type="hidden" name="invitation_id" value={invitation.invitation_id} />
         <input type="hidden" name="room_id" value={invitation.room_id} />
