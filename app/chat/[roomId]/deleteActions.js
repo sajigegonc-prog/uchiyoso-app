@@ -19,7 +19,11 @@ export async function confirmLeaveOrDelete(formData) {
   if (!user) redirect('/')
   const roomId = formData.get('room_id')?.toString()
   if (!roomId) redirect('/chat')
-
+  const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+  await supabase.from('room_ooc_messages').insert({
+    room_id: roomId, user_id: user.id, is_system: true, log_type: 'member_leave',
+    content: `${profile?.display_name || '名前未設定'}さんが退室しました`,
+  })
   await supabase
     .from('chat_room_members')
     .update({ left_at: new Date().toISOString() })
