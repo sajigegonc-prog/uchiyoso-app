@@ -156,7 +156,7 @@ export default async function RandomMatchPage() {
       />
 
       <a href="/chat/random" style={{ display: 'block', width: '100%', maxWidth: 360, marginTop: 10, padding: 13, background: '#4a5580', color: '#f4eee0', border: 'none', fontWeight: 700, fontSize: 13, textAlign: 'center', textDecoration: 'none', boxSizing: 'border-box' }}>別の友達を探す</a>
-      <Link href="/chat" style={{ display: 'block', marginTop: 20, fontSize: 11.5, color: '#6b6250' }}>やっぱりやめる</Link>
+      <Link href="/chat" style={{ display: 'block', marginTop: 20, marginBottom: 30, fontSize: 11.5, color: '#6b6250' }}>やっぱりやめる</Link>
     </div>
   )
 }
