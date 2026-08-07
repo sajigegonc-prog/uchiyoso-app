@@ -42,16 +42,6 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
 
   useEffect(() => {
     setMounted(true)
-    const originalBodyOverflow = document.body.style.overflow
-    const originalHtmlOverflow = document.documentElement.style.overflow
-    const originalPosition = document.body.style.position
-    const originalWidth = document.body.style.width
-    const scrollY = window.scrollY
-    document.body.style.overflow = 'hidden'
-    document.documentElement.style.overflow = 'hidden'
-    document.body.style.position = 'fixed'
-    document.body.style.width = '100%'
-    document.body.style.top = `-${scrollY}px`
     function scrollToBottom() {
       const el = document.getElementById('ooc-bottom-anchor')
       if (el) el.scrollIntoView({ block: 'end' })
@@ -62,15 +52,8 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
     return () => {
       clearTimeout(t1)
       clearTimeout(t2)
-      document.body.style.overflow = originalBodyOverflow
-      document.documentElement.style.overflow = originalHtmlOverflow
-      document.body.style.position = originalPosition
-      document.body.style.width = originalWidth
-      document.body.style.top = ''
-      window.scrollTo(0, scrollY)
     }
   }, [])
-
   useEffect(() => {
     markOocRead(roomId)
   }, [roomId, messages?.length])
