@@ -32,6 +32,7 @@ const typeBtnStyle = (active) => ({
   const [oneFriendOcId, setOneFriendOcId] = useState(initialFriendOcId || '')
   const [groupSlots, setGroupSlots] = useState([{ friendUserId: '', ocId: '' }])
   const [title, setTitle] = useState('')
+  const [note, setNote] = useState('')
   const [location, setLocation] = useState('')
   const [timePeriod, setTimePeriod] = useState('')
   const [pending, setPending] = useState(false)
@@ -89,6 +90,7 @@ const typeBtnStyle = (active) => ({
       roomType === 'solo' ? 'solo' :
       roomType === 'one' ? 'friend_1on1' : 'friend_group'
     formData.set('room_type', roomTypeValue)
+    formData.set('note', note)
     if (roomType === 'self') {
       extraOcIds.forEach((id) => formData.append('extra_oc_ids', id))
     } else if (roomType === 'one') {
@@ -446,6 +448,20 @@ const typeBtnStyle = (active) => ({
               </button>
               <p style={{ fontSize: 11, color: '#8a8168', marginTop: 10, lineHeight: 1.7, fontStyle: 'italic' }}>
                 1人の中の人につき、選べるOCは1人までです。
+              </p>
+            </div>
+          )}
+          {(roomType === 'one' || roomType === 'group') && (
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelStyle}>一言メモ(任意)</label>
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="お相手への一言があれば書いてください"
+                style={{ ...inputStyle, minHeight: 56, resize: 'none' }}
+              />
+              <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 6, lineHeight: 1.7, fontStyle: 'italic' }}>
+                例: テンポ重視より、じっくり関係を築いていくタイプの子です。気長にお付き合いいただけると助かります
               </p>
             </div>
           )}
