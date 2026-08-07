@@ -42,7 +42,7 @@ export default async function PublicOCDetailPage({ params }) {
         <div style={{ marginTop: 16 }}>
           <div style={{ fontSize: 10, color: '#6b6250', letterSpacing: '.05em' }}>生年月日</div>
           <div style={{ fontSize: 13, color: '#211d17', marginTop: 4 }}>
-            {new Date(oc.birth_date).getMonth() + 1}月{new Date(oc.birth_date).getDate()}日
+            {new Date(oc.birth_date).getFullYear()}年{new Date(oc.birth_date).getMonth() + 1}月{new Date(oc.birth_date).getDate()}日
           </div>
         </div>
       )}
