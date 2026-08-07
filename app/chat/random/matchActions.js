@@ -9,12 +9,14 @@ export async function confirmRandomMatch(formData) {
   const location = formData.get('location')?.toString()
   const timePeriod = formData.get('time_period')?.toString()
   const situationText = formData.get('situation_text')?.toString()
+  const note = formData.get('note')?.toString()
 
   const roomForm = new FormData()
   roomForm.set('oc_id', myOcId)
   roomForm.set('room_type', 'friend_1on1')
   roomForm.set('location', location)
   roomForm.set('time_period', timePeriod)
+  roomForm.set('note', note)
   roomForm.append('friend_oc_ids', friendOcId)
 
   const result = await createRoom(roomForm)
