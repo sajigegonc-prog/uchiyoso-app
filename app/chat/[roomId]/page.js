@@ -124,7 +124,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
   }
   const myTranscriptPreview = buildTranscriptText(messages, myOcIdSet)
   const showFinalNotice = room.pending_deletion_by && room.pending_deletion_by !== user.id && !myMembership?.left_at
-  const deleteButtonLabel = isGroup ? '退出' : '削除'
+  const deleteButtonLabel = '退出'
   const { data: latestOocMsg } = await supabase
     .from('room_ooc_messages')
     .select('created_at, user_id')
