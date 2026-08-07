@@ -11,10 +11,10 @@ const NAV_ITEMS = [
 ]
 
 const HIDDEN_PREFIXES = ['/onboarding', '/dev']
-
 export default function BottomNav({ notifications = {} }) {
   const pathname = usePathname()
-  const hidden = pathname === '/' || HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))
+  const isRoomDetail = /^\/chat\/[^/]+$/.test(pathname) && !['/chat/new', '/chat/random'].includes(pathname)
+  const hidden = pathname === '/' || isRoomDetail || HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))
   if (hidden) return null
 
   return (
