@@ -3,6 +3,7 @@ import { useRef, useState, useEffect } from 'react'
 import { useFormStatus } from 'react-dom'
 import { createPortal } from 'react-dom'
 import { markOocRead } from './oocActions'
+import CoachMark from '@/components/CoachMark'
 
 function SubmitBtn() {
   const { pending } = useFormStatus()
@@ -16,7 +17,7 @@ function SubmitBtn() {
   )
 }
 
-export default function OocPanel({ roomId, myUserId, messages, sendAction, onClose, drawAction }) {
+export default function OocPanel({ roomId, myUserId, messages, sendAction, onClose, drawAction, showGachaTutorial, markGachaTutorialSeenAction }) {
   const inputRef = useRef(null)
   const submittingRef = useRef(false)
   const [mounted, setMounted] = useState(false)
@@ -73,6 +74,14 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
       display: 'flex', flexDirection: 'column',
       height: '100dvh',
     }}>
+      {showGachaTutorial && (
+        <CoachMark
+          steps={[
+            { targetId: 'coach-ooc-gacha-btn', text: 'シチュエーションガチャです。押すと場所や時間帯がランダムに決まり、そのまま部屋に反映されます。' },
+          ]}
+          onFinish={markGachaTutorialSeenAction}
+        />
+      )}
       <div style={{ background: '#12151f', color: '#c7ccdd', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0, borderBottom: '1px solid #3a4360' }}>
         <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '.1em', fontFamily: "'Courier New', monospace" }}>MEMO — 中の人チャット</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -113,6 +122,7 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
       }}>
         <input type="hidden" name="room_id" value={roomId} />
         <button
+          id="coach-ooc-gacha-btn"
           type="button"
           disabled={drawing}
           onClick={handleDraw}
