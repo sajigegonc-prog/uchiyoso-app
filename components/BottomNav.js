@@ -6,7 +6,7 @@ const NAV_ITEMS = [
   { href: '/home', label: 'ホーム', match: (p) => p === '/home', badgeKey: null },
   { href: '/chat', label: 'おしゃべり', match: (p) => p.startsWith('/chat'), badgeKey: 'chat' },
   { href: '/ocs', label: 'OC', match: (p) => p.startsWith('/ocs'), badgeKey: null },
-  { href: '/friends', label: '友達', match: (p) => p.startsWith('/friends'), badgeKey: null },
+  { href: '/friends', label: '友達', match: (p) => p.startsWith('/friends'), badgeKey: 'friends' },
   { href: '/owl', label: 'ふくろう便', match: (p) => p.startsWith('/owl'), badgeKey: 'owl' },
 ]
 
