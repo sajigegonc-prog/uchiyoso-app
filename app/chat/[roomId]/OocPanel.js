@@ -8,11 +8,12 @@ import useTypingChannel from '@/lib/useTypingChannel'
 import TypingDots from '@/components/TypingDots'
 import useKeyboardOffset from '@/components/useKeyboardOffset'
 
-function SubmitBtn() {
+function SubmitBtn({ cooldown }) {
   const { pending } = useFormStatus()
+  const disabled = pending || cooldown
   return (
-    <button type="submit" disabled={pending} style={{
-      border: '1px solid #5a6a8a', borderRadius: 3, background: pending ? '#3a4360' : '#4a5580',
+    <button type="submit" disabled={disabled} style={{
+      border: '1px solid #5a6a8a', borderRadius: 3, background: disabled ? '#3a4360' : '#4a5580',
       color: '#e8eaf5', fontWeight: 700, fontSize: 13, padding: '0 16px', letterSpacing: '.03em',
     }}>
       {pending ? '…' : '送信'}
@@ -23,6 +24,8 @@ function SubmitBtn() {
 export default function OocPanel({ roomId, myUserId, messages, sendAction, onClose, drawAction, showGachaTutorial, markGachaTutorialSeenAction, logAction, showLogTutorial, markLogTutorialSeenAction }) {
   const inputRef = useRef(null)
   const submittingRef = useRef(false)
+  const lastSentRef = useRef(0)
+  const [cooldown, setCooldown] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [drawing, setDrawing] = useState(false)
   const [logConfirming, setLogConfirming] = useState(false)
@@ -61,17 +64,12 @@ const { typerNames, sendTyping } = useTypingChannel(`typing-ooc-${roomId}`, myUs
   }, [roomId, messages?.length])
 
   function handleSubmit(e) {
-    if (submittingRef.current) { e.preventDefault(); return }
+    const now = Date.now()
+    if (submittingRef.current || now - lastSentRef.current < 2000) { e.preventDefault(); return }
+    lastSentRef.current = now
     submittingRef.current = true
-    setTimeout(() => {
-      submittingRef.current = false
-      if (inputRef.current) inputRef.current.value = ''
-    }, 600)
-  }
-
-  function handleSubmit(e) {
-    if (submittingRef.current) { e.preventDefault(); return }
-    submittingRef.current = true
+    setCooldown(true)
+    setTimeout(() => setCooldown(false), 2000)
     setTimeout(() => {
       submittingRef.current = false
       if (inputRef.current) inputRef.current.value = ''
@@ -204,7 +202,7 @@ const { typerNames, sendTyping } = useTypingChannel(`typing-ooc-${roomId}`, myUs
             resize: 'none', overflowY: 'auto', lineHeight: '20px',
           }}
         />
-        <SubmitBtn />
+        <SubmitBtn cooldown={cooldown} />
       </form>
 
       {logConfirming && (
