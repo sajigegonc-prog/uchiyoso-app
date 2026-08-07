@@ -116,6 +116,7 @@ export default async function RandomMatchPage() {
   }
   if (sameGrade) pool = pool.concat(GRADE_POOL)
   pool = pool.filter((item) => !item.excludeIf || !item.excludeIf(myOc, friendOc))
+  if (pool.length === 0) pool = COMMON_POOL
 
   const pick = pool[Math.floor(Math.random() * pool.length)]
   const situationText = pick.text.replace(/〇〇（あなた）/g, myOc.name).replace(/〇〇（お相手）/g, friendOc.name)
