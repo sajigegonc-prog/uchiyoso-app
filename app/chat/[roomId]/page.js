@@ -128,6 +128,8 @@ export default async function ChatRoomPage({ params, searchParams }) {
   const showFullTutorial = !tutorialProfile?.seen_chat_tutorial
   const showInviteOnlyTutorial = !showFullTutorial && inviteVisible && !tutorialProfile?.seen_invite_tutorial
   const myMembership = (members || []).find((m) => m.user_id === user.id)
+  const { data: myProfileForTyping } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+  const myDisplayName = myProfileForTyping?.display_name || '名前未設定'
   const lastOocRead = myMembership?.ooc_last_read_at
   function hasUnreadLogType(type) {
     return (oocMessagesRaw || []).some((m) =>
@@ -295,6 +297,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
           myOcs={myOcs}
           npcs={npcs || []}
           myUserId={user.id}
+          myDisplayName={myDisplayName}
           addNpcAction={addNpc}
           deleteNpcAction={deleteNpc}
           frogAction={openFrogCard}
