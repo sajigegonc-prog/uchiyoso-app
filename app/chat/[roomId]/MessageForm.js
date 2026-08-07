@@ -5,6 +5,7 @@ import FrogChocolateButton from './FrogChocolateButton'
 import SceneTransitionButton from './SceneTransitionButton'
 import DeleteRoomButton from './DeleteRoomButton'
 import OocPanel from './OocPanel'
+import useTypingChannel from '@/lib/useTypingChannel'
 
 function ClearOnDone({ inputRef, onClear }) {
   const { pending } = useFormStatus()
@@ -27,6 +28,7 @@ export default function MessageForm({
   showGachaTutorial, markGachaTutorialSeenAction, logAction, showLogTutorial, markLogTutorialSeenAction,
 }) {
   const inputRef = useRef(null)
+  const { sendTyping } = useTypingChannel(`typing-${roomId}`, myUserId)
   const [open, setOpen] = useState(false)
   const [oocOpen, setOocOpen] = useState(false)
   const [extrasOpen, setExtrasOpen] = useState(true)
@@ -199,7 +201,7 @@ export default function MessageForm({
           rows={1}
           placeholder={`${speaker.name || ''}として発言`}
           onFocus={() => setExtrasOpen(false)}
-          onInput={autoResize}
+          onInput={() => { autoResize(); sendTyping(speaker.name) }} 
           style={{
             flex: 1, border: '1px solid #211d17', padding: '8px 10px', fontSize: 16,
             fontFamily: "'BIZ UDPGothic', sans-serif", background: '#fff', color: '#211d17',
