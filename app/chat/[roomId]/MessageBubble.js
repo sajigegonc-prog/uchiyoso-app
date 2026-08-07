@@ -3,6 +3,15 @@ import { useState, useTransition } from 'react'
 import OcInfoModal from '@/components/OcInfoModal'
 import { getOcDetailForRoom } from './ocPreviewActions'
 
+function renderWithBold(text) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+      return <b key={i}>{part.slice(2, -2)}</b>
+    }
+    return part
+  })
+}
 export default function MessageBubble({ msg, mine, isOwner, speakerName, speakerIcon, roomId, editAction, deleteAction, reorderAction }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [editing, setEditing] = useState(false)
@@ -138,7 +147,7 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
               border: '1px solid #211d17',
               display: 'inline-block',
             }}>
-              {msg.content}
+              {renderWithBold(msg.content)}
             </div>
           </div>
         )}
