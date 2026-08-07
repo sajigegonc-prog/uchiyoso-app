@@ -52,8 +52,15 @@ const typeBtnStyle = (active) => ({
     return friendOcs.filter((f) => f.friend_user_id === userId)
   }
   function toggleExtraOc(id) {
-    setExtraOcIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
+    const isDreamPartner = dreamPartner && id === dreamPartner.id
+    setExtraOcIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id)
+      if (isDreamPartner) return [id]
+      if (dreamPartner && prev.includes(dreamPartner.id)) return prev
+      return [...prev, id]
+    })
   }
+  const dreamPartnerSelected = dreamPartner && extraOcIds.includes(dreamPartner.id)
   function updateSlotFriend(index, userId) {
     setGroupSlots((prev) => prev.map((s, i) => i === index ? { friendUserId: userId, ocId: '' } : s))
   }
@@ -229,7 +236,8 @@ const typeBtnStyle = (active) => ({
             type="checkbox"
             checked={extraOcIds.includes(oc.id)}
             onChange={() => toggleExtraOc(oc.id)}
-            style={{ width: 16, height: 16 }}
+            disabled={dreamPartnerSelected}
+            style={{ width: 16, height: 16, opacity: dreamPartnerSelected ? .4 : 1 }}
           />
 
           <div
