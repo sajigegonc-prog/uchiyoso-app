@@ -20,12 +20,12 @@ function parseTranscript(text) {
   })
 }
 
-export default function ReplayClient({ myOcs }) {
+export default function ReplayClient({ myOcs, allKnownOcs }) {
   const [raw, setRaw] = useState('')
   const [parsed, setParsed] = useState(null)
 
   function ocFor(speakerName) {
-    return myOcs.find((oc) => oc.name === speakerName)
+    return (allKnownOcs || myOcs).find((oc) => oc.name === speakerName)
   }
 
   function handleParse() {
