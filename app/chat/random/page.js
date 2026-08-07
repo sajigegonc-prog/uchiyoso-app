@@ -5,14 +5,32 @@ import { confirmRandomMatch } from './matchActions'
 import RandomMatchOcIcon from './RandomMatchOcIcon'
 
 const DORMS = ['グリフィンドール', 'ハッフルパフ', 'レイブンクロー', 'スリザリン']
+
+function isTeacher(oc) {
+  return /先生|教授|教師/.test(oc?.house || '')
+}
+
 const COMMON_POOL = [
   { place: '図書室', time: '午後', text: '自習をしていた〇〇（あなた）、羽根ペンのインクを勢いよく振ってしまい、数滴が隣の席の〇〇（お相手）の羊皮紙に飛んでしまった。' },
   { place: '図書室', time: '午後', text: '最上段の本を取ろうとした〇〇（あなた）、踏み台がぐらついてバランスを崩し、たまたま通りかかった〇〇（お相手）の方へ倒れ込んでしまった。' },
   { place: 'ホグズミード', time: '休日の昼', text: '混雑した店内で〇〇（あなた）、後ろの客に押されて体勢を崩し、隣にいた〇〇（お相手）に手にしていた小袋をぶつけてしまった。' },
+  { place: 'ホグワーツの中庭', time: '昼休み', text: '中庭で休憩していた〇〇（あなた）は、フィフィ・フィズビーで遊んでいる生徒をなんとなく眺めていた。ところがその生徒が着地に失敗し、こちらへ倒れ込んでくる。たまたま通りがかった〇〇（お相手）も、その巻き添えになってしまった。' },
+  { place: 'ホグワーツの廊下(1〜7階のいずれか)', time: '朝・昼・夜のいずれか', text: '廊下を歩いていた〇〇（あなた）の目の前に、噛みつきフリスビーが突然飛んできた。とっさに身をかわしたものの、その先ではまだフリスビーに気づいていない〇〇（お相手）が、こちらに向かって歩いてきていた。' },
+  {
+    place: 'ホグワーツの大階段', time: 'ランダム',
+    text: '動く階段が急に切り替わり、目的の踊り場にたどり着けなくなってしまった〇〇（あなた）。同じように足止めを食らっていた〇〇（お相手）と、しばらく一緒に別の道を探すことになった。',
+    excludeIf: (ocA, ocB) => isTeacher(ocA) && isTeacher(ocB),
+  },
 ]
 const HOUSE_POOL = [
   { place: '大広間', time: '朝食または夕食どき', text: '郵便ふくろうの群れが飛び込んできた拍子に、〇〇（あなた）の目の前の皿からパンプキンジュースが跳ねて、隣に座っていた〇〇（お相手）の袖にかかってしまった。' },
   { place: '談話室', time: '夕方〜夜', text: '暖炉の火が急に大きく爆ぜて灰が舞い、驚いた〇〇（あなた）がとっさに後ずさりした拍子に、近くにいた〇〇（お相手）とぶつかってしまった。' },
+]
+const HOUSE_SPECIFIC_POOL = [
+  { house: 'スリザリン', place: 'スリザリンの談話室', time: '夕食後', text: '談話室で休憩していた〇〇（あなた）は、窓から湖を眺めていた。すると、見たこともない珍しい魔法生物が泳いでくるのが見えた。驚いてふと隣を見ると、〇〇（お相手）も同じ光景を目撃していた。' },
+  { house: 'ハッフルパフ', place: 'ハッフルパフ寮入口', time: '昼休みまたは夕食前', text: '授業からの帰り道、〇〇（あなた）が寮の樽を開けようとリズムよく叩いていると、急いでいた生徒がぶつかってきて、そのリズムが狂ってしまった。とたんに樽から酢が噴き出し、〇〇（あなた）は頭からお酢まみれに。ふと横を見ると、たまたま居合わせた〇〇（お相手）も、同じくお酢まみれになっていた。' },
+  { house: 'レイブンクロー', place: 'レイブンクローの談話室(星空の間)', time: '夜', text: '天井に星空が映し出される談話室で、〇〇（あなた）は課題をしているうちについうたた寝してしまい、机に突っ伏した拍子にインクの小瓶を倒してしまう。同じテーブルの端にいた〇〇（お相手）の課題にまでインクが飛び散ってしまい、二人揃って慌てて拭き取ることになった。' },
+  { house: 'グリフィンドール', place: 'グリフィンドール寮入口', time: '昼または夜', text: 'グリフィンドールの寮の入口で、太った婦人はなかなか〇〇（あなた）の合言葉を聞いてくれない。最近覚えた歌を披露したくてたまらないらしく、オペラを熱唱し続けている。そこへ偶然、〇〇（お相手）も寮に帰ってきた。太った婦人は、相変わらず熱唱中だった。' },
 ]
 const GRADE_POOL = [
   { place: '寮合同授業(薬草学)', time: '午前〜午後', text: '今日のペア作業は、先生の指示で〇〇（あなた）と〇〇（お相手）が組むことになった。' },
@@ -78,8 +96,13 @@ export default async function RandomMatchPage() {
   const sameGrade = isStudent(myOc) && isStudent(friendOc) && gap === 0
 
   let pool = [...COMMON_POOL]
-  if (sameHouse && gap <= 6) pool = pool.concat(HOUSE_POOL)
+  if (sameHouse && gap <= 6) {
+    pool = pool.concat(HOUSE_POOL)
+    pool = pool.concat(HOUSE_SPECIFIC_POOL.filter((item) => item.house === myOc.house))
+  }
   if (sameGrade) pool = pool.concat(GRADE_POOL)
+  pool = pool.filter((item) => !item.excludeIf || !item.excludeIf(myOc, friendOc))
+
   const pick = pool[Math.floor(Math.random() * pool.length)]
   const situationText = pick.text.replace(/〇〇（あなた）/g, myOc.name).replace(/〇〇（お相手）/g, friendOc.name)
   const ageDiffLabel = ageLabel(myOc.birth_date, friendOc.birth_date)
