@@ -1,14 +1,17 @@
 'use client'
 import { useState } from 'react'
 
-export default function RoomMembersButton({ members, pendingMembers }) {
+export default function RoomMembersButton({ members, pendingMembers, hasUnread }) {
   const [open, setOpen] = useState(false)
   return (
     <>
       <button id="coach-members-btn" type="button" onClick={() => setOpen(true)}
-        style={{ flexShrink: 0, width: 36, height: 36, borderRadius: '50%', border: '1px solid #211d17', background: '#f4eee0', fontSize: 15, cursor: 'pointer' }}
+        style={{ position: 'relative', flexShrink: 0, width: 36, height: 36, borderRadius: '50%', border: '1px solid #211d17', background: '#f4eee0', fontSize: 15, cursor: 'pointer' }}
         aria-label="メンバー一覧">
         👥
+        {hasUnread && (
+          <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, borderRadius: '50%', background: '#8a2418', border: '1px solid #f4eee0' }} />
+        )}
       </button>
       {open && (
         <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(33,29,23,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110 }}>
