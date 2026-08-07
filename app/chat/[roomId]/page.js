@@ -9,7 +9,7 @@ import { editMessage, deleteMessage } from './messageActions'
 import { inviteMoreMembers } from './memberActions'
 import MessageForm from './MessageForm'
 import FinalDeletionNotice from './FinalDeletionNotice'
-import DeleteRoomButton from './DeleteRoomButton'
+import RoomMembersButton from './RoomMembersButton'
 import { buildTranscriptText } from './transcriptUtil'
 import AddMemberButton from './AddMemberButton'
 import MessageBubble from './MessageBubble'
@@ -174,7 +174,10 @@ export default async function ChatRoomPage({ params, searchParams }) {
           <Link href="/chat" style={{ fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>← 一覧に戻る</Link>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
             {isGroup && <AddMemberButton roomId={room.id} action={inviteMoreMembers} friendOcs={invitableFriendOcs} />}
-            <DeleteRoomButton roomId={room.id} label={deleteButtonLabel} action={confirmLeaveOrDelete} transcript={myTranscriptPreview} />
+            <RoomMembersButton
+              members={activeMembers.map((m) => ({ id: m.oc_id, name: m.ocs?.name, icon_url: m.ocs?.icon_url }))}
+              pendingMembers={(pendingInvites || []).map((p) => ({ id: p.invitee_oc_id, name: p.ocs?.name, icon_url: p.ocs?.icon_url }))}
+            />
           </div>
         </div>
         <RoomTitleEditor roomId={room.id} title={room.title} fallback={memberNames.join('、')} action={updateRoomTitle} />
@@ -255,6 +258,14 @@ export default async function ChatRoomPage({ params, searchParams }) {
           oocSendAction={sendOocMessage}
           hasUnreadOoc={hasUnreadOoc}
           initialOcId={myMembership?.oc_id}
+          sceneProps={{
+            pending: !!room.transition_requested_at,
+            alreadyApproved: alreadyApprovedTransition,
+            requestedByName,
+          }}
+          deleteLabel={deleteButtonLabel}
+          deleteAction={confirmLeaveOrDelete}
+          transcript={myTranscriptPreview}
           sceneProps={{
             pending: !!room.transition_requested_at,
             alreadyApproved: alreadyApprovedTransition,
