@@ -18,6 +18,7 @@ import CoachMark from '@/components/CoachMark'
 import { markChatTutorialSeen, markInviteTutorialSeen, markOocGachaTutorialSeen, markFeatureSeen } from '../../tutorialActions'
 import MarkRoomReadOnMount from './MarkRoomReadOnMount'
 import AutoScrollBottom from './AutoScrollBottom'
+import TypingBubble from '@/components/TypingBubble'
 import RoomTitleEditor from './RoomTitleEditor'
 import { updateRoomTitle } from './titleActions'
 import { drawSituation } from './situationActions'
@@ -264,6 +265,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
             />
           )
         })}
+        <TypingBubble channelName={`typing-${room.id}`} myUserId={user.id} />
         <div id="messages-bottom-anchor" />
       </div>
 
