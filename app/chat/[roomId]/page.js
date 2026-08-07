@@ -73,7 +73,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
     .order('created_at', { ascending: true })
   const { data: oocMessagesRaw } = await supabase
     .from('room_ooc_messages')
-    .select('id, content, is_system, created_at, user_id')
+    .select('id, content, is_system, created_at, user_id, log_type')
     .eq('room_id', roomId)
     .order('created_at', { ascending: true })
   const oocUserIds = [...new Set((oocMessagesRaw || []).map((m) => m.user_id))]
@@ -107,6 +107,17 @@ export default async function ChatRoomPage({ params, searchParams }) {
   const showFullTutorial = !tutorialProfile?.seen_chat_tutorial
   const showInviteOnlyTutorial = !showFullTutorial && inviteVisible && !tutorialProfile?.seen_invite_tutorial
   const myMembership = (members || []).find((m) => m.user_id === user.id)
+  const myMembership = (members || []).find((m) => m.user_id === user.id)
+  const lastOocRead = myMembership?.ooc_last_read_at
+  function hasUnreadLogType(type) {
+    return (oocMessagesRaw || []).some((m) =>
+      m.log_type === type && m.user_id !== user.id &&
+      (!lastOocRead || new Date(m.created_at) > new Date(lastOocRead))
+    )
+  }
+  const hasUnreadFrog = hasUnreadLogType('frog_choc')
+  const hasUnreadScene = hasUnreadLogType('scene_transition')
+  const hasUnreadMembers = hasUnreadLogType('member_join') || hasUnreadLogType('member_leave')
   let requestedByName = null
   let alreadyApprovedTransition = false
   if (room.transition_requested_at) {
@@ -179,6 +190,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
             <RoomMembersButton
               members={activeMembers.map((m) => ({ id: m.oc_id, name: m.ocs?.name, icon_url: m.ocs?.icon_url }))}
               pendingMembers={(pendingInvites || []).map((p) => ({ id: p.invitee_oc_id, name: p.ocs?.name, icon_url: p.ocs?.icon_url }))}
+              hasUnread={hasUnreadMembers}
             />
           </div>
         </div>
@@ -268,6 +280,8 @@ export default async function ChatRoomPage({ params, searchParams }) {
           deleteLabel={deleteButtonLabel}
           deleteAction={confirmLeaveOrDelete}
           transcript={myTranscriptPreview}
+          hasUnreadFrog={hasUnreadFrog}
+          hasUnreadScene={hasUnreadScene}
           sceneProps={{
             pending: !!room.transition_requested_at,
             alreadyApproved: alreadyApprovedTransition,
