@@ -35,6 +35,8 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
     const originalPosition = document.body.style.position
     const originalWidth = document.body.style.width
     const scrollY = window.scrollY
+    const el = document.getElementById('ooc-messages-scroll')
+    if (el) el.scrollTop = el.scrollHeight
     document.body.style.overflow = 'hidden'
     document.documentElement.style.overflow = 'hidden'
     document.body.style.position = 'fixed'
@@ -112,7 +114,7 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
         </div>
       </div>
 
-      <div style={{
+      <div id="ooc-messages-scroll" style={{
         flex: '1 1 auto', minHeight: 0, overflowY: 'auto', padding: '16px',
         WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain',
       }}>
