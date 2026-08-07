@@ -159,6 +159,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
           steps={[
             { targetId: 'coach-speaker-btn', text: 'タップすると話すキャラを切り替えられます。NPCの追加もここから。' },
             { text: '自分の発言をタップすると、編集や削除ができます。' },
+            { targetId: 'coach-title-btn', text: 'タップすると、部屋の名前を自由に変更できます。' },
             { targetId: 'coach-members-btn', text: '今この部屋にいるメンバーを確認できます。' },
             { targetId: 'coach-menu-toggle-btn', text: 'ここを押すと、蛙チョコ・場面転換・中の人チャット・退出のメニューを開閉できます。' },
             { targetId: 'coach-frog-btn', text: '気になったら開けてみて。中身はお楽しみです。' },
