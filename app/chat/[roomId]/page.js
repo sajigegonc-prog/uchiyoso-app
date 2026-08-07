@@ -102,6 +102,18 @@ export default async function ChatRoomPage({ params, searchParams }) {
       .eq('user_id', user.id)
       .order('created_at', { ascending: true })
     myOcs = (allMyOcs || []).map((oc) => ({ id: oc.id, name: oc.name }))
+  } else if (room.room_type === 'self') {
+    const { data: allMyNormalOcs } = await supabase
+      .from('ocs')
+      .select('id, name')
+      .eq('user_id', user.id)
+      .eq('is_dream_partner', false)
+      .order('created_at', { ascending: true })
+    const dreamPartnerMember = (members || []).find((m) => m.user_id === user.id && m.ocs?.name && m.oc_id && !(allMyNormalOcs || []).some((oc) => oc.id === m.oc_id))
+    myOcs = (allMyNormalOcs || []).map((oc) => ({ id: oc.id, name: oc.name }))
+    if (dreamPartnerMember) {
+      myOcs = [...myOcs, { id: dreamPartnerMember.oc_id, name: dreamPartnerMember.ocs?.name }]
+    }
   }
   const myOcIdSet = new Set(myOcs.map((oc) => oc.id))
   const myNpcs = (npcs || []).filter((n) => n.created_by === user.id).map((n) => n.id)
