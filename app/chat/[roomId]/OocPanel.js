@@ -28,6 +28,15 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
   const [logTranscript, setLogTranscript] = useState(null)
   const [logCopied, setLogCopied] = useState(false)
   const { typerNames, sendTyping } = useTypingChannel(`typing-ooc-${roomId}`, myUserId)
+  const LINE_HEIGHT = 20
+  const MAX_LINES = 5
+  function autoResize() {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    const maxHeight = LINE_HEIGHT * MAX_LINES + 16
+    el.style.height = Math.min(el.scrollHeight, maxHeight) + 'px'
+  }
   const now = new Date()
   const timeLabel = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
 
@@ -73,6 +82,22 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
       submittingRef.current = false
       if (inputRef.current) inputRef.current.value = ''
     }, 600)
+  }
+
+  function handleSubmit(e) {
+    if (submittingRef.current) { e.preventDefault(); return }
+    submittingRef.current = true
+    setTimeout(() => {
+      submittingRef.current = false
+      if (inputRef.current) inputRef.current.value = ''
+    }, 600)
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      e.currentTarget.form?.requestSubmit()
+    }
   }
 
   async function handleDraw() {
@@ -177,7 +202,20 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
           }}
           aria-label="ログを書き出す"
         >📋</button>
-        <input ref={inputRef} name="content" placeholder="中の人として発言" onChange={() => sendTyping('中の人')} style={{ flex: 1, border: '1px solid #3a4360', borderRadius: 3, padding: '10px 12px', fontSize: 16, background: '#252b40', color: '#e8eaf5', fontFamily: "'Courier New', monospace" }} />
+        <textarea
+          ref={inputRef}
+          name="content"
+          rows={1}
+          placeholder="中の人として発言"
+          onChange={() => sendTyping('中の人')}
+          onInput={autoResize}
+          onKeyDown={handleKeyDown}
+          style={{
+            flex: 1, border: '1px solid #3a4360', borderRadius: 3, padding: '10px 12px', fontSize: 16,
+            background: '#252b40', color: '#e8eaf5', fontFamily: "'Courier New', monospace",
+            resize: 'none', overflowY: 'auto', lineHeight: '20px',
+          }}
+        />
         <SubmitBtn />
       </form>
 
