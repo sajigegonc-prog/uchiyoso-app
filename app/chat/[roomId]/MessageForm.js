@@ -23,7 +23,7 @@ const MAX_LINES = 5
 export default function MessageForm({
   action, roomId, myOcs, npcs, myUserId, addNpcAction, deleteNpcAction, frogAction,
   oocMessages, oocSendAction, hasUnreadOoc, drawSituationAction, initialOcId,
-  sceneProps, deleteLabel, deleteAction, transcript,
+  sceneProps, deleteLabel, deleteAction, transcript, hasUnreadFrog, hasUnreadScene,
 }) {
   const inputRef = useRef(null)
   const [open, setOpen] = useState(false)
@@ -134,12 +134,13 @@ export default function MessageForm({
         borderBottom: extrasOpen ? '1px solid #211d17' : 'none',
       }}>
         <div style={{ display: 'flex', gap: 14, alignItems: 'center', padding: '12px', flexWrap: 'wrap' }}>
-          <FrogChocolateButton roomId={roomId} action={frogAction} speakerName={speaker.name} />
+          <FrogChocolateButton roomId={roomId} action={frogAction} speakerName={speaker.name} hasUnread={hasUnreadFrog} />
           <SceneTransitionButton
             roomId={roomId}
             pending={sceneProps?.pending}
             alreadyApproved={sceneProps?.alreadyApproved}
             requestedByName={sceneProps?.requestedByName}
+            hasUnread={hasUnreadScene}
           />
           <button
             id="coach-ooc-btn"
@@ -221,7 +222,7 @@ export default function MessageForm({
           }}
         >
           ▼
-          {!extrasOpen && hasUnreadOoc && (
+          {!extrasOpen && (hasUnreadOoc || hasUnreadFrog || hasUnreadScene) && (
             <span style={{
               position: 'absolute', top: 4, right: 2,
               width: 7, height: 7, borderRadius: '50%',
