@@ -153,7 +153,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
       .maybeSingle()
     alreadyApprovedTransition = !!myApproval
   }
-  const myTranscriptPreview = buildTranscriptText(messages, myOcIdSet)
+  const myTranscriptPreview = buildTranscriptText(messages, myOcIdSet, { roomType: room.room_type, primaryOcId: room.primary_oc_id })
   const showFinalNotice = room.pending_deletion_by && room.pending_deletion_by !== user.id && !myMembership?.left_at
   const deleteButtonLabel = '退出'
   const { data: latestOocMsg } = await supabase
