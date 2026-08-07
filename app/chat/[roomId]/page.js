@@ -15,14 +15,13 @@ import AddMemberButton from './AddMemberButton'
 import MessageBubble from './MessageBubble'
 import RealtimeRefresh from '@/components/RealtimeRefresh'
 import CoachMark from '@/components/CoachMark'
-import { markChatTutorialSeen, markInviteTutorialSeen, markOocGachaTutorialSeen } from '../../tutorialActions'
+import { markChatTutorialSeen, markInviteTutorialSeen, markOocGachaTutorialSeen, markFeatureSeen } from '../../tutorialActions'
 import MarkRoomReadOnMount from './MarkRoomReadOnMount'
 import RoomTitleEditor from './RoomTitleEditor'
 import { updateRoomTitle } from './titleActions'
 import { drawSituation } from './situationActions'
 import { exportRoomLog } from './logActions'
 import WelcomePartnerModal from './WelcomePartnerModal'
-
 
 export default async function ChatRoomPage({ params, searchParams }) {
   const supabase = await createClient()
@@ -34,6 +33,12 @@ export default async function ChatRoomPage({ params, searchParams }) {
     .select('seen_chat_tutorial, seen_invite_tutorial, seen_ooc_gacha_tutorial')
     .eq('id', user.id)
     .maybeSingle()
+  const { data: seenFeatures } = await supabase
+    .from('feature_tutorials_seen')
+    .select('feature_key')
+    .eq('user_id', user.id)
+  const seenFeatureKeys = new Set((seenFeatures || []).map((f) => f.feature_key))
+  const showLogTutorial = !seenFeatureKeys.has('ooc_log_button')
   const { data: room } = await supabase
     .from('chat_rooms')
     .select('id, location, time_period, primary_oc_id, pending_deletion_by, deleted_at, title, transition_requested_at, transition_requested_by, room_type')
@@ -286,11 +291,8 @@ export default async function ChatRoomPage({ params, searchParams }) {
           showGachaTutorial={!tutorialProfile?.seen_ooc_gacha_tutorial}
           markGachaTutorialSeenAction={markOocGachaTutorialSeen}
           logAction={exportRoomLog}
-          sceneProps={{
-            pending: !!room.transition_requested_at,
-            alreadyApproved: alreadyApprovedTransition,
-            requestedByName,
-          }}
+          showLogTutorial={showLogTutorial}
+          markLogTutorialSeenAction={markFeatureSeen.bind(null, 'ooc_log_button')}
           roomMembers={activeMembers.map((m) => ({ id: m.oc_id, name: m.ocs?.name, icon_url: m.ocs?.icon_url }))}
           pendingMembers={(pendingInvites || []).map((p) => ({ id: p.invitee_oc_id, name: p.ocs?.name, icon_url: p.ocs?.icon_url }))}
         />
