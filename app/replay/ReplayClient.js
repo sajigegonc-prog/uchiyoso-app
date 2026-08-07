@@ -1,5 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+
+const LINES_PER_IMAGE = 7
 
 function parseTranscript(text) {
   const lines = text.split('\n').map((l) => l.trim()).filter(Boolean)
@@ -30,9 +32,59 @@ function renderWithBold(text) {
   })
 }
 
+function chunkLines(parsed) {
+  const chunks = []
+  for (let i = 0; i < parsed.length; i += LINES_PER_IMAGE) {
+    chunks.push(parsed.slice(i, i + LINES_PER_IMAGE))
+  }
+  return chunks.length > 0 ? chunks : [[]]
+}
+
+function ChatLine({ line, oc, showName }) {
+  const mine = line.isMine
+  if (line.isSystem) {
+    return (
+      <div style={{ textAlign: 'center', fontSize: 11, color: '#8a8168', fontStyle: 'italic' }}>
+        — {line.content} —
+      </div>
+    )
+  }
+  return (
+    <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexDirection: mine ? 'row-reverse' : 'row' }}>
+      <div style={{
+        width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
+        background: '#211d17', border: '1px solid #211d17',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: '#f4eee0', fontWeight: 700, fontSize: 12, fontFamily: 'Georgia, serif',
+      }}>
+        {oc?.icon_url ? (
+          <img src={oc.icon_url} alt="" crossOrigin="anonymous" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : (line.speaker || '?').charAt(0)}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', maxWidth: '72%' }}>
+        {showName && (
+          <div style={{ fontSize: 10.5, color: '#6b6250', marginBottom: 3, fontStyle: 'italic' }}>{line.speaker}</div>
+        )}
+        <div style={{
+          padding: '9px 13px', fontSize: 14, lineHeight: 1.6,
+          background: mine ? '#211d17' : '#fff', color: mine ? '#f4eee0' : '#211d17',
+          border: '1px solid #211d17',
+        }}>
+          {renderWithBold(line.content)}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function ReplayClient({ myOcs, allKnownOcs }) {
   const [raw, setRaw] = useState('')
   const [parsed, setParsed] = useState(null)
+  const [imageModalOpen, setImageModalOpen] = useState(false)
+  const [activePage, setActivePage] = useState(0)
+  const [generatedImages, setGeneratedImages] = useState({})
+  const [generating, setGenerating] = useState(false)
+  const captureRefs = useRef([])
 
   function ocFor(speakerName) {
     return (allKnownOcs || myOcs).find((oc) => oc.name === speakerName)
@@ -45,7 +97,36 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
   function handleReset() {
     setParsed(null)
     setRaw('')
+    setGeneratedImages({})
   }
+
+  const chunks = parsed ? chunkLines(parsed) : []
+
+  async function generateImage(pageIndex) {
+    if (generatedImages[pageIndex] || typeof window === 'undefined' || !window.html2canvas) return
+    const node = captureRefs.current[pageIndex]
+    if (!node) return
+    setGenerating(true)
+    try {
+      const canvas = await window.html2canvas(node, { backgroundColor: '#eee1cb', scale: 2 })
+      const dataUrl = canvas.toDataURL('image/png')
+      setGeneratedImages((prev) => ({ ...prev, [pageIndex]: dataUrl }))
+    } catch (e) {
+      console.error('画像生成エラー:', e)
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  async function openImageModal() {
+    setImageModalOpen(true)
+    setActivePage(0)
+    await generateImage(0)
+  }
+
+  useEffect(() => {
+    if (imageModalOpen) generateImage(activePage)
+  }, [activePage, imageModalOpen])
 
   return (
     <div style={{ marginTop: 20 }}>
@@ -94,48 +175,91 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
               <p style={{ fontSize: 12.5, color: '#8a8168', textAlign: 'center', fontStyle: 'italic' }}>内容が読み取れませんでした。</p>
             )}
             {parsed.map((line, i) => {
-              if (line.isSystem) {
-                return (
-                  <div key={i} style={{ textAlign: 'center', fontSize: 11, color: '#8a8168', fontStyle: 'italic' }}>
-                    — {line.content} —
-                  </div>
-                )
-              }
-              const mine = line.isMine
-              const oc = ocFor(line.speaker)
               const prevLine = parsed[i - 1]
               const showName = !prevLine || prevLine.isSystem || prevLine.speaker !== line.speaker
-              return (
-                <div key={i} style={{
-                  display: 'flex', gap: 8, alignItems: 'flex-end',
-                  flexDirection: mine ? 'row-reverse' : 'row',
-                }}>
-                  <div style={{
-                    width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
-                    background: '#211d17', border: '1px solid #211d17',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#f4eee0', fontWeight: 700, fontSize: 12, fontFamily: 'Georgia, serif',
-                  }}>
-                    {oc?.icon_url ? (
-                      <img src={oc.icon_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (line.speaker || '?').charAt(0)}
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', maxWidth: '72%' }}>
-                    {showName && (
-                      <div style={{ fontSize: 10.5, color: '#6b6250', marginBottom: 3, fontStyle: 'italic' }}>{line.speaker}</div>
-                    )}
-                    <div style={{
-                      padding: '9px 13px', fontSize: 14, lineHeight: 1.6,
-                      background: mine ? '#211d17' : '#fff', color: mine ? '#f4eee0' : '#211d17',
-                      border: '1px solid #211d17',
-                    }}>
-                      {renderWithBold(line.content)}
-                    </div>
-                  </div>
-                </div>
-              )
+              return <ChatLine key={i} line={line} oc={ocFor(line.speaker)} showName={showName} />
             })}
           </div>
+
+          {parsed.length > 0 && (
+            <button
+              type="button"
+              onClick={openImageModal}
+              style={{
+                display: 'block', width: '100%', marginTop: 14, padding: 13,
+                border: '1px solid #211d17', background: '#211d17', color: '#f4eee0',
+                fontWeight: 700, fontSize: 14, letterSpacing: '.05em', cursor: 'pointer',
+              }}
+            >
+              画像として保存
+            </button>
+          )}
+
+          {/* 画像生成用の見えない描画エリア(モーダルの外、画面には出さない) */}
+          <div style={{ position: 'fixed', top: -9999, left: -9999, pointerEvents: 'none' }}>
+            {chunks.map((chunk, pageIndex) => (
+              <div
+                key={pageIndex}
+                ref={(el) => { captureRefs.current[pageIndex] = el }}
+                style={{ width: 360, background: '#eee1cb', padding: '18px 14px 22px', fontFamily: "'BIZ UDPGothic', sans-serif" }}
+              >
+                <div style={{ textAlign: 'center', fontSize: 10, letterSpacing: '.3em', color: '#8a8168', marginBottom: 14 }}>THE UCHIYOSO CLUB</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {chunk.map((line, i) => {
+                    const globalIndex = pageIndex * LINES_PER_IMAGE + i
+                    const prevLine = parsed[globalIndex - 1]
+                    const showName = !prevLine || prevLine.isSystem || prevLine.speaker !== line.speaker
+                    return <ChatLine key={i} line={line} oc={ocFor(line.speaker)} showName={showName} />
+                  })}
+                </div>
+                <div style={{ textAlign: 'center', fontSize: 9, color: '#a89b7a', marginTop: 10, letterSpacing: '.1em' }}>
+                  {pageIndex + 1} / {chunks.length}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {imageModalOpen && (
+            <div
+              onClick={() => setImageModalOpen(false)}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(33,29,23,.85)', zIndex: 200, display: 'flex', flexDirection: 'column', padding: '18px 14px', overflowY: 'auto' }}
+            >
+              <div onClick={(e) => e.stopPropagation()}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <span style={{ color: '#f4eee0', fontSize: 12, letterSpacing: '.1em' }}>画像プレビュー（全{chunks.length}枚）</span>
+                  <button type="button" onClick={() => setImageModalOpen(false)} style={{ background: 'none', border: 'none', color: '#cbb98a', fontSize: 18, cursor: 'pointer' }}>×</button>
+                </div>
+                {chunks.length > 1 && (
+                  <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
+                    {chunks.map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setActivePage(i)}
+                        style={{
+                          padding: '4px 10px', fontSize: 10.5, cursor: 'pointer',
+                          border: `1px solid ${activePage === i ? '#f4eee0' : '#6b6250'}`,
+                          background: activePage === i ? '#f4eee0' : 'transparent',
+                          color: activePage === i ? '#211d17' : '#cbb98a',
+                        }}
+                      >
+                        {i + 1}枚目
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {generatedImages[activePage] ? (
+                  <img src={generatedImages[activePage]} alt={`${activePage + 1}枚目`} style={{ width: '100%', border: '1px solid #211d17' }} />
+                ) : (
+                  <p style={{ color: '#cbb98a', fontSize: 12, textAlign: 'center', padding: 30 }}>{generating ? '生成中…' : '準備しています…'}</p>
+                )}
+                <p style={{ textAlign: 'center', fontSize: 10, color: '#cbb98a', marginTop: 14, lineHeight: 1.8 }}>
+                  画像を<b style={{ color: '#f4eee0' }}>長押し</b>して「写真に保存」を選んでください<br />
+                  （自動保存は行われません）
+                </p>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
