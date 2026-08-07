@@ -43,7 +43,7 @@ export async function openFrogCard(formData) {
   await supabase.from('room_ooc_messages').insert({
     room_id: roomId, user_id: user.id,
     content: `${openerName} が、蛙チョコを開けました → ${card.name}\n${card.description}`,
-    is_system: true,
+    is_system: true, log_type: 'frog_choc',
   })
   revalidatePath(`/chat/${roomId}`)
   return { card }
