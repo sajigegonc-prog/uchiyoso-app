@@ -4,6 +4,8 @@ import { useFormStatus } from 'react-dom'
 import { createPortal } from 'react-dom'
 import { markOocRead } from './oocActions'
 import CoachMark from '@/components/CoachMark'
+import useTypingChannel from '@/lib/useTypingChannel'
+import TypingDots from '@/components/TypingDots'
 
 function SubmitBtn() {
   const { pending } = useFormStatus()
@@ -25,6 +27,7 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
   const [logConfirming, setLogConfirming] = useState(false)
   const [logTranscript, setLogTranscript] = useState(null)
   const [logCopied, setLogCopied] = useState(false)
+  const { typerNames, sendTyping } = useTypingChannel(`typing-ooc-${roomId}`, myUserId)
   const now = new Date()
   const timeLabel = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
 
@@ -143,6 +146,7 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
               </div>
             )
           })}
+          <TypingDots names={typerNames} dark />
           <div id="ooc-bottom-anchor" />
         </div>
       </div>
@@ -173,7 +177,7 @@ export default function OocPanel({ roomId, myUserId, messages, sendAction, onClo
           }}
           aria-label="ログを書き出す"
         >📋</button>
-        <input ref={inputRef} name="content" placeholder="中の人として発言" style={{ flex: 1, border: '1px solid #3a4360', borderRadius: 3, padding: '10px 12px', fontSize: 16, background: '#252b40', color: '#e8eaf5', fontFamily: "'Courier New', monospace" }} />
+        <input ref={inputRef} name="content" placeholder="中の人として発言" onChange={() => sendTyping('中の人')} style={{ flex: 1, border: '1px solid #3a4360', borderRadius: 3, padding: '10px 12px', fontSize, background: '#252b40', color: '#e8eaf5', fontFamily: "'Courier New', monospace" }} />
         <SubmitBtn />
       </form>
 
