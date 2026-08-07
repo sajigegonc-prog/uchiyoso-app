@@ -17,6 +17,7 @@ import RealtimeRefresh from '@/components/RealtimeRefresh'
 import CoachMark from '@/components/CoachMark'
 import { markChatTutorialSeen, markInviteTutorialSeen, markOocGachaTutorialSeen, markFeatureSeen } from '../../tutorialActions'
 import MarkRoomReadOnMount from './MarkRoomReadOnMount'
+import AutoScrollBottom from './AutoScrollBottom'
 import RoomTitleEditor from './RoomTitleEditor'
 import { updateRoomTitle } from './titleActions'
 import { drawSituation } from './situationActions'
@@ -160,6 +161,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
     }}>
       <RealtimeRefresh tables={['messages', 'room_ooc_messages', 'chat_room_members', 'chat_room_invitations']} fallbackMs={15000} />
       <MarkRoomReadOnMount roomId={room.id} messageCount={messages?.length || 0} />
+      <AutoScrollBottom targetId="messages-scroll" />
       {showFullTutorial && (
         <CoachMark
           steps={[
@@ -213,7 +215,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
           </p>
         )}
       </div>
-      <div style={{
+      <div id="messages-scroll" style={{
         flex: 1, minHeight: 0, overflowY: 'auto', padding: '16px 16px 16px', display: 'flex', flexDirection: 'column', gap: 12,
         WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain',
       }}>
