@@ -15,7 +15,7 @@ import AddMemberButton from './AddMemberButton'
 import MessageBubble from './MessageBubble'
 import RealtimeRefresh from '@/components/RealtimeRefresh'
 import CoachMark from '@/components/CoachMark'
-import { markChatTutorialSeen, markInviteTutorialSeen } from '../../tutorialActions'
+import { markChatTutorialSeen, markInviteTutorialSeen, markOocGachaTutorialSeen } from '../../tutorialActions'
 import MarkRoomReadOnMount from './MarkRoomReadOnMount'
 import RoomTitleEditor from './RoomTitleEditor'
 import { updateRoomTitle } from './titleActions'
@@ -30,7 +30,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
   const { roomId } = params
   const { data: tutorialProfile } = await supabase
     .from('profiles')
-    .select('seen_chat_tutorial, seen_invite_tutorial')
+    .select('seen_chat_tutorial, seen_invite_tutorial, seen_ooc_gacha_tutorial')
     .eq('id', user.id)
     .maybeSingle()
   const { data: room } = await supabase
@@ -281,6 +281,8 @@ export default async function ChatRoomPage({ params, searchParams }) {
           transcript={myTranscriptPreview}
           hasUnreadFrog={hasUnreadFrog}
           hasUnreadScene={hasUnreadScene}
+          showGachaTutorial={!tutorialProfile?.seen_ooc_gacha_tutorial}
+          markGachaTutorialSeenAction={markOocGachaTutorialSeen}
           sceneProps={{
             pending: !!room.transition_requested_at,
             alreadyApproved: alreadyApprovedTransition,
