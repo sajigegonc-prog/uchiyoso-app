@@ -18,13 +18,14 @@ export async function updateDisplayNameLimited(formData) {
     .eq('id', user.id)
     .maybeSingle()
 
-  if (profile?.display_name_changed_at) {
-    const last = new Date(profile.display_name_changed_at).getTime()
-    const elapsed = Date.now() - last
-    if (elapsed < THIRTY_DAYS_MS) {
-      const remainingDays = Math.ceil((THIRTY_DAYS_MS - elapsed) / (24 * 60 * 60 * 1000))
-      return { error: `表示名の変更は前回から30日経つまでできません。あと${remainingDays}日お待ちください。` }
-    }
+  const { data: duplicate } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('display_name', newName)
+    .neq('id', user.id)
+    .maybeSingle()
+  if (duplicate) {
+    return { error: 'その表示名はすでに使われています。別の名前を入力してください。' }
   }
 
   const { error } = await supabase
