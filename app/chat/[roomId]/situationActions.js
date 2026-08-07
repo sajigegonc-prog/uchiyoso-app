@@ -60,6 +60,7 @@ function buildPool(ocA, ocB) {
   }
   if (sameGrade) pool = pool.concat(GRADE_POOL)
   pool = pool.filter((item) => !item.excludeIf || !item.excludeIf(ocA, ocB))
+  if (pool.length === 0) pool = COMMON_POOL
   return pool
 }
 
