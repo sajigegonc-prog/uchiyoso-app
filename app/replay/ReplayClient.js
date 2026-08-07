@@ -40,7 +40,23 @@ function chunkLines(parsed) {
   return chunks.length > 0 ? chunks : [[]]
 }
 
-function ChatLine({ line, oc, showName }) {
+async function urlToDataUrl(url) {
+  try {
+    const res = await fetch(url)
+    const blob = await res.blob()
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result)
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+  } catch (e) {
+    console.error('画像の変換に失敗:', url, e)
+    return null
+  }
+}
+
+function ChatLine({ line, oc, showName, iconDataUrl }) {
   const mine = line.isMine
   if (line.isSystem) {
     return (
@@ -57,8 +73,10 @@ function ChatLine({ line, oc, showName }) {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         color: '#f4eee0', fontWeight: 700, fontSize: 12, fontFamily: 'Georgia, serif',
       }}>
-        {oc?.icon_url ? (
-          <img src={oc.icon_url} alt="" crossOrigin="anonymous" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        {iconDataUrl ? (
+          <img src={iconDataUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : oc?.icon_url ? (
+          <img src={oc.icon_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (line.speaker || '?').charAt(0)}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', maxWidth: '72%' }}>
@@ -84,6 +102,8 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
   const [activePage, setActivePage] = useState(0)
   const [generatedImages, setGeneratedImages] = useState({})
   const [generating, setGenerating] = useState(false)
+  const [iconDataUrls, setIconDataUrls] = useState({})
+  const [iconsReady, setIconsReady] = useState(false)
   const captureRefs = useRef([])
 
   function ocFor(speakerName) {
@@ -92,15 +112,34 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
 
   function handleParse() {
     setParsed(parseTranscript(raw))
+    setIconDataUrls({})
+    setIconsReady(false)
   }
 
   function handleReset() {
     setParsed(null)
     setRaw('')
     setGeneratedImages({})
+    setIconDataUrls({})
+    setIconsReady(false)
   }
 
   const chunks = parsed ? chunkLines(parsed) : []
+
+  async function preloadIcons() {
+    if (!parsed) return
+    const uniqueUrls = [...new Set(
+      parsed
+        .filter((l) => !l.isSystem)
+        .map((l) => ocFor(l.speaker)?.icon_url)
+        .filter(Boolean)
+    )]
+    const entries = await Promise.all(uniqueUrls.map(async (url) => [url, await urlToDataUrl(url)]))
+    const map = {}
+    entries.forEach(([url, dataUrl]) => { if (dataUrl) map[url] = dataUrl })
+    setIconDataUrls(map)
+    setIconsReady(true)
+  }
 
   async function generateImage(pageIndex) {
     if (generatedImages[pageIndex] || typeof window === 'undefined' || !window.html2canvas) return
@@ -108,7 +147,7 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
     if (!node) return
     setGenerating(true)
     try {
-      const canvas = await window.html2canvas(node, { backgroundColor: '#eee1cb', scale: 2 })
+      const canvas = await window.html2canvas(node, { backgroundColor: '#eee1cb', scale: 2, useCORS: true })
       const dataUrl = canvas.toDataURL('image/png')
       setGeneratedImages((prev) => ({ ...prev, [pageIndex]: dataUrl }))
     } catch (e) {
@@ -121,12 +160,12 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
   async function openImageModal() {
     setImageModalOpen(true)
     setActivePage(0)
-    await generateImage(0)
+    if (!iconsReady) await preloadIcons()
   }
 
   useEffect(() => {
-    if (imageModalOpen) generateImage(activePage)
-  }, [activePage, imageModalOpen])
+    if (imageModalOpen && iconsReady) generateImage(activePage)
+  }, [activePage, imageModalOpen, iconsReady])
 
   return (
     <div style={{ marginTop: 20 }}>
@@ -195,73 +234,5 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
             </button>
           )}
 
-          {/* 画像生成用の見えない描画エリア(モーダルの外、画面には出さない) */}
           <div style={{ position: 'fixed', top: -9999, left: -9999, pointerEvents: 'none' }}>
             {chunks.map((chunk, pageIndex) => (
-              <div
-                key={pageIndex}
-                ref={(el) => { captureRefs.current[pageIndex] = el }}
-                style={{ width: 360, background: '#eee1cb', padding: '18px 14px 22px', fontFamily: "'BIZ UDPGothic', sans-serif" }}
-              >
-                <div style={{ textAlign: 'center', fontSize: 10, letterSpacing: '.3em', color: '#8a8168', marginBottom: 14 }}>THE UCHIYOSO CLUB</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {chunk.map((line, i) => {
-                    const globalIndex = pageIndex * LINES_PER_IMAGE + i
-                    const prevLine = parsed[globalIndex - 1]
-                    const showName = !prevLine || prevLine.isSystem || prevLine.speaker !== line.speaker
-                    return <ChatLine key={i} line={line} oc={ocFor(line.speaker)} showName={showName} />
-                  })}
-                </div>
-                <div style={{ textAlign: 'center', fontSize: 9, color: '#a89b7a', marginTop: 10, letterSpacing: '.1em' }}>
-                  {pageIndex + 1} / {chunks.length}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {imageModalOpen && (
-            <div
-              onClick={() => setImageModalOpen(false)}
-              style={{ position: 'fixed', inset: 0, background: 'rgba(33,29,23,.85)', zIndex: 200, display: 'flex', flexDirection: 'column', padding: '18px 14px', overflowY: 'auto' }}
-            >
-              <div onClick={(e) => e.stopPropagation()}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <span style={{ color: '#f4eee0', fontSize: 12, letterSpacing: '.1em' }}>画像プレビュー（全{chunks.length}枚）</span>
-                  <button type="button" onClick={() => setImageModalOpen(false)} style={{ background: 'none', border: 'none', color: '#cbb98a', fontSize: 18, cursor: 'pointer' }}>×</button>
-                </div>
-                {chunks.length > 1 && (
-                  <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
-                    {chunks.map((_, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setActivePage(i)}
-                        style={{
-                          padding: '4px 10px', fontSize: 10.5, cursor: 'pointer',
-                          border: `1px solid ${activePage === i ? '#f4eee0' : '#6b6250'}`,
-                          background: activePage === i ? '#f4eee0' : 'transparent',
-                          color: activePage === i ? '#211d17' : '#cbb98a',
-                        }}
-                      >
-                        {i + 1}枚目
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {generatedImages[activePage] ? (
-                  <img src={generatedImages[activePage]} alt={`${activePage + 1}枚目`} style={{ width: '100%', border: '1px solid #211d17' }} />
-                ) : (
-                  <p style={{ color: '#cbb98a', fontSize: 12, textAlign: 'center', padding: 30 }}>{generating ? '生成中…' : '準備しています…'}</p>
-                )}
-                <p style={{ textAlign: 'center', fontSize: 10, color: '#cbb98a', marginTop: 14, lineHeight: 1.8 }}>
-                  画像を<b style={{ color: '#f4eee0' }}>長押し</b>して「写真に保存」を選んでください<br />
-                  （自動保存は行われません）
-                </p>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  )
-}
