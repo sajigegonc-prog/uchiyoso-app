@@ -107,7 +107,6 @@ export default async function ChatRoomPage({ params, searchParams }) {
   const showFullTutorial = !tutorialProfile?.seen_chat_tutorial
   const showInviteOnlyTutorial = !showFullTutorial && inviteVisible && !tutorialProfile?.seen_invite_tutorial
   const myMembership = (members || []).find((m) => m.user_id === user.id)
-  const myMembership = (members || []).find((m) => m.user_id === user.id)
   const lastOocRead = myMembership?.ooc_last_read_at
   function hasUnreadLogType(type) {
     return (oocMessagesRaw || []).some((m) =>
