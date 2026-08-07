@@ -35,3 +35,10 @@ export async function markUpdate1TutorialSeen() {
   await supabase.from('profiles').update({ seen_update1_tutorial: true }).eq('id', user.id)
   revalidatePath('/chat')
 }
+
+export async function markOocGachaTutorialSeen() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  await supabase.from('profiles').update({ seen_ooc_gacha_tutorial: true }).eq('id', user.id)
+}
