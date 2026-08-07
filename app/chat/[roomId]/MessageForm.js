@@ -209,6 +209,7 @@ export default function MessageForm({
           送信
         </button>
         <button
+          id="coach-menu-toggle-btn"
           type="button"
           onClick={() => setExtrasOpen((v) => !v)}
           aria-label="メニューの開閉"
