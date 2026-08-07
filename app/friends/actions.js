@@ -53,3 +53,15 @@ export async function unfriendUser(formData) {
   if (token) redirect(`/friends/add/${token}`)
   redirect('/friends')
 }
+
+export async function markFriendNotificationsSeen() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  await supabase
+    .from('friendships')
+    .update({ requester_seen_accepted: true })
+    .eq('requester_id', user.id)
+    .eq('status', 'accepted')
+    .eq('requester_seen_accepted', false)
+}
