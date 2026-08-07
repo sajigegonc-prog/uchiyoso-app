@@ -2,6 +2,8 @@
 import { useRef, useState, useEffect } from 'react'
 import { useFormStatus } from 'react-dom'
 import FrogChocolateButton from './FrogChocolateButton'
+import SceneTransitionButton from './SceneTransitionButton'
+import RoomMembersButton from './RoomMembersButton'
 import OocPanel from './OocPanel'
 
 function ClearOnDone({ inputRef, onClear }) {
@@ -18,7 +20,11 @@ function ClearOnDone({ inputRef, onClear }) {
 const LINE_HEIGHT = 20
 const MAX_LINES = 5
 
-export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, addNpcAction, deleteNpcAction, frogAction, oocMessages, oocSendAction, hasUnreadOoc, drawSituationAction, initialOcId }) {
+export default function MessageForm({
+  action, roomId, myOcs, npcs, myUserId, addNpcAction, deleteNpcAction, frogAction,
+  oocMessages, oocSendAction, hasUnreadOoc, drawSituationAction, initialOcId,
+  sceneProps, roomMembers, pendingMembers,
+}) {
   const inputRef = useRef(null)
   const [open, setOpen] = useState(false)
   const [oocOpen, setOocOpen] = useState(false)
@@ -119,6 +125,42 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
         </div>
       )}
 
+      {extrasOpen && (
+        <div style={{
+          display: 'flex', gap: 8, alignItems: 'center', padding: '10px 12px',
+          background: 'rgba(244,238,224,.88)', borderBottom: '1px solid #211d17', flexWrap: 'wrap',
+        }}>
+          <FrogChocolateButton roomId={roomId} action={frogAction} speakerName={speaker.name} />
+          <SceneTransitionButton
+            roomId={roomId}
+            pending={sceneProps?.pending}
+            alreadyApproved={sceneProps?.alreadyApproved}
+            requestedByName={sceneProps?.requestedByName}
+          />
+          <RoomMembersButton members={roomMembers || []} pendingMembers={pendingMembers || []} />
+          <button
+            id="coach-ooc-btn"
+            type="button"
+            onClick={() => setOocOpen(true)}
+            style={{
+              position: 'relative', flexShrink: 0, width: 36, height: 36, borderRadius: '50%',
+              border: '1px solid #211d17', background: '#f4eee0', color: '#211d17',
+              fontSize: 15, cursor: 'pointer',
+            }}
+            aria-label="中の人チャットへ"
+          >
+            💬
+            {hasUnreadOoc && (
+              <span style={{
+                position: 'absolute', top: -3, right: -3,
+                width: 8, height: 8, borderRadius: '50%',
+                background: '#8a2418', border: '1px solid #f4eee0',
+              }} />
+            )}
+          </button>
+        </div>
+      )}
+
       <form
         action={action}
         style={{ display: 'flex', gap: 6, alignItems: 'flex-end', padding: '10px 12px', paddingBottom: 'calc(10px + env(safe-area-inset-bottom))' }}
@@ -165,13 +207,13 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
         <button
           type="button"
           onClick={() => setExtrasOpen((v) => !v)}
-          aria-label="その他の操作"
+          aria-label="メニューの開閉"
           style={{
             position: 'relative', flexShrink: 0, width: 28, height: 36, border: 'none', background: 'none',
-            color: '#6b6250', fontSize: 14, cursor: 'pointer', marginBottom: 2,
+            color: '#6b6250', fontSize: 13, cursor: 'pointer', marginBottom: 2,
           }}
         >
-          {extrasOpen ? '›' : '‹'}
+          {extrasOpen ? '▼' : '▲'}
           {!extrasOpen && hasUnreadOoc && (
             <span style={{
               position: 'absolute', top: 4, right: 2,
@@ -180,31 +222,6 @@ export default function MessageForm({ action, roomId, myOcs, npcs, myUserId, add
             }} />
           )}
         </button>
-        {extrasOpen && (
-          <>
-            <FrogChocolateButton roomId={roomId} action={frogAction} speakerName={speaker.name} />
-            <button
-              id="coach-ooc-btn"
-              type="button"
-              onClick={() => setOocOpen(true)}
-              style={{
-                position: 'relative', flexShrink: 0, padding: '0 8px', height: 36,
-                border: '1px solid #211d17', background: '#f4eee0', color: '#211d17',
-                fontSize: 9.5, cursor: 'pointer', letterSpacing: '.02em', lineHeight: 1.15,
-                marginBottom: 2,
-              }}
-            >
-              中の人<br />チャットへ
-              {hasUnreadOoc && (
-                <span style={{
-                  position: 'absolute', top: -3, right: -3,
-                  width: 8, height: 8, borderRadius: '50%',
-                  background: '#8a2418', border: '1px solid #f4eee0',
-                }} />
-              )}
-            </button>
-          </>
-        )}
         <ClearOnDone inputRef={inputRef} onClear={autoResize} />
       </form>
     </div>
