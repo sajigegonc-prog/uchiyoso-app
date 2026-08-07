@@ -29,6 +29,15 @@ export default async function RootLayout({ children }) {
             height: calc(100vh - 60px);
             height: calc(100dvh - 60px);
           }
+          @media (max-width: 600px) {
+            #coach-bottomnav {
+              height: 76px !important;
+              padding-bottom: env(safe-area-inset-bottom) !important;
+            }
+            #coach-bottomnav span {
+              font-size: 12.5px !important;
+            }
+          }
           .app-shell {
             min-height: 100vh;
             min-height: 100dvh;
