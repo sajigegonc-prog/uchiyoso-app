@@ -3,7 +3,7 @@ import { useState, useTransition } from 'react'
 import OcInfoModal from '@/components/OcInfoModal'
 import { getOcDetailForRoom } from './ocPreviewActions'
 
-export default function MessageBubble({ msg, mine, isOwner, speakerName, speakerIcon, roomId, editAction, deleteAction }) {
+export default function MessageBubble({ msg, mine, isOwner, speakerName, speakerIcon, roomId, editAction, deleteAction, reorderAction }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [editing, setEditing] = useState(false)
   const [detail, setDetail] = useState(null)
@@ -36,6 +36,18 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
       } else {
         setMenuOpen(false)
       }
+    })
+  }
+
+  function handleReorder(direction) {
+    setError(null)
+    const formData = new FormData()
+    formData.set('message_id', msg.id)
+    formData.set('room_id', roomId)
+    formData.set('direction', direction)
+    startTransition(async () => {
+      const result = await reorderAction(formData)
+      if (result?.error) setError(result.error)
     })
   }
 
@@ -132,7 +144,7 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
         )}
         {isOwner && menuOpen && !editing && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', gap: 4, marginTop: 4 }}>
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <button type="button" onClick={() => setEditing(true)} style={{ fontSize: 10.5, color: '#6b6250', background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer' }}>編集</button>
               <form
                 action={(formData) => {
@@ -149,6 +161,23 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
                   {isPending ? '削除中…' : '削除'}
                 </button>
               </form>
+              <div style={{ width: 1, height: 11, background: '#b3a98f' }} />
+              <div style={{ display: 'flex', gap: 3 }}>
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => handleReorder('up')}
+                  title="1つ前の発言と入れ替え"
+                  style={{ width: 15, height: 15, border: 'none', background: 'none', color: '#8a8168', fontSize: 10, padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >▲</button>
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => handleReorder('down')}
+                  title="1つ後の発言と入れ替え"
+                  style={{ width: 15, height: 15, border: 'none', background: 'none', color: '#8a8168', fontSize: 10, padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >▼</button>
+              </div>
             </div>
             {error && <p style={{ fontSize: 10.5, color: '#8a2418' }}>{error}</p>}
           </div>
