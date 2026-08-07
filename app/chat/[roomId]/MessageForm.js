@@ -24,7 +24,7 @@ export default function MessageForm({
   action, roomId, myOcs, npcs, myUserId, addNpcAction, deleteNpcAction, frogAction,
   oocMessages, oocSendAction, hasUnreadOoc, drawSituationAction, initialOcId,
   sceneProps, deleteLabel, deleteAction, transcript, hasUnreadFrog, hasUnreadScene,
-  showGachaTutorial, markGachaTutorialSeenAction, logAction,
+  showGachaTutorial, markGachaTutorialSeenAction, logAction, showLogTutorial, markLogTutorialSeenAction,
 }) {
   const inputRef = useRef(null)
   const [open, setOpen] = useState(false)
@@ -55,6 +55,7 @@ export default function MessageForm({
           onClose={() => setOocOpen(false)} drawAction={drawSituationAction}
           showGachaTutorial={showGachaTutorial} markGachaTutorialSeenAction={markGachaTutorialSeenAction}
           logAction={logAction}
+          showLogTutorial={showLogTutorial} markLogTutorialSeenAction={markLogTutorialSeenAction}
         />
       )}
 
