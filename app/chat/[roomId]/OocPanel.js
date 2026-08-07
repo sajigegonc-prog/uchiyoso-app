@@ -22,7 +22,7 @@ function SubmitBtn({ cooldown }) {
 }
 
 export default function OocPanel({
-  roomId, myUserId, messages, sendAction, onClose,
+  roomId, myUserId, myDisplayName, messages, sendAction, onClose,
   drawAction, proposeAction, respondAction, pendingSituation,
   showGachaTutorial, markGachaTutorialSeenAction, logAction, showLogTutorial, markLogTutorialSeenAction,
 }) {
@@ -260,7 +260,7 @@ export default function OocPanel({
           name="content"
           rows={1}
           placeholder="中の人として発言"
-          onChange={() => sendTyping('中の人')}
+          onChange={() => sendTyping(myDisplayName)}
           onInput={autoResize}
           onKeyDown={handleKeyDown}
           style={{
