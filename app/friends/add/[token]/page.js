@@ -49,9 +49,13 @@ export default async function ProfilePage({ params }) {
         </div>
       </div>
       <div style={{ fontSize: 17, fontWeight: 700, textAlign: 'center', marginTop: 10, fontFamily: 'Georgia, serif', color: '#211d17' }}>
-        {owner.display_name || '名前未設定'}
+        {owner.emoji ? `${owner.emoji} ` : ''}{owner.display_name || '名前未設定'}
       </div>
-      <div style={{ fontSize: 10.5, color: '#8a8168', textAlign: 'center', marginTop: 4, fontStyle: 'italic' }}>うちよそユーザー</div>
+      {owner.bio ? (
+        <div style={{ fontSize: 12, color: '#6b6250', textAlign: 'center', marginTop: 6, fontStyle: 'italic', lineHeight: 1.6 }}>{owner.bio}</div>
+      ) : (
+        <div style={{ fontSize: 10.5, color: '#8a8168', textAlign: 'center', marginTop: 4, fontStyle: 'italic' }}>うちよそユーザー</div>
+      )}
 
       <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 26 }}>
         登録OC
