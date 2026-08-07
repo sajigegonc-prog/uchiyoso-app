@@ -26,8 +26,8 @@ export default async function RootLayout({ children }) {
           html, body { max-width: 100%; overflow-x: hidden; overscroll-behavior-x: none; }
           input, select, textarea { max-width: 100%; width: 100%; }
           .chat-room-height {
-            height: calc(100vh - 60px);
-            height: calc(100dvh - 60px);
+            height: 100vh;
+            height: 100dvh;
           }
           .app-shell {
             min-height: 100vh;
