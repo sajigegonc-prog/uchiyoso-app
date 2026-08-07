@@ -18,6 +18,7 @@ export async function markChatTutorialSeen(includedInvite) {
   if (includedInvite) update.seen_invite_tutorial = true
   await supabase.from('profiles').update(update).eq('id', user.id)
   revalidatePath('/chat')
+  revalidatePath('/chat/[roomId]', 'page')
 }
 
 export async function markInviteTutorialSeen() {
@@ -41,4 +42,5 @@ export async function markOocGachaTutorialSeen() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
   await supabase.from('profiles').update({ seen_ooc_gacha_tutorial: true }).eq('id', user.id)
+  revalidatePath('/chat/[roomId]', 'page')
 }
