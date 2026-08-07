@@ -64,11 +64,16 @@ export default async function ChatListPage() {
   const { data: pendingOutgoing } = roomIds.length > 0
     ? await supabase
       .from('chat_room_invitations')
-      .select('room_id')
+      .select('room_id, ocs:invitee_oc_id(name)')
       .in('room_id', roomIds)
       .eq('status', 'pending')
     : { data: [] }
   const pendingRoomIds = new Set((pendingOutgoing || []).map((p) => p.room_id))
+  const pendingNamesByRoom = new Map()
+  for (const p of pendingOutgoing || []) {
+    if (!pendingNamesByRoom.has(p.room_id)) pendingNamesByRoom.set(p.room_id, [])
+    if (p.ocs?.name) pendingNamesByRoom.get(p.room_id).push(p.ocs.name)
+  }
 
   const membersByRoom = new Map()
   const uniqueUsersByRoom = new Map()
@@ -146,9 +151,11 @@ export default async function ChatListPage() {
     const primaryOcId = primaryOcByRoom.get(id)
     const otherOcs = allInRoom.filter((m) => m.oc_id !== primaryOcId)
     const displayMembers = otherOcs.length > 0 ? otherOcs : allInRoom
-    const title = customTitleByRoom.get(id) || allInRoom.map((m) => m.ocs?.name).filter(Boolean).join('、')
+    const customTitle = customTitleByRoom.get(id) || null
+    const joinedNames = allInRoom.map((m) => m.ocs?.name).filter(Boolean)
+    const pendingNames = pendingNamesByRoom.get(id) || []
     return {
-      id, title, displayMembers,
+      id, customTitle, displayMembers, joinedNames, pendingNames,
       unread: unreadByRoom.get(id) || false,
       unreadOoc: unreadOocByRoom.get(id) || false,
       pending: pendingRoomIds.has(id),
@@ -283,7 +290,20 @@ export default async function ChatListPage() {
             </div>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 15, fontWeight: 700, color: '#211d17', fontFamily: 'Georgia, serif', display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, overflow: 'hidden' }}>
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{room.title || '名前未設定'}</span>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {room.customTitle ? (
+                    room.customTitle
+                  ) : room.joinedNames.length === 0 && room.pendingNames.length === 0 ? (
+                    '名前未設定'
+                  ) : (
+                    [...room.joinedNames.map((n) => ({ n, pending: false })), ...room.pendingNames.map((n) => ({ n, pending: true }))]
+                      .map((item, i, arr) => (
+                        <span key={i} style={{ color: item.pending ? '#b3a98f' : '#211d17' }}>
+                          {item.n}{i < arr.length - 1 ? '、' : ''}
+                        </span>
+                      ))
+                  )}
+                </span>
                 {room.pending && (
                   <span style={{ fontSize: 9, color: '#8a8168', border: '1px solid #8a8168', padding: '1px 6px', fontFamily: "'BIZ UDPGothic', sans-serif", fontWeight: 700, flexShrink: 0 }}>
                     承諾待ち
