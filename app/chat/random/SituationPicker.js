@@ -3,6 +3,7 @@ import { useState } from 'react'
 
 export default function SituationPicker({ myOcId, friendOcId, gachaPick, noteExamples, confirmAction }) {
   const [mode, setMode] = useState('gacha')
+  const [noteOpen, setNoteOpen] = useState(false)
   const [customPlace, setCustomPlace] = useState('')
   const [customTime, setCustomTime] = useState('')
   const [customText, setCustomText] = useState('')
