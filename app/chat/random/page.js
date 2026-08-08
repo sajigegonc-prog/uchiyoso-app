@@ -133,7 +133,7 @@ function ageLabel(myBirth, otherBirth) {
   const diff = (new Date(myBirth) - new Date(otherBirth)) / (365.25 * 24 * 60 * 60 * 1000)
   const rounded = Math.round(Math.abs(diff))
   if (rounded === 0) return '同い年です'
-  return diff > 0 ? `あなたより${rounded}歳年下です` : `あなたより${rounded}歳年上です`
+  return diff > 0 ? `あなたより${rounded}歳年上です` : `あなたより${rounded}歳年下です`
 }
 
 const NOTE_EXAMPLES = [
