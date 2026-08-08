@@ -1,5 +1,5 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabaseClient'
 
@@ -10,22 +10,27 @@ function isTyping() {
 
 export default function RealtimeRefresh({ tables = [], fallbackMs = 15000 }) {
   const router = useRouter()
+  const debounceRef = useRef(null)
+
   useEffect(() => {
+    function scheduleRefresh() {
+      if (isTyping()) return
+      clearTimeout(debounceRef.current)
+      debounceRef.current = setTimeout(() => {
+        if (!isTyping()) router.refresh()
+      }, 600)
+    }
+
     const supabase = createClient()
     const channelName = 'realtime-' + tables.join('-') + '-' + Math.random().toString(36).slice(2)
     const channel = supabase.channel(channelName)
     tables.forEach((table) => {
-      channel.on('postgres_changes', { event: '*', schema: 'public', table }, () => {
-        if (isTyping()) return
-        router.refresh()
-      })
+      channel.on('postgres_changes', { event: '*', schema: 'public', table }, scheduleRefresh)
     })
     channel.subscribe()
-    const interval = setInterval(() => {
-      if (isTyping()) return
-      router.refresh()
-    }, fallbackMs)
+    const interval = setInterval(scheduleRefresh, fallbackMs)
     return () => {
+      clearTimeout(debounceRef.current)
       supabase.removeChannel(channel)
       clearInterval(interval)
     }
