@@ -70,14 +70,16 @@ export default async function OwlMailPage({ searchParams }) {
 
   const expandedIds = new Set((searchParams?.expand || '').split(',').filter(Boolean))
 
-  function LetterRow({ letter }) {
+    function LetterRow({ letter, delay = 0 }) {
     return (
       <div
+        className="fade-in-notice"
         style={{
           display: 'flex', alignItems: 'center', gap: 10,
           background: 'linear-gradient(160deg, #f3e6c8 0%, #e8d6ac 55%, #ddc794 100%)',
           opacity: letter.unread ? 1 : 0.55,
           border: '1px solid #c9a876', padding: '10px 10px', marginTop: 8,
+          animationDelay: `${delay}s`,
         }}
       >
         <Link href={`/owl/${letter.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flex: 1 }}>
@@ -131,13 +133,23 @@ export default async function OwlMailPage({ searchParams }) {
               <div style={{ fontSize: 11, color: '#3d2717', fontWeight: 700, fontFamily: 'Georgia, serif' }}>
                 {g.myOcName} 宛
               </div>
-              {visibleLetters.map((letter) => <LetterRow key={letter.id} letter={letter} />)}
-              {!isExpanded && g.letters.length > VISIBLE_COUNT && (
+              {visibleLetters.map((letter, i) => (
+                <LetterRow key={letter.id} letter={letter} delay={i >= VISIBLE_COUNT ? (i - VISIBLE_COUNT) * 0.08 : 0} />
+              ))}
+                            {!isExpanded && g.letters.length > VISIBLE_COUNT && (
                 <Link
                   href={`/owl?expand=${expandParam}`}
                   style={{ display: 'block', textAlign: 'center', marginTop: 8, fontSize: 11, color: '#6b6250', textDecoration: 'underline' }}
                 >
                   もっと見る({g.letters.length - VISIBLE_COUNT}件)
+                </Link>
+              )}
+              {isExpanded && g.letters.length > VISIBLE_COUNT && (
+                <Link
+                  href={`/owl?expand=${[...expandedIds].filter((id) => id !== g.myOcId).join(',')}`}
+                  style={{ display: 'block', textAlign: 'center', marginTop: 8, fontSize: 11, color: '#6b6250', textDecoration: 'underline' }}
+                >
+                  閉じる
                 </Link>
               )}
             </div>
