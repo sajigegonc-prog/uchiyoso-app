@@ -49,22 +49,21 @@ export default function SituationPicker({ myOcId, friendOcId, gachaPick, noteExa
           type="button"
           onClick={() => setNoteOpen((v) => !v)}
           style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
-            background: 'none', border: 'none', padding: 0, marginTop: 4, cursor: 'pointer',
+            display: 'block', width: '100%', textAlign: 'center', padding: 8, marginTop: 6,
+            border: '1px dashed #6b6250', background: 'none', color: noteOpen ? '#8a8168' : '#3d2717',
+            fontWeight: 700, fontSize: 12, letterSpacing: '.05em', cursor: 'pointer',
           }}
         >
-          <span style={{ fontSize: 11, color: '#6b6250' }}>一言メモ(任意)</span>
-          <span style={{ fontSize: 12, color: '#8a8168' }}>{noteOpen ? '︿ 閉じる' : '﹀ 開く'}</span>
+          {noteOpen ? '− 一言メモを閉じる' : '+ 一言メモを添える'}
         </button>
         {noteOpen && (
-          <>
-            <textarea name="note" placeholder="お相手への一言があれば書いてください"
-              style={{ width: '100%', minHeight: 56, padding: 10, fontSize: 12.5, border: '1px solid #211d17', background: '#fff', color: '#211d17', resize: 'none', boxSizing: 'border-box', marginTop: 5, fontFamily: "'BIZ UDPGothic', sans-serif" }} />
-            <p style={{ fontSize: 10, color: '#8a8168', marginTop: 6, marginBottom: 4, lineHeight: 1.7, fontStyle: 'italic' }}>
-              {noteExamples.map((ex, i) => <span key={i}>例: {ex}<br /></span>)}
-            </p>
-          </>
+          <textarea name="note" placeholder="お相手への一言があれば書いてください"
+            style={{ width: '100%', minHeight: 56, padding: 10, fontSize: 12.5, border: '1px solid #211d17', background: '#fff', color: '#211d17', resize: 'none', boxSizing: 'border-box', marginTop: 8, fontFamily: "'BIZ UDPGothic', sans-serif" }} />
         )}
+        <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 6, marginBottom: 0, lineHeight: 1.7, fontStyle: 'italic' }}>
+          {noteExamples.map((ex, i) => <span key={i}>例: {ex}<br /></span>)}
+        </p>
+        <hr style={{ border: 'none', borderTop: '1px solid #d8cdb0', margin: '16px 0 14px' }} />
         <button type="submit" disabled={mode === 'custom' && !customText.trim()}
           style={{ width: '100%', padding: 13, background: '#211d17', color: '#f4eee0', border: 'none', fontWeight: 700, fontSize: 13, marginTop: 10 }}>
           このお部屋を作る
