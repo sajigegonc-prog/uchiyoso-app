@@ -13,14 +13,21 @@ function isTeacher(oc) {
   return /先生|教授|教師/.test(oc?.house || '')
 }
 
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)]
+}
+
 const COMMON_POOL = [
   { place: '図書室', time: '午後', text: '自習をしていた〇〇（あなた）、羽根ペンのインクを勢いよく振ってしまい、数滴が隣の席の〇〇（お相手）の羊皮紙に飛んでしまった。' },
   { place: '図書室', time: '午後', text: '最上段の本を取ろうとした〇〇（あなた）、踏み台がぐらついてバランスを崩し、たまたま通りかかった〇〇（お相手）の方へ倒れ込んでしまった。' },
   { place: 'ホグズミード', time: '休日の昼', text: '混雑した店内で〇〇（あなた）、後ろの客に押されて体勢を崩し、隣にいた〇〇（お相手）に手にしていた小袋をぶつけてしまった。' },
   { place: 'ホグワーツの中庭', time: '昼休み', text: '中庭で休憩していた〇〇（あなた）は、フィフィ・フィズビーで遊んでいる生徒をなんとなく眺めていた。ところがその生徒が着地に失敗し、こちらへ倒れ込んでくる。たまたま通りがかった〇〇（お相手）も、その巻き添えになってしまった。' },
-  { place: 'ホグワーツの廊下(1〜7階のいずれか)', time: '朝・昼・夜のいずれか', text: '廊下を歩いていた〇〇（あなた）の目の前に、噛みつきフリスビーが突然飛んできた。とっさに身をかわしたものの、その先ではまだフリスビーに気づいていない〇〇（お相手）が、こちらに向かって歩いてきていた。' },
   {
-    place: 'ホグワーツの大階段', time: 'ランダム',
+    place: 'ホグワーツの{floor}階廊下', time: '{time3}',
+    text: '廊下を歩いていた〇〇（あなた）の目の前に、噛みつきフリスビーが突然飛んできた。とっさに身をかわしたものの、その先ではまだフリスビーに気づいていない〇〇（お相手）が、こちらに向かって歩いてきていた。',
+  },
+  {
+    place: 'ホグワーツの大階段', time: '{time3}',
     text: '動く階段が急に切り替わり、目的の踊り場にたどり着けなくなってしまった〇〇（あなた）。同じように足止めを食らっていた〇〇（お相手）と、しばらく一緒に別の道を探すことになった。',
     excludeIf: (ocA, ocB) => isTeacher(ocA) && isTeacher(ocB),
   },
@@ -31,14 +38,31 @@ const HOUSE_POOL = [
 ]
 const HOUSE_SPECIFIC_POOL = [
   { house: 'スリザリン', place: 'スリザリンの談話室', time: '夕食後', text: '談話室で休憩していた〇〇（あなた）は、窓から湖を眺めていた。すると、見たこともない珍しい魔法生物が泳いでくるのが見えた。驚いてふと隣を見ると、〇〇（お相手）も同じ光景を目撃していた。' },
-  { house: 'ハッフルパフ', place: 'ハッフルパフ寮入口', time: '昼休みまたは夕食前', text: '授業からの帰り道、〇〇（あなた）が寮の樽を開けようとリズムよく叩いていると、急いでいた生徒がぶつかってきて、そのリズムが狂ってしまった。とたんに樽から酢が噴き出し、〇〇（あなた）は頭からお酢まみれに。ふと横を見ると、たまたま居合わせた〇〇（お相手）も、同じくお酢まみれになっていた。' },
+  { house: 'ハッフルパフ', place: 'ハッフルパフ寮入口', time: '{time_lunch_dinner}', text: '授業からの帰り道、〇〇（あなた）が寮の樽を開けようとリズムよく叩いていると、急いでいた生徒がぶつかってきて、そのリズムが狂ってしまった。とたんに樽から酢が噴き出し、〇〇（あなた）は頭からお酢まみれに。ふと横を見ると、たまたま居合わせた〇〇（お相手）も、同じくお酢まみれになっていた。' },
   { house: 'レイブンクロー', place: 'レイブンクローの談話室(星空の間)', time: '夜', text: '天井に星空が映し出される談話室で、〇〇（あなた）は課題をしているうちについうたた寝してしまい、机に突っ伏した拍子にインクの小瓶を倒してしまう。同じテーブルの端にいた〇〇（お相手）の課題にまでインクが飛び散ってしまい、二人揃って慌てて拭き取ることになった。' },
-  { house: 'グリフィンドール', place: 'グリフィンドール寮入口', time: '昼または夜', text: 'グリフィンドールの寮の入口で、太った婦人はなかなか〇〇（あなた）の合言葉を聞いてくれない。最近覚えた歌を披露したくてたまらないらしく、オペラを熱唱し続けている。そこへ偶然、〇〇（お相手）も寮に帰ってきた。太った婦人は、相変わらず熱唱中だった。' },
+  { house: 'グリフィンドール', place: 'グリフィンドール寮入口', time: '{time_noon_night}', text: 'グリフィンドールの寮の入口で、太った婦人はなかなか〇〇（あなた）の合言葉を聞いてくれない。最近覚えた歌を披露したくてたまらないらしく、オペラを熱唱し続けている。そこへ偶然、〇〇（お相手）も寮に帰ってきた。太った婦人は、相変わらず熱唱中だった。' },
 ]
 const GRADE_POOL = [
   { place: '寮合同授業(薬草学)', time: '午前〜午後', text: '今日のペア作業は、先生の指示で〇〇（あなた）と〇〇（お相手）が組むことになった。' },
   { place: '寮合同授業(魔法生物飼育学)', time: '午前〜午後', text: '実習のペア分けで、〇〇（あなた）と〇〇（お相手）が同じ班になった。' },
 ]
+
+function resolveRandomTokens(item) {
+  const floor = String(1 + Math.floor(Math.random() * 7))
+  const time3 = pickRandom(['朝', '昼', '夜'])
+  const timeLunchDinner = pickRandom(['昼休み', '夕食前'])
+  const timeNoonNight = pickRandom(['昼', '夜'])
+  return {
+    place: item.place.replace('{floor}', floor),
+    time: item.time
+      .replace('{time3}', time3)
+      .replace('{time_lunch_dinner}', timeLunchDinner)
+      .replace('{time_noon_night}', timeNoonNight),
+    text: item.text,
+    excludeIf: item.excludeIf,
+  }
+}
+
 function yearGroup(birthDate) {
   if (!birthDate) return null
   const d = new Date(birthDate)
@@ -124,7 +148,8 @@ export default async function RandomMatchPage() {
   pool = pool.filter((item) => !item.excludeIf || !item.excludeIf(myOc, friendOc))
   if (pool.length === 0) pool = COMMON_POOL
 
-  const pick = pool[Math.floor(Math.random() * pool.length)]
+  const picked = pickRandom(pool)
+  const pick = resolveRandomTokens(picked)
   const situationText = pick.text.replace(/〇〇（あなた）/g, myOc.name).replace(/〇〇（お相手）/g, friendOc.name)
   const gachaPick = { place: pick.place, time: pick.time, text: situationText }
   const ageDiffLabel = ageLabel(myOc.birth_date, friendOc.birth_date)
@@ -155,7 +180,7 @@ export default async function RandomMatchPage() {
         confirmAction={confirmRandomMatch}
       />
 
-      <a href="/chat/random" style={{ display: 'block', width: '100%', maxWidth: 360, marginTop: 10, padding: 13, background: '#4a5580', color: '#f4eee0', border: 'none', fontWeight: 700, fontSize: 13, textAlign: 'center', textDecoration: 'none', boxSizing: 'border-box' }}>別の友達を探す</a>
+      <Link href="/chat/random" style={{ display: 'block', width: '100%', maxWidth: 360, marginTop: 10, padding: 13, background: '#4a5580', color: '#f4eee0', border: 'none', fontWeight: 700, fontSize: 13, textAlign: 'center', textDecoration: 'none', boxSizing: 'border-box' }}>別の友達を探す</Link>
       <Link href="/chat" style={{ display: 'block', marginTop: 20, marginBottom: 30, fontSize: 11.5, color: '#6b6250' }}>やっぱりやめる</Link>
     </div>
   )
