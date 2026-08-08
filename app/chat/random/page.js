@@ -180,8 +180,10 @@ export default async function RandomMatchPage() {
         confirmAction={confirmRandomMatch}
       />
 
-      <Link href="/chat/random" style={{ display: 'block', width: '100%', maxWidth: 360, marginTop: 10, padding: 13, background: '#4a5580', color: '#f4eee0', border: 'none', fontWeight: 700, fontSize: 13, textAlign: 'center', textDecoration: 'none', boxSizing: 'border-box' }}>別の友達を探す</Link>
-      <Link href="/chat" style={{ display: 'block', marginTop: 20, marginBottom: 30, fontSize: 11.5, color: '#6b6250' }}>やっぱりやめる</Link>
+<p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 14, textAlign: 'center', fontStyle: 'italic', lineHeight: 1.8 }}>
+        別の友達を探したい場合は、画面を上にスワイプして更新してください
+      </p>
+          <Link href="/chat" style={{ display: 'block', marginTop: 20, marginBottom: 30, fontSize: 11.5, color: '#6b6250' }}>やっぱりやめる</Link>
     </div>
   )
 }
