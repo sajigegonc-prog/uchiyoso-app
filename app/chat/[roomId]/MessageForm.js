@@ -1,5 +1,6 @@
 'use client'
 import { useRef, useState, useEffect } from 'react'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useFormStatus } from 'react-dom'
 import FrogChocolateButton from './FrogChocolateButton'
 import SceneTransitionButton from './SceneTransitionButton'
@@ -31,8 +32,18 @@ export default function MessageForm({
   const lastSentRef = useRef(0)
   const [cooldown, setCooldown] = useState(false)
   const { sendTyping } = useTypingChannel(`typing-${roomId}`, myUserId)
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [open, setOpen] = useState(false)
-  const [oocOpen, setOocOpen] = useState(false)
+  const oocOpen = searchParams.get('ooc') === '1'
+  function setOocOpen(next) {
+    if (next) {
+      router.replace(`${pathname}?ooc=1`, { scroll: false })
+    } else {
+      router.replace(pathname, { scroll: false })
+    }
+  }
   const [extrasOpen, setExtrasOpen] = useState(true)
   const initialOc = myOcs.find((oc) => oc.id === initialOcId) || myOcs[0]
   const [speaker, setSpeaker] = useState({ type: 'oc', id: initialOc?.id, name: initialOc?.name })
