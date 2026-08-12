@@ -22,13 +22,14 @@ const typeBtnStyle = (active) => ({
   fontSize: 14, fontWeight: 700, cursor: 'pointer', textAlign: 'left',
 })
 
-  export default function NewRoomForm({ ocs, friendOcs, initialFriendOcId, dreamPartner }) {
+    export default function NewRoomForm({ ocs, friendOcs, initialFriendOcId, dreamPartner }) {
   const router = useRouter()
+  const initialFriendUserId = friendOcs.find((f) => f.oc_id === initialFriendOcId)?.friend_user_id || ''
   const [step, setStep] = useState(0)
-  const [roomType, setRoomType] = useState('')
+  const [roomType, setRoomType] = useState(initialFriendOcId ? 'one' : '')
   const [speakerOcId, setSpeakerOcId] = useState(ocs[0]?.id || '')
   const [extraOcIds, setExtraOcIds] = useState([])
-  const [oneFriendUserId, setOneFriendUserId] = useState('')
+  const [oneFriendUserId, setOneFriendUserId] = useState(initialFriendUserId)
   const [oneFriendOcId, setOneFriendOcId] = useState(initialFriendOcId || '')
   const [groupSlots, setGroupSlots] = useState([{ friendUserId: '', ocId: '' }])
   const [title, setTitle] = useState('')
