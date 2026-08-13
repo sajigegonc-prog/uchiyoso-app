@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import LoginButton from './LoginButton'
 import PrivacyPolicyModal from './PrivacyPolicyModal'
+import CreditsModal from './CreditsModal'
 
 export const metadata = {
   title: 'うちよそクラブ',
@@ -38,6 +39,7 @@ export default async function LoginPage() {
           権利者様からのご連絡があった場合、速やかに削除いたします。
         </p>
         <PrivacyPolicyModal />
+        <CreditsModal />
       </div>
     </div>
   )
