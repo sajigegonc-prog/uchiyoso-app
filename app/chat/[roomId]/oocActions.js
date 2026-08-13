@@ -9,11 +9,18 @@ export async function sendOocMessage(formData) {
   if (!user) redirect('/')
   const roomId = formData.get('room_id')?.toString()
   const content = formData.get('content')?.toString().trim()
-  if (roomId && content) {
-    await supabase.from('room_ooc_messages').insert({ room_id: roomId, user_id: user.id, content })
+  const imageUrl = formData.get('image_url')?.toString()
+  if (roomId && (content || imageUrl)) {
+    const row = { room_id: roomId, user_id: user.id, content: content || '' }
+    if (imageUrl) {
+      row.image_url = imageUrl
+      row.image_expires_at = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+    }
+    await supabase.from('room_ooc_messages').insert(row)
   }
   revalidatePath(`/chat/${roomId}`)
 }
+
 
 export async function markOocRead(roomId) {
   const supabase = await createClient()
