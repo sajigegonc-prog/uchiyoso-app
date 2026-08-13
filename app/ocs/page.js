@@ -20,7 +20,7 @@ export default async function OCsPage() {
 
     const { data: ocs } = await supabase
     .from('ocs')
-    .select('id, name, oc_type, house, icon_url')
+    .select('id, name, oc_type, house, career, era_focus, icon_url')
     .eq('user_id', user.id)
     .eq('is_dream_partner', false)
     .order('created_at', { ascending: true })
@@ -92,12 +92,29 @@ export default async function OCsPage() {
                 ) : oc.name?.charAt(0)}
               </div>
               <div>
+              <div>
                 <div style={{ fontSize: 15, fontWeight: 700, color: '#211d17', fontFamily: 'Georgia, serif' }}>
                   {oc.name}
                 </div>
-                <div style={{ fontSize: 11.5, color: '#6b6250', marginTop: 3, fontStyle: 'italic' }}>
-                  {oc.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{oc.house ? ` ・ ${oc.house}` : ''}
-                </div>
+                {oc.era_focus === 'career' ? (
+                  <>
+                    <div style={{ fontSize: 11.5, color: '#6b6250', marginTop: 3, fontStyle: 'italic' }}>
+                      {oc.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{oc.career ? ` ・ ${oc.career}` : ''}
+                    </div>
+                    {oc.house && (
+                      <div style={{ fontSize: 10, color: '#8a8168', marginTop: 2 }}>在学時└ {oc.house}卒</div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div style={{ fontSize: 11.5, color: '#6b6250', marginTop: 3, fontStyle: 'italic' }}>
+                      {oc.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{oc.house ? ` ・ ${oc.house}` : ''}
+                    </div>
+                    {oc.career && (
+                      <div style={{ fontSize: 10, color: '#8a8168', marginTop: 2 }}>卒後└ {oc.career}</div>
+                    )}
+                  </>
+                )}
               </div>
             </Link>
           ))}
