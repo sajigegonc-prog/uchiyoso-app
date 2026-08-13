@@ -7,6 +7,8 @@ import CoachMark from '@/components/CoachMark'
 import useTypingChannel from '@/lib/useTypingChannel'
 import TypingDots from '@/components/TypingDots'
 import useKeyboardOffset from '@/components/useKeyboardOffset'
+import { resizeImageFile } from './resizeImage'
+import { createClient } from '@/lib/supabaseClient'
 
 function SubmitBtn({ cooldown }) {
   const { pending } = useFormStatus()
