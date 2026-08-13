@@ -32,10 +32,10 @@ export default async function PublicOCDetailPage({ params }) {
       <div style={{ fontSize: 10.5, color: '#8a8168', marginTop: 6, fontStyle: 'italic', textAlign: 'center' }}>
         {oc.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{oc.house ? ` ・ ${oc.house}` : ''}
       </div>
-      {oc.oc_type === 'dreamer' && oc.paired_character && (
-        <div style={{ marginTop: 22 }}>
-          <div style={{ fontSize: 10, color: '#6b6250', letterSpacing: '.05em' }}>お相手</div>
-          <div style={{ fontSize: 13, color: '#211d17', marginTop: 4 }}>{oc.paired_character}</div>
+        {oc.career && (
+        <div style={{ marginTop: 16 }}>
+          <div style={{ fontSize: 10, color: '#6b6250', letterSpacing: '.05em' }}>卒業後の進路</div>
+          <div style={{ fontSize: 13, color: '#211d17', marginTop: 4 }}>{oc.career}</div>
         </div>
       )}
       {oc.birth_date && (
