@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import LoginButton from './LoginButton'
+import PrivacyPolicyModal from './PrivacyPolicyModal'
 
 export const metadata = {
   title: 'うちよそクラブ',
@@ -29,13 +30,14 @@ export default async function LoginPage() {
           紳士、淑女、そしてゴーストの皆さん、<br />全てのうちよそ魔人に捧げます。
         </div>
         <LoginButton />
-            <p style={{ fontSize: 9, color: '#7a7160', marginTop: 26, lineHeight: 1.8 }}>
+        <p style={{ fontSize: 9, color: '#7a7160', marginTop: 26, lineHeight: 1.8 }}>
           本アプリは個人が制作した非公式のファンメイドアプリです。<br />
           「ハリー・ポッター」「ウィザーディング・ワールド」の<br />
           原作者・出版社・映画会社等とは一切関係ありません。<br />
           営利目的の運営ではなく、利用料・広告収入等は一切発生していません。<br />
           権利者様からのご連絡があった場合、速やかに削除いたします。
         </p>
+        <PrivacyPolicyModal />
       </div>
     </div>
   )
