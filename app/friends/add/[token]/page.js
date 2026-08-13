@@ -79,11 +79,27 @@ export default async function ProfilePage({ params }) {
               <img src={oc.icon_url} alt={oc.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : oc.name?.charAt(0)}
           </div>
-          <div>
+             <div>
             <div style={{ fontSize: 13.5, fontWeight: 700, color: '#211d17' }}>{oc.name}</div>
-            <div style={{ fontSize: 10.5, color: '#6b6250', marginTop: 2, fontStyle: 'italic' }}>
-              {oc.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{oc.house ? ` ・ ${oc.house}` : ''}
-            </div>
+            {oc.era_focus === 'career' ? (
+              <>
+                <div style={{ fontSize: 10.5, color: '#6b6250', marginTop: 2, fontStyle: 'italic' }}>
+                  {oc.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{oc.career ? ` ・ ${oc.career}` : ''}
+                </div>
+                {oc.house && (
+                  <div style={{ fontSize: 9.5, color: '#8a8168', marginTop: 2 }}>在学時└ {oc.house}卒</div>
+                )}
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: 10.5, color: '#6b6250', marginTop: 2, fontStyle: 'italic' }}>
+                  {oc.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{oc.house ? ` ・ ${oc.house}` : ''}
+                </div>
+                {oc.career && (
+                  <div style={{ fontSize: 9.5, color: '#8a8168', marginTop: 2 }}>卒後└ {oc.career}</div>
+                )}
+              </>
+            )}
           </div>
         </Link>
       ))}
