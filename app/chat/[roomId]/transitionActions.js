@@ -2,24 +2,20 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
+import { buildTranscriptText } from './transcriptUtil'
 
 async function generateTranscript(supabase, roomId, viewerId) {
+  const { data: room } = await supabase.from('chat_rooms').select('room_type, primary_oc_id').eq('id', roomId).maybeSingle()
   const { data: myOcs } = await supabase.from('ocs').select('id').eq('user_id', viewerId)
   const myOcIds = new Set((myOcs || []).map((o) => o.id))
 
   const { data: messages } = await supabase
     .from('messages')
-    .select('content, created_at, sender_oc_id, sender_npc_id, is_system, ocs(name), chat_room_npcs(name)')
+    .select('content, created_at, sender_oc_id, sender_npc_id, is_system, deleted_at, ocs(name), chat_room_npcs(name)')
     .eq('room_id', roomId)
     .order('created_at', { ascending: true })
 
-  const lines = (messages || []).map((m) => {
-    if (m.is_system) return `（${m.content}）`
-    const speaker = m.ocs?.name || m.chat_room_npcs?.name || '???'
-    const mark = m.sender_oc_id && myOcIds.has(m.sender_oc_id) ? '★' : ''
-    return `${mark}${speaker}: ${m.content}`
-  })
-  return lines.join('\n')
+  return buildTranscriptText(messages, myOcIds, { roomType: room?.room_type, primaryOcId: room?.primary_oc_id })
 }
 
 async function checkAndComplete(supabase, roomId) {
