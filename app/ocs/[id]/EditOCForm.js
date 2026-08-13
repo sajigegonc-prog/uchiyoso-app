@@ -59,7 +59,7 @@ export default function EditOCForm({ oc, action }) {
         </div>
       )}
       <div style={{ marginBottom: 14 }}>
-        <label style={labelStyle}>寮・職業</label>
+        <label style={labelStyle}>寮</label>
         <select value={house} onChange={(e) => setHouse(e.target.value)} style={inputStyle}>
           <option value="">選んでください</option>
           {HOUSES.map((h) => <option key={h} value={h}>{h}</option>)}
