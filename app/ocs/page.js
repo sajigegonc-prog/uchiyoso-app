@@ -92,7 +92,6 @@ export default async function OCsPage() {
                 ) : oc.name?.charAt(0)}
               </div>
               <div>
-              <div>
                 <div style={{ fontSize: 15, fontWeight: 700, color: '#211d17', fontFamily: 'Georgia, serif' }}>
                   {oc.name}
                 </div>
