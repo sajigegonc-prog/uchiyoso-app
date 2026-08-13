@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
 import { getNotifications } from '@/lib/notifications'
 import PrivacyPolicyModal from '../PrivacyPolicyModal'
+import CreditsModal from '../CreditsModal'
 import CoachMark from '@/components/CoachMark'
 import { markHomeTutorialSeen } from '../tutorialActions'
 import { signOutOnly } from '../dev/reset/actions'
@@ -120,6 +121,7 @@ export default async function HomePage() {
           </button>
         </form>
         <PrivacyPolicyModal />
+        <CreditsModal />
       </div>
     </>
   )
