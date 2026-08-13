@@ -46,7 +46,7 @@ export default function OocPanel({
   const [customText, setCustomText] = useState('')
   const [proposing, setProposing] = useState(false)
   const [respondPending, setRespondPending] = useState(false)
-
+  const [extrasOpen, setExtrasOpen] = useState(true)
   const LINE_HEIGHT = 20
   const MAX_LINES = 5
   function autoResize() {
@@ -221,45 +221,57 @@ export default function OocPanel({
         </div>
       )}
 
+     <div style={{
+        maxHeight: extrasOpen ? 60 : 0,
+        opacity: extrasOpen ? 1 : 0,
+        overflow: 'hidden',
+        transition: 'max-height .3s cubic-bezier(.4,0,.2,1), opacity .25s ease',
+        flexShrink: 0, background: '#12151f',
+      }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '10px 16px' }}>
+          <button
+            id="coach-ooc-gacha-btn"
+            type="button"
+            onClick={openGacha}
+            style={{
+              flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
+              border: 'none', background: '#3d4d75', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
+            }}
+          >✨</button>
+          <button
+            type="button"
+            onClick={openCustom}
+            style={{
+              flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
+              border: 'none', background: '#2f3a5c', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
+            }}
+            aria-label="シチュエーションを自由記入"
+          >✏️</button>
+          <button
+            id="coach-ooc-log-btn"
+            type="button"
+            onClick={() => setLogConfirming(true)}
+            style={{
+              flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
+              border: 'none', background: '#2f3a5c', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
+            }}
+            aria-label="ログを書き出す"
+          >📋</button>
+        </div>
+      </div>
+
       <form id="ooc-input-row" action={sendAction} onSubmit={handleSubmit} style={{
-        flexShrink: 0, display: 'flex', gap: 8, padding: '12px 16px',
+        flexShrink: 0, display: 'flex', gap: 6, alignItems: 'flex-end', padding: '12px 16px',
         background: '#12151f', borderTop: '1px solid #3a4360',
         paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
       }}>
         <input type="hidden" name="room_id" value={roomId} />
-        <button
-          id="coach-ooc-gacha-btn"
-          type="button"
-          onClick={openGacha}
-          style={{
-            flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
-            border: 'none', background: '#3d4d75', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
-          }}
-        >✨</button>
-        <button
-          type="button"
-          onClick={openCustom}
-          style={{
-            flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
-            border: 'none', background: '#2f3a5c', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
-          }}
-          aria-label="シチュエーションを自由記入"
-        >✏️</button>
-        <button
-          id="coach-ooc-log-btn"
-          type="button"
-          onClick={() => setLogConfirming(true)}
-          style={{
-            flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
-            border: 'none', background: '#2f3a5c', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
-          }}
-          aria-label="ログを書き出す"
-        >📋</button>
         <textarea
           ref={inputRef}
           name="content"
           rows={1}
           placeholder="中の人として発言"
+          onFocus={() => setExtrasOpen(false)}
           onChange={() => sendTyping(myDisplayName)}
           onInput={autoResize}
           onKeyDown={handleKeyDown}
@@ -270,8 +282,20 @@ export default function OocPanel({
           }}
         />
         <SubmitBtn cooldown={cooldown} />
+        <button
+          type="button"
+          onClick={() => setExtrasOpen((v) => !v)}
+          aria-label="メニューの開閉"
+          style={{
+            flexShrink: 0, width: 28, height: 38, border: 'none', background: 'none',
+            color: '#8a92b5', fontSize: 13, cursor: 'pointer',
+            transition: 'transform .3s ease',
+            transform: extrasOpen ? 'rotate(0deg)' : 'rotate(180deg)',
+          }}
+        >
+          ▼
+        </button>
       </form>
-
       {situationOpen && (
         <div onClick={() => setSituationOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110 }}>
           <div onClick={(e) => e.stopPropagation()} style={{ background: '#1c2133', border: '1px solid #3a4360', borderRadius: 4, padding: 18, maxWidth: 300, width: '90%' }}>
