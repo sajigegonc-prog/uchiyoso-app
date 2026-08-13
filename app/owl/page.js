@@ -72,30 +72,30 @@ export default async function OwlMailPage({ searchParams }) {
 
   const expandedIds = new Set((searchParams?.expand || '').split(',').filter(Boolean))
 
-    function LetterRow({ letter, delay = 0 }) {
+    function LetterRow({ letter, delay = 0, forceSentView = false }) {
+    const showAsSent = forceSentView || !letter.isReceived
     return (
       <div
         className="fade-in-notice"
         style={{
           display: 'flex', alignItems: 'center', gap: 10,
           background: 'linear-gradient(160deg, #f3e6c8 0%, #e8d6ac 55%, #ddc794 100%)',
-          opacity: letter.unread ? 1 : 0.55,
+          opacity: showAsSent ? 1 : (letter.unread ? 1 : 0.55),
           border: '1px solid #c9a876', padding: '10px 10px', marginTop: 8,
           animationDelay: `${delay}s`,
         }}
       >
         <Link href={`/owl/${letter.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flex: 1 }}>
-          <span style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: letter.unread ? '#8a2418' : 'transparent' }} />
+          <span style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: !showAsSent && letter.unread ? '#8a2418' : 'transparent' }} />
           <div>
-            <div style={{ fontSize: 12.5, fontWeight: letter.unread ? 700 : 400, color: '#3d2c14', fontFamily: 'Georgia, serif' }}>
-              {letter.isReceived ? `${letter.otherOcName} より` : `${letter.otherOcName} へ`}
+            <div style={{ fontSize: 12.5, fontWeight: !showAsSent && letter.unread ? 700 : 400, color: '#3d2c14', fontFamily: 'Georgia, serif' }}>
+              {showAsSent ? `${letter.otherOcName} へ` : `${letter.otherOcName} より`}
             </div>
-            {letter.unread && (
+            {!showAsSent && letter.unread && (
               <div style={{ fontSize: 9.5, color: '#7a6537', marginTop: 2, fontStyle: 'italic' }}>未開封</div>
             )}
           </div>
         </Link>
-        
       </div>
     )
   }
@@ -166,7 +166,7 @@ export default async function OwlMailPage({ searchParams }) {
         {sent.length === 0 && (
           <p style={{ fontSize: 12.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>まだ送っていません。</p>
         )}
-        {sent.map((letter) => <LetterRow key={letter.id} letter={letter} />)}
+        {sent.map((letter) => <LetterRow key={letter.id} letter={letter} forceSentView />)} 
       </div>
     </div>
   )
