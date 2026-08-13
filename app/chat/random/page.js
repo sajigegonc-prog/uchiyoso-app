@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 const DORMS = ['グリフィンドール', 'ハッフルパフ', 'レイブンクロー', 'スリザリン']
 
 function isTeacher(oc) {
-  return /先生|教授|教師/.test(oc?.house || '')
+  return /先生|教授|教師/.test(oc?.house || '') || /先生|教授|教師/.test(oc?.career || '')
 }
 
 function pickRandom(arr) {
@@ -234,11 +234,11 @@ export default async function RandomMatchPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
 
-  const { data: myOcs } = await supabase.from('ocs').select('id, name, house, birth_date, icon_url').eq('user_id', user.id).eq('is_dream_partner', false)
+  const { data: myOcs } = await supabase.from('ocs').select('id, name, house, career, birth_date, icon_url').eq('user_id', user.id).eq('is_dream_partner', false)
   const { data: friendOcs } = await supabase.rpc('list_friend_ocs')
   const friendOcIds = (friendOcs || []).map((f) => f.oc_id)
   const { data: friendOcDetails } = friendOcIds.length > 0
-    ? await supabase.from('ocs').select('id, name, house, birth_date, icon_url').in('id', friendOcIds)
+    ? await supabase.from('ocs').select('id, name, house, career, birth_date, icon_url').in('id', friendOcIds)
     : { data: [] }
 
   const { data: existing1on1 } = await supabase
@@ -317,9 +317,9 @@ export default async function RandomMatchPage() {
       <div style={{ width: '100%', maxWidth: 360, border: '4px double #211d17', padding: 18, textAlign: 'center', marginTop: 20, background: '#fff' }}>
         <div style={{ fontSize: 9, color: '#8a8168', letterSpacing: '.1em', marginBottom: 8 }}>🔒 お相手はランダムで決定済み・固定</div>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-          <RandomMatchOcIcon name={myOc.name} iconUrl={myOc.icon_url} house={myOc.house} ageDiffLabel="あなたです" />
+          <RandomMatchOcIcon name={myOc.name} iconUrl={myOc.icon_url} house={myOc.house} career={myOc.career} ageDiffLabel="あなたです" />
           <span style={{ fontSize: 11, color: '#8a8168' }}>×</span>
-          <RandomMatchOcIcon name={friendOc.name} iconUrl={friendOc.icon_url} house={friendOc.house} ageDiffLabel={ageDiffLabel} />
+          <RandomMatchOcIcon name={friendOc.name} iconUrl={friendOc.icon_url} house={friendOc.house} career={friendOc.career} ageDiffLabel={ageDiffLabel} />
         </div>
         <div style={{ fontSize: 9.5, color: '#8a8168', marginBottom: 4 }}>アイコンをタップして、お相手の詳細をご確認ください。</div>
         <div style={{ fontSize: 15, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{myOc.name} × {friendOc.name}</div>
