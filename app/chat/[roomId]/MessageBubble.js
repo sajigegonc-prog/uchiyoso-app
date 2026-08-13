@@ -100,6 +100,12 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
                   <div style={{ fontSize: 13, marginTop: 2 }}>{detail.paired_character}</div>
                 </div>
               )}
+                {detail.career && (
+                <div style={{ marginTop: 10 }}>
+                  <div style={{ fontSize: 10, color: '#6b6250' }}>卒業後の進路</div>
+                  <div style={{ fontSize: 13, marginTop: 2 }}>{detail.career}</div>
+                </div>
+              )}
               {detail.birth_date && (
                 <div style={{ marginTop: 10 }}>
                   <div style={{ fontSize: 10, color: '#6b6250' }}>生年月日</div>
