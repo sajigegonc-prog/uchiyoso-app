@@ -15,7 +15,7 @@ export async function getOcDetailForRoom(ocId, roomId) {
   if (!memberships || memberships.length === 0) return { error: `メンバー情報が見つかりません(room:${roomId} / user:${user.id})` }
   const { data: oc, error: ocErr } = await supabase
     .from('ocs')
-    .select('name, icon_url, house, oc_type, birth_date, description, paired_character')
+    .select('name, icon_url, house, oc_type, birth_date, description, paired_character, career') 
     .eq('id', ocId)
     .maybeSingle()
   if (ocErr) return { error: `OC取得エラー: ${ocErr.message}` }
