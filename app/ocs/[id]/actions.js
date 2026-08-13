@@ -14,6 +14,7 @@ export async function updateOC(formData) {
   const pairedCharacter = formData.get('paired_character')?.toString().trim()
   const house = formData.get('house')?.toString().trim()
   const career = formData.get('career')?.toString().trim()
+  const eraFocus = formData.get('era_focus')?.toString() || 'student'
   const birthDate = formData.get('birth_date')?.toString()
   const description = formData.get('description')?.toString().trim()
   if (id && name) {
@@ -23,6 +24,7 @@ export async function updateOC(formData) {
       paired_character: pairedCharacter || null,
       house: house || null,
       career: career || null,
+      era_focus: eraFocus,
       birth_date: birthDate || null,
       description: description || null,
     }).eq('id', id).eq('user_id', user.id)
