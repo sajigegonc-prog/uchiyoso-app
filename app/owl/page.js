@@ -42,10 +42,12 @@ export default async function OwlMailPage({ searchParams }) {
   }
 
   const enriched = (letters || []).map((l) => {
+    const isSelfSent = myOcIds.includes(l.sender_oc_id) && myOcIds.includes(l.recipient_oc_id)
     const isReceived = myOcIds.includes(l.recipient_oc_id)
     return {
       ...l,
       isReceived,
+      isSelfSent,
       unread: isReceived && !l.read_at,
       myOcId: isReceived ? l.recipient_oc_id : l.sender_oc_id,
       otherOcName: nameOf(isReceived ? l.sender_oc_id : l.recipient_oc_id),
@@ -53,7 +55,7 @@ export default async function OwlMailPage({ searchParams }) {
   })
 
   const received = enriched.filter((l) => l.isReceived)
-  const sent = enriched.filter((l) => !l.isReceived)
+  const sent = enriched.filter((l) => !l.isReceived || l.isSelfSent)
 
   const receivedGroupMap = new Map()
   for (const l of received) {
