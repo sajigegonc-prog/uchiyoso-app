@@ -31,6 +31,12 @@ export default function CreditsModal({ dark = true }) {
             <div style={{ fontSize: 12, color: '#d8cdb0', lineHeight: 2 }}>
               <p style={{ margin: 0 }}>制作: 藤堂</p>
               <p style={{ margin: '10px 0 0' }}>
+                X:<br />
+                <a href="https://x.com/Milla_tohdoh" target="_blank" rel="noopener noreferrer" style={{ color: '#c9b98a' }}>
+                  @Milla_tohdoh
+                </a>
+              </p>
+              <p style={{ margin: '10px 0 0' }}>
                 個人サイト:<br />
                 <a href="https://w-chronicle.raindrop.jp/index.html" target="_blank" rel="noopener noreferrer" style={{ color: '#c9b98a' }}>
                   https://w-chronicle.raindrop.jp/index.html
