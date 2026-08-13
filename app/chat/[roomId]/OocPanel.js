@@ -39,6 +39,13 @@ export default function OocPanel({
   const { typerNames, sendTyping } = useTypingChannel(`typing-ooc-${roomId}`, myUserId)
   const keyboardOffset = useKeyboardOffset()
 
+  const [extrasOpen, setExtrasOpen] = useState(true)
+
+  const [selectedImage, setSelectedImage] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef(null)
+
   const [situationOpen, setSituationOpen] = useState(false)
   const [situationMode, setSituationMode] = useState('gacha')
   const [drawResult, setDrawResult] = useState(null)
@@ -48,7 +55,7 @@ export default function OocPanel({
   const [customText, setCustomText] = useState('')
   const [proposing, setProposing] = useState(false)
   const [respondPending, setRespondPending] = useState(false)
-  const [extrasOpen, setExtrasOpen] = useState(true)
+
   const LINE_HEIGHT = 20
   const MAX_LINES = 5
   function autoResize() {
@@ -77,16 +84,53 @@ export default function OocPanel({
     markOocRead(roomId)
   }, [roomId, messages?.length])
 
-  function handleSubmit(e) {
+  function canSubmitNow() {
     const nowTs = Date.now()
-    if (submittingRef.current || nowTs - lastSentRef.current < 2000) { e.preventDefault(); return }
-    lastSentRef.current = nowTs
+    if (submittingRef.current || nowTs - lastSentRef.current < 2000) return false
+    return true
+  }
+
+  function markSubmitted() {
+    lastSentRef.current = Date.now()
     submittingRef.current = true
     setCooldown(true)
     setTimeout(() => setCooldown(false), 2000)
     setTimeout(() => {
       submittingRef.current = false
-      if (inputRef.current) inputRef.current.value = ''
+    }, 600)
+  }
+
+  async function handleFormSubmit(e) {
+    if (!canSubmitNow()) {
+      e.preventDefault()
+      return
+    }
+
+    if (selectedImage) {
+      e.preventDefault()
+      markSubmitted()
+      setUploading(true)
+      try {
+        const supabase = createClient()
+        const path = `${myUserId}/${roomId}/${Date.now()}.jpg`
+        const { error: uploadError } = await supabase.storage.from('ooc-images').upload(path, selectedImage, { contentType: 'image/jpeg' })
+        if (!uploadError) {
+          const { data } = supabase.storage.from('ooc-images').getPublicUrl(path)
+          const formData = new FormData(e.target)
+          formData.set('image_url', data.publicUrl)
+          await sendAction(formData)
+        }
+      } finally {
+        setUploading(false)
+        clearImage()
+        if (inputRef.current) { inputRef.current.value = ''; autoResize() }
+      }
+      return
+    }
+
+    markSubmitted()
+    setTimeout(() => {
+      if (inputRef.current) { inputRef.current.value = ''; autoResize() }
     }, 600)
   }
 
@@ -95,6 +139,20 @@ export default function OocPanel({
       e.preventDefault()
       e.currentTarget.form?.requestSubmit()
     }
+  }
+
+  async function handleImageSelect(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const resized = await resizeImageFile(file)
+    setSelectedImage(resized)
+    setImagePreview(URL.createObjectURL(resized))
+    e.target.value = ''
+  }
+
+  function clearImage() {
+    setSelectedImage(null)
+    setImagePreview(null)
   }
 
   function openGacha() {
@@ -193,8 +251,13 @@ export default function OocPanel({
             return (
               <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start' }}>
                 {showName && <div style={{ fontSize: 10, color: '#7a82a0', marginBottom: 2, fontFamily: "'Courier New', monospace" }}>{msg.senderName}</div>}
-                <div style={{ maxWidth: '75%', padding: '9px 13px', borderRadius: 3, fontSize: 14, lineHeight: 1.5, background: mine ? '#4a5580' : '#252b40', color: '#e8eaf5', border: '1px solid #3a4360' }}>
-                  {msg.content}
+                <div style={{ maxWidth: '75%', padding: msg.image_url ? 6 : '9px 13px', borderRadius: 3, fontSize: 14, lineHeight: 1.5, background: mine ? '#4a5580' : '#252b40', color: '#e8eaf5', border: '1px solid #3a4360' }}>
+                  {msg.image_url && (
+                    <a href={msg.image_url} target="_blank" rel="noopener noreferrer">
+                      <img src={msg.image_url} alt="" style={{ display: 'block', maxWidth: '100%', maxHeight: 240, borderRadius: 2 }} />
+                    </a>
+                  )}
+                  {msg.content && <div style={{ padding: msg.image_url ? '6px 4px 2px' : 0 }}>{msg.content}</div>}
                 </div>
               </div>
             )
@@ -223,7 +286,7 @@ export default function OocPanel({
         </div>
       )}
 
-     <div style={{
+      <div style={{
         maxHeight: extrasOpen ? 60 : 0,
         opacity: extrasOpen ? 1 : 0,
         overflow: 'hidden',
@@ -250,6 +313,15 @@ export default function OocPanel({
             aria-label="シチュエーションを自由記入"
           >✏️</button>
           <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
+              border: 'none', background: '#2f3a5c', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
+            }}
+            aria-label="画像を添付"
+          >📎</button>
+          <button
             id="coach-ooc-log-btn"
             type="button"
             onClick={() => setLogConfirming(true)}
@@ -262,42 +334,52 @@ export default function OocPanel({
         </div>
       </div>
 
-      <form id="ooc-input-row" action={sendAction} onSubmit={handleSubmit} style={{
-        flexShrink: 0, display: 'flex', gap: 6, alignItems: 'flex-end', padding: '12px 16px',
+      <form id="ooc-input-row" action={sendAction} onSubmit={handleFormSubmit} style={{
+        flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 6, padding: '12px 16px',
         background: '#12151f', borderTop: '1px solid #3a4360',
         paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
       }}>
-        <input type="hidden" name="room_id" value={roomId} />
-        <textarea
-          ref={inputRef}
-          name="content"
-          rows={1}
-          placeholder="中の人として発言"
-          onFocus={() => setExtrasOpen(false)}
-          onChange={() => sendTyping(myDisplayName)}
-          onInput={autoResize}
-          onKeyDown={handleKeyDown}
-          style={{
-            flex: 1, border: '1px solid #3a4360', borderRadius: 3, padding: '10px 12px', fontSize: 16,
-            background: '#252b40', color: '#e8eaf5', fontFamily: "'Courier New', monospace",
-            resize: 'none', overflowY: 'auto', lineHeight: '20px',
-          }}
-        />
-        <SubmitBtn cooldown={cooldown} />
-        <button
-          type="button"
-          onClick={() => setExtrasOpen((v) => !v)}
-          aria-label="メニューの開閉"
-          style={{
-            flexShrink: 0, width: 28, height: 38, border: 'none', background: 'none',
-            color: '#8a92b5', fontSize: 13, cursor: 'pointer',
-            transition: 'transform .3s ease',
-            transform: extrasOpen ? 'rotate(0deg)' : 'rotate(180deg)',
-          }}
-        >
-          ▼
-        </button>
+        {imagePreview && (
+          <div style={{ position: 'relative', width: 70 }}>
+            <img src={imagePreview} alt="" style={{ width: 70, height: 70, objectFit: 'cover', borderRadius: 4, border: '1px solid #3a4360' }} />
+            <button type="button" onClick={clearImage} style={{ position: 'absolute', top: -6, right: -6, width: 20, height: 20, borderRadius: '50%', border: 'none', background: '#8a2418', color: '#fff', fontSize: 12, cursor: 'pointer' }}>×</button>
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end' }}>
+          <input type="hidden" name="room_id" value={roomId} />
+          <input type="file" ref={fileInputRef} accept="image/*" onChange={handleImageSelect} style={{ display: 'none' }} />
+          <textarea
+            ref={inputRef}
+            name="content"
+            rows={1}
+            placeholder="中の人として発言"
+            onFocus={() => setExtrasOpen(false)}
+            onChange={() => sendTyping(myDisplayName)}
+            onInput={autoResize}
+            onKeyDown={handleKeyDown}
+            style={{
+              flex: 1, border: '1px solid #3a4360', borderRadius: 3, padding: '10px 12px', fontSize: 16,
+              background: '#252b40', color: '#e8eaf5', fontFamily: "'Courier New', monospace",
+              resize: 'none', overflowY: 'auto', lineHeight: '20px',
+            }}
+          />
+          <SubmitBtn cooldown={cooldown || uploading} />
+          <button
+            type="button"
+            onClick={() => setExtrasOpen((v) => !v)}
+            aria-label="メニューの開閉"
+            style={{
+              flexShrink: 0, width: 28, height: 38, border: 'none', background: 'none',
+              color: '#8a92b5', fontSize: 13, cursor: 'pointer',
+              transition: 'transform .3s ease',
+              transform: extrasOpen ? 'rotate(0deg)' : 'rotate(180deg)',
+            }}
+          >
+            ▼
+          </button>
+        </div>
       </form>
+
       {situationOpen && (
         <div onClick={() => setSituationOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110 }}>
           <div onClick={(e) => e.stopPropagation()} style={{ background: '#1c2133', border: '1px solid #3a4360', borderRadius: 4, padding: 18, maxWidth: 300, width: '90%' }}>
