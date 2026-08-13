@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import OcInfoModal from '@/components/OcInfoModal'
 
-export default function RandomMatchOcIcon({ name, iconUrl, house, ageDiffLabel }) {
+export default function RandomMatchOcIcon({ name, iconUrl, house, career, ageDiffLabel }) {
   const [open, setOpen] = useState(false)
   return (
     <>
@@ -18,6 +18,9 @@ export default function RandomMatchOcIcon({ name, iconUrl, house, ageDiffLabel }
         <OcInfoModal onClose={() => setOpen(false)}>
           <div style={{ fontSize: 17, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{name}</div>
           <div style={{ fontSize: 11, color: '#8a8168', marginTop: 4 }}>{house || '寮情報なし'}</div>
+          {career && (
+            <div style={{ fontSize: 10, color: '#8a8168', marginTop: 2 }}>卒後└ {career}</div>
+          )}
           <div style={{ fontSize: 12.5, marginTop: 10 }}>{ageDiffLabel}</div>
         </OcInfoModal>
       )}
