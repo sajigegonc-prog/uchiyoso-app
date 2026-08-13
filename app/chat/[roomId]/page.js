@@ -81,7 +81,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
     .order('created_at', { ascending: true })
   const { data: oocMessagesRaw } = await supabase
     .from('room_ooc_messages')
-    .select('id, content, is_system, created_at, user_id, log_type')
+    .select('id, content, is_system, created_at, user_id, log_type, image_url')
     .eq('room_id', roomId)
     .order('created_at', { ascending: true })
   const oocUserIds = [...new Set((oocMessagesRaw || []).map((m) => m.user_id))]
