@@ -140,11 +140,7 @@ export default function NewOCFormWithIcon({ action, userId }) {
             )}
             <input type="hidden" name="house" value={house === 'その他' ? customHouse : house} />
           </div>
-            <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>卒業後の進路(任意)</label>
-            <input name="career" defaultValue={oc.career || ''} style={inputStyle} />
-          </div>
-            <div style={{ marginBottom: 14 }}>
+                      <div style={{ marginBottom: 14 }}>
             <label style={labelStyle}>卒業後の進路(任意)</label>
             <input name="career" placeholder="例:魔法薬学の研究者" style={inputStyle} />
           </div>
