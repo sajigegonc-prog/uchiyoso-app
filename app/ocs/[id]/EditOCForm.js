@@ -76,6 +76,10 @@ export default function EditOCForm({ oc, action }) {
         <input type="hidden" name="house" value={house === 'その他' ? customHouse : house} />
       </div>
       <div style={{ marginBottom: 14 }}>
+         <label style={labelStyle}>卒業後の進路(任意)</label>
+        <input name="career" defaultValue={oc.career || ''} style={inputStyle} />
+          </div>
+      <div style={{ marginBottom: 14 }}>
         <label style={labelStyle}>生年月日</label>
         <div style={{ display: 'flex', gap: 8 }}>
           <select style={{ ...selectStyle, flex: 1.3 }} value={year} onChange={(e) => setYear(e.target.value)}>
