@@ -35,6 +35,7 @@ export default function NewOCFormWithIcon({ action, userId }) {
   const [step, setStep] = useState(1)
   const [ocType, setOcType] = useState('creation')
   const [house, setHouse] = useState('')
+  const [eraFocus, setEraFocus] = useState('student')
   const [customHouse, setCustomHouse] = useState('')
   const [year, setYear] = useState('')
   const [month, setMonth] = useState('')
@@ -140,9 +141,40 @@ export default function NewOCFormWithIcon({ action, userId }) {
             )}
             <input type="hidden" name="house" value={house === 'その他' ? customHouse : house} />
           </div>
-                      <div style={{ marginBottom: 14 }}>
+                       <div style={{ marginBottom: 14 }}>
             <label style={labelStyle}>卒業後の進路(任意)</label>
             <input name="career" placeholder="例:魔法薬学の研究者" style={inputStyle} />
+          </div>
+          <div style={{ marginBottom: 14 }}>
+            <label style={labelStyle}>メインで活動する時代</label>
+            <div style={{ display: 'flex', border: '1px solid #211d17' }}>
+              <div
+                onClick={() => setEraFocus('student')}
+                style={{
+                  flex: 1, textAlign: 'center', padding: '10px 6px', fontSize: 12, cursor: 'pointer',
+                  background: eraFocus === 'student' ? '#211d17' : '#fff',
+                  color: eraFocus === 'student' ? '#f4eee0' : '#6b6250',
+                  fontWeight: eraFocus === 'student' ? 700 : 400,
+                }}
+              >
+                在学中メイン
+              </div>
+              <div
+                onClick={() => setEraFocus('career')}
+                style={{
+                  flex: 1, textAlign: 'center', padding: '10px 6px', fontSize: 12, cursor: 'pointer',
+                  background: eraFocus === 'career' ? '#211d17' : '#fff',
+                  color: eraFocus === 'career' ? '#f4eee0' : '#6b6250',
+                  fontWeight: eraFocus === 'career' ? 700 : 400,
+                }}
+              >
+                卒業後メイン
+              </div>
+            </div>
+            <p style={{ fontSize: 10, color: '#8a8168', marginTop: 6, lineHeight: 1.6, fontStyle: 'italic' }}>
+              選んだ方が一覧で先に表示されます(いつでも切り替え可能です)
+            </p>
+            <input type="hidden" name="era_focus" value={eraFocus} />
           </div>
           <div style={{ marginBottom: 14 }}>
             <label style={labelStyle}>生年月日</label>
