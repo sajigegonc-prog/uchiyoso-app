@@ -8,16 +8,21 @@ function isTyping() {
   return !!el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT')
 }
 
+function isRefreshSuppressed() {
+  return document.body?.dataset.suppressRefresh === 'true'
+}
+
+
 export default function RealtimeRefresh({ tables = [], fallbackMs = 15000 }) {
   const router = useRouter()
   const debounceRef = useRef(null)
 
   useEffect(() => {
     function scheduleRefresh() {
-      if (isTyping()) return
+      if (isTyping() || isRefreshSuppressed()) return
       clearTimeout(debounceRef.current)
       debounceRef.current = setTimeout(() => {
-        if (!isTyping()) router.refresh()
+        if (!isTyping() && !isRefreshSuppressed()) router.refresh()
       }, 600)
     }
 
