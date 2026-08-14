@@ -12,6 +12,7 @@ export async function createRoom(formData) {
   const timePeriod = formData.get('time_period')?.toString().trim()
   const roomType = formData.get('room_type')?.toString()
   const note = formData.get('note')?.toString().trim()
+  const title = formData.get('title')?.toString().trim()
   const friendOcIds = formData.getAll('friend_oc_ids').map((v) => v.toString()).filter(Boolean)
   const extraOcIds = formData.getAll('extra_oc_ids').map((v) => v.toString()).filter(Boolean)
   if (!ocId) return { error: '話すOCを選択してください' }
