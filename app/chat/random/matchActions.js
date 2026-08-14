@@ -23,6 +23,9 @@ export async function confirmRandomMatch(formData) {
   if (result?.error) return result
 
   const supabase = await createClient()
+  if (situationText) {
+    await supabase.from('chat_rooms').update({ situation: situationText }).eq('id', result.id)
+  }
   const header = location && timePeriod ? `${location}／${timePeriod}` : (location || timePeriod || null)
   const rows = []
   if (header) rows.push({ room_id: result.id, is_system: true, content: header })
