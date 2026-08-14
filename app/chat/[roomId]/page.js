@@ -76,7 +76,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
     .order('created_at', { ascending: true })
   const { data: messages } = await supabase
     .from('messages')
-    .select('id, content, created_at, sender_oc_id, sender_npc_id, is_system, edited_at, deleted_at, ocs(name, icon_url), chat_room_npcs(name)')
+    .select('id, content, created_at, sender_oc_id, sender_npc_id, sender_user_id, is_system, edited_at, deleted_at, ocs(name, icon_url), chat_room_npcs(name)')
     .eq('room_id', roomId)
     .order('created_at', { ascending: true })
   const { data: oocMessagesRaw } = await supabase
@@ -249,7 +249,9 @@ export default async function ChatRoomPage({ params, searchParams }) {
           const mine = isSelfRoom
             ? msg.sender_oc_id === room.primary_oc_id
             : (msg.sender_oc_id ? myOcIdSet.has(msg.sender_oc_id) : false)
-          const isOwner = msg.sender_oc_id ? myOcIdSet.has(msg.sender_oc_id) : myNpcs.includes(msg.sender_npc_id)
+          const isOwner = msg.sender_user_id
+            ? msg.sender_user_id === user.id
+            : (msg.sender_oc_id ? myOcIdSet.has(msg.sender_oc_id) : myNpcs.includes(msg.sender_npc_id))
           const speakerName = msg.ocs?.name || msg.chat_room_npcs?.name
           const speakerIcon = msg.ocs?.icon_url || null
           const prevMsg = messages[idx - 1]
