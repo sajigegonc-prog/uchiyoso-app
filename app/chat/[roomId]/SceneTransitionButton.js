@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { requestSceneTransition, approveSceneTransition } from './transitionActions'
 
 export default function SceneTransitionButton({ roomId, pending, alreadyApproved, requestedByName, hasUnread }) {
@@ -7,7 +7,17 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
   const [busy, setBusy] = useState(false)
   const [transcript, setTranscript] = useState(null)
   const [completed, setCompleted] = useState(false)
-  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    if (transcript !== null) {
+      document.body.dataset.suppressRefresh = 'true'
+    } else {
+      delete document.body.dataset.suppressRefresh
+    }
+    return () => {
+      delete document.body.dataset.suppressRefresh
+    }
+  }, [transcript])
 
   async function handleStart() {
     setBusy(true)
