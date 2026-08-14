@@ -4,6 +4,19 @@ export default function InvitationRow({ invitation, action }) {
       <div style={{ fontSize: 13, color: '#211d17', lineHeight: 1.7 }}>
         {invitation.inviter_name || '名前未設定'}さん宅の{invitation.inviter_oc_name || '名前未設定'}が、{invitation.invitee_oc_name || 'あなたのOC'}と話したがっています
       </div>
+      {(invitation.location || invitation.time_period || invitation.situation) && (
+        <div style={{ background: '#f4eee0', border: '1px dashed #8a8168', padding: '8px 10px', marginTop: 8 }}>
+          <div style={{ fontSize: 9.5, color: '#8a8168', letterSpacing: '.05em', marginBottom: 3 }}>シチュエーションも一緒に申請が来ています</div>
+          {(invitation.location || invitation.time_period) && (
+            <div style={{ fontSize: 11, color: '#6b6250', fontStyle: 'italic' }}>
+              {invitation.location}{invitation.location && invitation.time_period ? '／' : ''}{invitation.time_period}
+            </div>
+          )}
+          {invitation.situation && (
+            <div style={{ fontSize: 12, color: '#211d17', lineHeight: 1.7, marginTop: 4 }}>{invitation.situation}</div>
+          )}
+        </div>
+      )}
       {invitation.note && (
         <div style={{ background: '#f4eee0', border: '1px dashed #8a8168', padding: '8px 10px', marginTop: 8 }}>
           <div style={{ fontSize: 9.5, color: '#8a8168', letterSpacing: '.05em', marginBottom: 3 }}>一言メモ</div>
