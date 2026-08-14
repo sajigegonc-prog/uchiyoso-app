@@ -110,6 +110,40 @@ export async function respondToChatInvitation(formData) {
     redirect(`/chat/${roomId}?welcome=1`)
   } else if (decision === 'declined') {
     await supabase.from('chat_room_invitations').update({ status: 'declined' }).eq('id', invitationId).eq('invitee_id', user.id)
+
+    const { data: declinedOc } = await supabase.from('ocs').select('name').eq('id', ocId).maybeSingle()
+    const reasonText = `${declinedOc?.name || '相手'}は急いでいたようで立ち去ってしまいました`
+    const { data: roomInfo } = await supabase.from('chat_rooms').select('room_type').eq('id', roomId).maybeSingle()
+
+    if (roomInfo?.room_type === 'friend_1on1') {
+      await supabase.from('chat_rooms').update({
+        pending_deletion_by: user.id,
+        pending_deletion_reason: reasonText,
+      }).eq('id', roomId)
+    } else if (roomInfo?.room_type === 'friend_group') {
+      await supabase.from('room_ooc_messages').insert({
+        room_id: roomId, user_id: user.id, is_system: true,
+        content: reasonText,
+      })
+      const { data: stillPending } = await supabase
+        .from('chat_room_invitations')
+        .select('id')
+        .eq('room_id', roomId)
+        .eq('status', 'pending')
+      const { data: activeMembers } = await supabase
+        .from('chat_room_members')
+        .select('user_id')
+        .eq('room_id', roomId)
+        .is('left_at', null)
+      const activeCount = new Set((activeMembers || []).map((m) => m.user_id)).size
+      if ((stillPending || []).length === 0 && activeCount <= 1) {
+        await supabase.from('chat_rooms').update({
+          pending_deletion_by: user.id,
+          pending_deletion_reason: reasonText,
+        }).eq('id', roomId)
+      }
+    }
+
     revalidatePath('/chat')
   }
 }
