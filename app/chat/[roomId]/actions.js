@@ -15,6 +15,7 @@ export async function sendMessage(formData) {
 
   const locationMatch = content.match(/^\/場所\s+(.+)/)
   const timeMatch = content.match(/^\/時間帯\s+(.+)/)
+  const situationMatch = content.match(/^\/状況\s+(.+)/)
 
   if (locationMatch) {
     const newLocation = locationMatch[1].trim()
@@ -36,6 +37,23 @@ export async function sendMessage(formData) {
       room_id: roomId,
       content: newTime,
       is_system: true,
+    })
+    revalidatePath(`/chat/${roomId}`)
+    return
+  }
+  
+  if (situationMatch) {
+    const newSituation = situationMatch[1].trim()
+    await supabase.from('messages').insert({
+      room_id: roomId,
+      content: newSituation,
+      is_system: true,
+    })
+    await supabase.from('room_ooc_messages').insert({
+      room_id: roomId,
+      user_id: user.id,
+      is_system: true,
+      content: '状況が追加されました',
     })
     revalidatePath(`/chat/${roomId}`)
     return
