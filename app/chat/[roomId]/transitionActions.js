@@ -71,7 +71,7 @@ export async function requestSceneTransition(roomId) {
 
   const completed = await checkAndComplete(supabase, roomId)
 
-  revalidatePath(`/chat/${roomId}`)
+  
   return { transcript, completed }
 }
 
@@ -84,6 +84,6 @@ export async function approveSceneTransition(roomId) {
 
   const completed = await checkAndComplete(supabase, roomId)
 
-  revalidatePath(`/chat/${roomId}`)
+  
   return { transcript, completed }
 }
