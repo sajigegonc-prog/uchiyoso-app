@@ -7,6 +7,7 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
   const [busy, setBusy] = useState(false)
   const [transcript, setTranscript] = useState(null)
   const [completed, setCompleted] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (transcript !== null) {
