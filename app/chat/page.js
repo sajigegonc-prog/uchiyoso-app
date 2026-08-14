@@ -91,7 +91,7 @@ export default async function ChatListPage() {
   if (roomIds.length > 0) {
     const { data: msgs } = await supabase
       .from('messages')
-      .select('room_id, content, sender_oc_id, is_system, created_at, deleted_at')
+      .select('room_id, content, sender_oc_id, sender_user_id, is_system, created_at, deleted_at')
       .in('room_id', roomIds)
       .order('created_at', { ascending: false })
     const seenForPreview = new Set()
@@ -104,13 +104,14 @@ export default async function ChatListPage() {
       if (!existingActivity || m.created_at > existingActivity) {
         lastActivityByRoom.set(m.room_id, m.created_at)
       }
-      if (!unreadByRoom.has(m.room_id) && !m.is_system) {
+            if (!unreadByRoom.has(m.room_id) && !m.is_system) {
         if (selfOnlyRooms.has(m.room_id)) {
           unreadByRoom.set(m.room_id, false)
           continue
         }
         const myOcs = myOcIdsInRoom.get(m.room_id) || new Set()
-        if (!myOcs.has(m.sender_oc_id)) {
+        const isMine = m.sender_user_id ? m.sender_user_id === user.id : myOcs.has(m.sender_oc_id)
+        if (!isMine) {
           const lastRead = lastReadByRoom.get(m.room_id)
           if (!lastRead || new Date(m.created_at) > new Date(lastRead)) {
             unreadByRoom.set(m.room_id, true)
