@@ -65,6 +65,13 @@ export async function createRoom(formData) {
   }
   await supabase.from('chat_room_members').insert({ room_id: room.id, oc_id: ocId, user_id: user.id })
 
+  await supabase.from('room_ooc_messages').insert({
+    room_id: room.id,
+    user_id: user.id,
+    is_system: true,
+    content: '「/状況 ○○」と打つことで「(NPC)が去る」などの状況をログに残せます',
+  })
+
   if (roomType === 'self') {
     for (const extraOcId of extraOcIds) {
       if (extraOcId !== ocId) {
