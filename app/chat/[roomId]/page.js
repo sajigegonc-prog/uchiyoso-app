@@ -43,7 +43,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
   const showLogTutorial = !seenFeatureKeys.has('ooc_log_button')
   const { data: room } = await supabase
     .from('chat_rooms')
-    .select('id, location, time_period, primary_oc_id, pending_deletion_by, deleted_at, title, transition_requested_at, transition_requested_by, room_type, pending_situation_place, pending_situation_time, pending_situation_text, pending_situation_by')
+    .select('id, location, time_period, primary_oc_id, pending_deletion_by, pending_deletion_reason, deleted_at, title, transition_requested_at, transition_requested_by, room_type, pending_situation_place, pending_situation_time, pending_situation_text, pending_situation_by')
     .eq('id', roomId)
     .maybeSingle()
   if (!room) {
@@ -204,7 +204,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
         />
       )}
       {showFinalNotice && (
-        <FinalDeletionNotice roomId={room.id} action={acknowledgeFinalDeletion} transcript={myTranscriptPreview} />
+        <FinalDeletionNotice roomId={room.id} action={acknowledgeFinalDeletion} transcript={myTranscriptPreview} reason={room.pending_deletion_reason} />
       )}
       <div style={{ background: '#f4eee0', padding: '14px 18px', flexShrink: 0, borderBottom: '4px double #211d17' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
