@@ -46,6 +46,7 @@ export async function sendMessage(formData) {
       room_id: roomId,
       sender_oc_id: speakerType === 'oc' ? speakerId : null,
       sender_npc_id: speakerType === 'npc' ? speakerId : null,
+      sender_user_id: user.id,
       content,
     })
   }
