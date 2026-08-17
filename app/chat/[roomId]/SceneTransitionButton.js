@@ -76,18 +76,22 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
     )
   }
 
-  if (pending) {
+    if (pending) {
     if (alreadyApproved) {
       return (
-        <button type="button" disabled
-          style={{ padding: '0 16px', height: 36, background: '#d8cdb0', border: '1px solid #8a8168', color: '#6b6250', fontSize: 12.5, borderRadius: 4 }}>
+        <div style={{
+          flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10,
+          height: 36, padding: '0 10px 0 16px', borderRadius: 4,
+          background: '#d8cdb0', border: '1px solid #8a8168', color: '#6b6250', fontSize: 12.5, whiteSpace: 'nowrap',
+        }}>
           場面転換：承諾待ち…
-        </button>
+        </div>
       )
     }
     return (
+          return (
       <button type="button" onClick={handleApprove} disabled={busy}
-        style={{ padding: '0 16px', height: 36, background: '#211d17', border: '1px solid #211d17', color: '#f4eee0', fontSize: 12.5, fontWeight: 700, borderRadius: 4, cursor: 'pointer' }}>
+        style={{ flexShrink: 0, padding: '0 16px', height: 36, background: '#211d17', border: '1px solid #211d17', color: '#f4eee0', fontSize: 12.5, fontWeight: 700, borderRadius: 4, cursor: 'pointer' }}>
         {busy ? '処理中…' : '場面転換に承諾する'}
       </button>
     )
@@ -96,7 +100,7 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
   return (
     <>
       <button id="coach-scene-btn" type="button" onClick={() => setConfirming(true)}
-        style={{ position: 'relative', fontSize: 12.5, color: '#211d17', background: '#fff', border: '1px solid #211d17', borderRadius: 4, padding: '0 14px', height: 36, cursor: 'pointer' }}>
+        style={{ position: 'relative', flexShrink: 0, fontSize: 12.5, color: '#211d17', background: '#fff', border: '1px solid #211d17', borderRadius: 4, padding: '0 14px', height: 36, cursor: 'pointer' }}>
         場面転換
         {hasUnread && (
           <span style={{ position: 'absolute', top: -3, right: -3, width: 8, height: 8, borderRadius: '50%', background: '#8a2418', border: '1px solid #f4eee0' }} />
