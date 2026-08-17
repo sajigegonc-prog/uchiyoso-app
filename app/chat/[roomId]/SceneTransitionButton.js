@@ -36,10 +36,11 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
     setCompleted(result.completed)
   }
 
+    const [cancelled, setCancelled] = useState(false)
+
   async function handleCancel() {
-    setBusy(true)
+    setCancelled(true)
     await cancelSceneTransition(roomId)
-    setBusy(false)
   }
 
   function handleCopy() {
@@ -81,7 +82,7 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
     )
   }
 
-      if (pending) {
+        if (pending && !cancelled) {
     if (alreadyApproved) {
       return (
         <div style={{
