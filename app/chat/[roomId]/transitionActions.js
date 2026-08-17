@@ -69,12 +69,22 @@ export async function requestSceneTransition(roomId) {
     content: `${profile?.display_name || '名前未設定'}さんが場面転換を申請しました`,
   })
 
-  const completed = await checkAndComplete(supabase, roomId)
+    const completed = await checkAndComplete(supabase, roomId)
 
-  
   return { transcript, completed }
 }
 
+export async function approveSceneTransition(roomId) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/')
+  const transcript = await generateTranscript(supabase, roomId, user.id)
+  await supabase.from('scene_transition_approvals').insert({ room_id: roomId, user_id: user.id })
+
+  const completed = await checkAndComplete(supabase, roomId)
+
+  return { transcript, completed }
+}
 
 export async function cancelSceneTransition(roomId) {
   const supabase = await createClient()
