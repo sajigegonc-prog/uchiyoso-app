@@ -48,6 +48,12 @@ export default function CreditsModal({ dark = true }) {
                   https://mond.how/milla_tohdoh
                 </a>
               </p>
+              <p style={{ margin: '10px 0 0' }}>
+                イラスト:<br />
+                <a href="https://x.com/arqxzw?s=11&t=oXNKWi99mdDDD5RaD7Jm_g" target="_blank" rel="noopener noreferrer" style={{ color: '#c9b98a' }}>
+                  あられ 様
+                </a>
+              </p>
             </div>
             <button
               type="button"
