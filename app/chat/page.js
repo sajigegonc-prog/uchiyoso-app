@@ -2,7 +2,8 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
 import InvitationRow from './InvitationRow'
-import { respondToChatInvitation } from './actions'
+import { respondToChatInvitation, cancelInvitation } from './actions'
+import CancelInvitationButton from './CancelInvitationButton'
 import RealtimeRefresh from '@/components/AutoRefresh'
 import CoachMark from '@/components/CoachMark'
 import { markUpdate1TutorialSeen } from '../tutorialActions'
@@ -22,12 +23,13 @@ export default async function ChatListPage() {
 
   const { data: memberships } = await supabase
     .from('chat_room_members')
-    .select('room_id, oc_id, left_at, last_read_at, ooc_last_read_at, chat_rooms(id, deleted_at, primary_oc_id, title)')
+    .select('room_id, oc_id, left_at, last_read_at, ooc_last_read_at, chat_rooms(id, deleted_at, primary_oc_id, title, room_type)')
     .eq('user_id', user.id)
     .is('left_at', null)
   const roomIdSet = new Set()
   const roomIds = []
   const primaryOcByRoom = new Map()
+  const roomTypeByRoom = new Map()
   const customTitleByRoom = new Map()
   const lastReadByRoom = new Map()
   const oocLastReadByRoom = new Map()
@@ -38,7 +40,8 @@ export default async function ChatListPage() {
         roomIdSet.add(m.chat_rooms.id)
         roomIds.push(m.chat_rooms.id)
       }
-      primaryOcByRoom.set(m.chat_rooms.id, m.chat_rooms.primary_oc_id)
+            primaryOcByRoom.set(m.chat_rooms.id, m.chat_rooms.primary_oc_id)
+      roomTypeByRoom.set(m.chat_rooms.id, m.chat_rooms.room_type)
       customTitleByRoom.set(m.chat_rooms.id, m.chat_rooms.title)
       const existing = lastReadByRoom.get(m.room_id)
       if (!existing || (m.last_read_at && m.last_read_at > existing)) {
@@ -61,18 +64,21 @@ export default async function ChatListPage() {
       .is('left_at', null)
     : { data: [] }
 
-  const { data: pendingOutgoing } = roomIds.length > 0
+    const { data: pendingOutgoing } = roomIds.length > 0
     ? await supabase
       .from('chat_room_invitations')
-      .select('room_id, ocs:invitee_oc_id(name)')
+      .select('id, room_id, ocs:invitee_oc_id(name)')
       .in('room_id', roomIds)
       .eq('status', 'pending')
+      .eq('inviter_id', user.id)
     : { data: [] }
   const pendingRoomIds = new Set((pendingOutgoing || []).map((p) => p.room_id))
   const pendingNamesByRoom = new Map()
+  const pendingInvitationIdByRoom = new Map()
   for (const p of pendingOutgoing || []) {
     if (!pendingNamesByRoom.has(p.room_id)) pendingNamesByRoom.set(p.room_id, [])
     if (p.ocs?.name) pendingNamesByRoom.get(p.room_id).push(p.ocs.name)
+    if (!pendingInvitationIdByRoom.has(p.room_id)) pendingInvitationIdByRoom.set(p.room_id, p.id)
   }
 
   const membersByRoom = new Map()
@@ -155,11 +161,13 @@ export default async function ChatListPage() {
     const customTitle = customTitleByRoom.get(id) || null
     const joinedNames = allInRoom.map((m) => m.ocs?.name).filter(Boolean)
     const pendingNames = pendingNamesByRoom.get(id) || []
-    return {
+        return {
       id, customTitle, displayMembers, joinedNames, pendingNames,
       unread: unreadByRoom.get(id) || false,
       unreadOoc: unreadOocByRoom.get(id) || false,
       pending: pendingRoomIds.has(id),
+      isOneOnOne: roomTypeByRoom.get(id) === 'friend_1on1',
+      invitationId: pendingInvitationIdByRoom.get(id) || null,
     }
   })
 
@@ -233,13 +241,19 @@ export default async function ChatListPage() {
             まだ部屋がありません。
           </p>
         )}
-        {rooms.map((room) => (
-          <Link
+                {rooms.map((room) => (
+          <div
             key={room.id}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '15px 2px', borderBottom: '1px solid #211d17',
+              position: 'relative',
+            }}
+          >
+          <Link
             href={`/chat/${room.id}`}
             style={{
-              display: 'flex', alignItems: 'center', gap: 14,
-              padding: '15px 2px', borderBottom: '1px solid #211d17',
+              display: 'flex', alignItems: 'center', gap: 14, flex: 1, minWidth: 0,
               textDecoration: 'none', position: 'relative',
             }}
           >
@@ -321,9 +335,13 @@ export default async function ChatListPage() {
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
               }}>
                 {lastMessages[room.id] || 'まだメッセージがありません'}
-              </div>
+                            </div>
             </div>
           </Link>
+          {room.pending && room.isOneOnOne && room.invitationId && (
+            <CancelInvitationButton invitationId={room.invitationId} roomId={room.id} action={cancelInvitation} />
+          )}
+          </div>
         ))}
       </div>
     </div>
