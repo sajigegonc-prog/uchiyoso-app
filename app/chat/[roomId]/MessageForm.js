@@ -168,34 +168,39 @@ export default function MessageForm({
         background: 'rgba(244,238,224,.88)',
         borderBottom: extrasOpen ? '1px solid #211d17' : 'none',
       }}>
-        <div style={{ display: 'flex', gap: 14, alignItems: 'center', padding: '12px', flexWrap: 'wrap' }}>
-          <FrogChocolateButton roomId={roomId} action={frogAction} speakerName={speaker.name} hasUnread={hasUnreadFrog} />
-          <SceneTransitionButton
-            roomId={roomId}
-            pending={sceneProps?.pending}
-            alreadyApproved={sceneProps?.alreadyApproved}
-            requestedByName={sceneProps?.requestedByName}
-            hasUnread={hasUnreadScene}
-          />
-          <button
-            id="coach-ooc-btn"
-            type="button"
-            onClick={() => setOocOpen(true)}
-            style={{
-              position: 'relative', fontSize: 12.5, color: '#211d17', background: '#fff',
-              border: '1px solid #211d17', borderRadius: 4, padding: '0 14px', height: 36, cursor: 'pointer',
-            }}
-          >
-            中の人チャットへ
-            {hasUnreadOoc && (
-              <span style={{
-                position: 'absolute', top: -2, right: -10,
-                width: 7, height: 7, borderRadius: '50%',
-                background: '#8a2418',
-              }} />
-            )}
-          </button>
-          <div style={{ marginLeft: 'auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', padding: '12px', gap: 10 }}>
+          <div style={{
+            display: 'flex', gap: 14, alignItems: 'center', flex: 1, minWidth: 0,
+            overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 2,
+          }}>
+            <FrogChocolateButton roomId={roomId} action={frogAction} speakerName={speaker.name} hasUnread={hasUnreadFrog} />
+            <SceneTransitionButton
+              roomId={roomId}
+              pending={sceneProps?.pending}
+              alreadyApproved={sceneProps?.alreadyApproved}
+              requestedByName={sceneProps?.requestedByName}
+              hasUnread={hasUnreadScene}
+            />
+            <button
+              id="coach-ooc-btn"
+              type="button"
+              onClick={() => setOocOpen(true)}
+              style={{
+                position: 'relative', flexShrink: 0, fontSize: 12.5, color: '#211d17', background: '#fff',
+                border: '1px solid #211d17', borderRadius: 4, padding: '0 14px', height: 36, cursor: 'pointer',
+              }}
+            >
+              中の人チャットへ
+              {hasUnreadOoc && (
+                <span style={{
+                  position: 'absolute', top: -2, right: -10,
+                  width: 7, height: 7, borderRadius: '50%',
+                  background: '#8a2418',
+                }} />
+              )}
+            </button>
+          </div>
+          <div style={{ flexShrink: 0 }}>
             <DeleteRoomButton roomId={roomId} label={deleteLabel} action={deleteAction} transcript={transcript} />
           </div>
         </div>
