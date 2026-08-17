@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Image from 'next/image'
 
 export default function FrogChocolateButton({ roomId, action, speakerName, hasUnread }) {
   const [confirming, setConfirming] = useState(false)
@@ -31,9 +32,9 @@ export default function FrogChocolateButton({ roomId, action, speakerName, hasUn
           border: '1px solid #211d17', background: '#f4eee0',
           fontSize: 15, cursor: 'pointer', marginBottom: 2,
         }}
-        aria-label="蛙チョコを開ける"
+                aria-label="蛙チョコを開ける"
       >
-        🐸
+        <Image src="/images/frog-choc-button.png" alt="" fill sizes="36px" style={{ objectFit: 'contain', padding: 3 }} />
         {hasUnread && (
           <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, borderRadius: '50%', background: '#8a2418', border: '1px solid #f4eee0' }} />
         )}
