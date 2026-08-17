@@ -275,8 +275,24 @@ export default function OocPanel({
             {(pendingSituation.place || pendingSituation.time) && <br />}
             {pendingSituation.text}
           </div>
-          {isProposer ? (
-            <p style={{ fontSize: 10.5, color: '#8a92b5', fontStyle: 'italic' }}>相手の判断を待っています</p>
+                    {isProposer ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <p style={{ fontSize: 10.5, color: '#8a92b5', fontStyle: 'italic', margin: 0 }}>相手の判断を待っています</p>
+              <button
+                type="button"
+                disabled={respondPending}
+                onClick={() => handleRespond('reject')}
+                style={{
+                  width: 18, height: 18, flexShrink: 0, borderRadius: '50%',
+                  border: '1px solid #b8c0da', background: 'none', color: '#b8c0da',
+                  fontSize: 11, fontWeight: 700, lineHeight: 1, padding: 0, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+                aria-label="提案を取り消す"
+              >
+                ×
+              </button>
+            </div>
           ) : (
             <div style={{ display: 'flex', gap: 8 }}>
               <button type="button" disabled={respondPending} onClick={() => handleRespond('reject')} style={{ flex: 1, padding: 8, background: 'none', border: '1px solid #5a6a8a', color: '#b8c0da', fontSize: 11.5, cursor: 'pointer' }}>不採用</button>
