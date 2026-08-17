@@ -90,10 +90,11 @@ export async function cancelSceneTransition(roomId) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
-  await supabase.from('chat_rooms').update({
+  const { data: updated } = await supabase.from('chat_rooms').update({
     transition_requested_at: null,
     transition_requested_by: null,
-  }).eq('id', roomId).eq('transition_requested_by', user.id)
+  }).eq('id', roomId).eq('transition_requested_by', user.id).select('id')
+  if (!updated || updated.length === 0) return { success: true }
   await supabase.from('scene_transition_approvals').delete().eq('room_id', roomId)
   await supabase.from('room_ooc_messages').insert({
     room_id: roomId, user_id: user.id, is_system: true,
