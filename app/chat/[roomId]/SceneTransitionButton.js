@@ -109,8 +109,7 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
         </div>
       )
     }
-    return (
-          return (
+        return (
       <button type="button" onClick={handleApprove} disabled={busy}
         style={{ flexShrink: 0, padding: '0 16px', height: 36, background: '#211d17', border: '1px solid #211d17', color: '#f4eee0', fontSize: 12.5, fontWeight: 700, borderRadius: 4, cursor: 'pointer' }}>
         {busy ? '処理中…' : '場面転換に承諾する'}
