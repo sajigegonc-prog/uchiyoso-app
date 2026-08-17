@@ -18,11 +18,16 @@ export default function RealtimeRefresh({ tables = [], fallbackMs = 15000 }) {
   const debounceRef = useRef(null)
 
   useEffect(() => {
-    function scheduleRefresh() {
-      if (isTyping() || isRefreshSuppressed()) return
+        function scheduleRefresh() {
+      if (isTyping()) return
       clearTimeout(debounceRef.current)
-      debounceRef.current = setTimeout(() => {
-        if (!isTyping() && !isRefreshSuppressed()) router.refresh()
+      debounceRef.current = setTimeout(function attempt() {
+        if (isTyping()) return
+        if (isRefreshSuppressed()) {
+          debounceRef.current = setTimeout(attempt, 600)
+          return
+        }
+        router.refresh()
       }, 600)
     }
 
