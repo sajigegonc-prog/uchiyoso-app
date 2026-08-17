@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { requestSceneTransition, approveSceneTransition, cancelSceneTransition } from './transitionActions'
 
 export default function SceneTransitionButton({ roomId, pending, alreadyApproved, requestedByName, isRequester, hasUnread }) {
+  const router = useRouter()
   const [confirming, setConfirming] = useState(false)
   const [busy, setBusy] = useState(false)
   const [transcript, setTranscript] = useState(null)
@@ -28,19 +30,21 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
     setCompleted(result.completed)
   }
 
-    async function handleApprove() {
+      async function handleApprove() {
     setBusy(true)
     const result = await approveSceneTransition(roomId)
     setBusy(false)
     setTranscript(result.transcript)
     setCompleted(result.completed)
+    router.refresh()
   }
 
     const [cancelled, setCancelled] = useState(false)
 
-  async function handleCancel() {
+    async function handleCancel() {
     setCancelled(true)
     await cancelSceneTransition(roomId)
+    router.refresh()
   }
 
   function handleCopy() {
@@ -70,10 +74,10 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
             <button type="button" onClick={handleCopy} style={{ flex: 1, padding: 10, border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
               {copied ? 'コピーしました' : 'コピーする'}
             </button>
-            <button type="button" onClick={() => setTranscript(null)} style={{ flex: 1, padding: 10, border: '1px solid #8a8168', background: '#fff', color: '#6b6250', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
+                        <button type="button" onClick={() => { setTranscript(null); router.refresh() }} style={{ flex: 1, padding: 10, border: '1px solid #8a8168', background: '#fff', color: '#6b6250', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
               閉じる
             </button>
-          </div>
+       </div>
           {!completed && (
             <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>他のメンバーの承諾を待っています。</p>
           )}
