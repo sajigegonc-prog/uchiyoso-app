@@ -28,6 +28,7 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
     setConfirming(false)
     setTranscript(result.transcript)
     setCompleted(result.completed)
+    router.refresh()
   }
 
       async function handleApprove() {
