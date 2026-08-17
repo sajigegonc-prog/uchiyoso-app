@@ -34,7 +34,7 @@ export default function FrogChocolateButton({ roomId, action, speakerName, hasUn
         }}
                 aria-label="蛙チョコを開ける"
       >
-        <Image src="/images/frog-choc-button.png" alt="" fill sizes="36px" style={{ objectFit: 'contain', padding: 3 }} />
+        <Image src="/images/frog-choc-button.png" alt="" fill sizes="36px" style={{ objectFit: 'contain', padding: 1, objectPosition: 'center 40%' }} />
         {hasUnread && (
           <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, borderRadius: '50%', background: '#8a2418', border: '1px solid #f4eee0' }} />
         )}
