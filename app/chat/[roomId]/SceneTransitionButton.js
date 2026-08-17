@@ -1,8 +1,7 @@
-'use client'
 import { useState, useEffect } from 'react'
-import { requestSceneTransition, approveSceneTransition } from './transitionActions'
+import { requestSceneTransition, approveSceneTransition, cancelSceneTransition } from './transitionActions'
 
-export default function SceneTransitionButton({ roomId, pending, alreadyApproved, requestedByName, hasUnread }) {
+export default function SceneTransitionButton({ roomId, pending, alreadyApproved, requestedByName, isRequester, hasUnread }) {
   const [confirming, setConfirming] = useState(false)
   const [busy, setBusy] = useState(false)
   const [transcript, setTranscript] = useState(null)
@@ -29,12 +28,18 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
     setCompleted(result.completed)
   }
 
-  async function handleApprove() {
+    async function handleApprove() {
     setBusy(true)
     const result = await approveSceneTransition(roomId)
     setBusy(false)
     setTranscript(result.transcript)
     setCompleted(result.completed)
+  }
+
+  async function handleCancel() {
+    setBusy(true)
+    await cancelSceneTransition(roomId)
+    setBusy(false)
   }
 
   function handleCopy() {
@@ -76,7 +81,7 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
     )
   }
 
-    if (pending) {
+      if (pending) {
     if (alreadyApproved) {
       return (
         <div style={{
@@ -85,6 +90,22 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
           background: '#d8cdb0', border: '1px solid #8a8168', color: '#6b6250', fontSize: 12.5, whiteSpace: 'nowrap',
         }}>
           場面転換：承諾待ち…
+          {isRequester && (
+            <button
+              type="button"
+              onClick={handleCancel}
+              disabled={busy}
+              style={{
+                width: 18, height: 18, flexShrink: 0, borderRadius: '50%',
+                border: '1px solid #8a2418', background: '#fff', color: '#8a2418',
+                fontSize: 11, fontWeight: 700, lineHeight: 1, padding: 0, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+              aria-label="申請を取り消す"
+            >
+              ×
+            </button>
+          )}
         </div>
       )
     }
