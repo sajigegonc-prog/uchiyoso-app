@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
 
-async function fullyDeleteRoom(supabase, roomId) {
+export async function fullyDeleteRoom(supabase, roomId) {
   await supabase.from('messages').delete().eq('room_id', roomId)
   await supabase.from('chat_room_npcs').delete().eq('room_id', roomId)
   await supabase.from('room_ooc_messages').delete().eq('room_id', roomId)
