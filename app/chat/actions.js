@@ -2,6 +2,7 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
+import { fullyDeleteRoom } from './[roomId]/deleteActions'
 
 export async function createRoom(formData) {
   const supabase = await createClient()
@@ -146,4 +147,48 @@ export async function respondToChatInvitation(formData) {
 
     revalidatePath('/chat')
   }
+}
+
+
+export async function cancelInvitation(formData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/')
+  const invitationId = formData.get('invitation_id')?.toString()
+  const roomId = formData.get('room_id')?.toString()
+  if (!invitationId || !roomId) return { error: '情報が不足しています' }
+
+  const { data: invitation } = await supabase
+    .from('chat_room_invitations')
+    .select('id')
+    .eq('id', invitationId)
+    .eq('inviter_id', user.id)
+    .maybeSingle()
+  if (!invitation) return { error: '取り消す権限がありません' }
+
+  await supabase.from('chat_room_invitations').delete().eq('id', invitationId).eq('inviter_id', user.id)
+
+  const { data: roomInfo } = await supabase.from('chat_rooms').select('room_type').eq('id', roomId).maybeSingle()
+
+  if (roomInfo?.room_type === 'friend_1on1') {
+    await fullyDeleteRoom(supabase, roomId)
+  } else if (roomInfo?.room_type === 'friend_group') {
+    const { data: stillPending } = await supabase
+      .from('chat_room_invitations')
+      .select('id')
+      .eq('room_id', roomId)
+      .eq('status', 'pending')
+    const { data: activeMembers } = await supabase
+      .from('chat_room_members')
+      .select('user_id')
+      .eq('room_id', roomId)
+      .is('left_at', null)
+    const activeCount = new Set((activeMembers || []).map((m) => m.user_id)).size
+    if ((stillPending || []).length === 0 && activeCount <= 1) {
+      await fullyDeleteRoom(supabase, roomId)
+    }
+  }
+
+  revalidatePath('/chat')
+  return { success: true }
 }
