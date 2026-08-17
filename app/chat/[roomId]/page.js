@@ -316,10 +316,11 @@ export default async function ChatRoomPage({ params, searchParams }) {
             text: room.pending_situation_text,
             by: room.pending_situation_by,
           } : null}
-          sceneProps={{
+                    sceneProps={{
             pending: !!room.transition_requested_at,
             alreadyApproved: alreadyApprovedTransition,
             requestedByName,
+            isRequester: room.transition_requested_by === user.id,
           }}
           deleteLabel={deleteButtonLabel}
           deleteAction={confirmLeaveOrDelete}
