@@ -174,11 +174,12 @@ export default function MessageForm({
             overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 2,
           }}>
             <FrogChocolateButton roomId={roomId} action={frogAction} speakerName={speaker.name} hasUnread={hasUnreadFrog} />
-            <SceneTransitionButton
+                        <SceneTransitionButton
               roomId={roomId}
               pending={sceneProps?.pending}
               alreadyApproved={sceneProps?.alreadyApproved}
               requestedByName={sceneProps?.requestedByName}
+              isRequester={sceneProps?.isRequester}
               hasUnread={hasUnreadScene}
             />
             <button
