@@ -170,8 +170,10 @@ export async function cancelInvitation(formData) {
 
   const { data: roomInfo } = await supabase.from('chat_rooms').select('room_type').eq('id', roomId).maybeSingle()
 
+  let deleted = false
   if (roomInfo?.room_type === 'friend_1on1') {
     await fullyDeleteRoom(supabase, roomId)
+    deleted = true
   } else if (roomInfo?.room_type === 'friend_group') {
     const { data: stillPending } = await supabase
       .from('chat_room_invitations')
@@ -186,9 +188,10 @@ export async function cancelInvitation(formData) {
     const activeCount = new Set((activeMembers || []).map((m) => m.user_id)).size
     if ((stillPending || []).length === 0 && activeCount <= 1) {
       await fullyDeleteRoom(supabase, roomId)
+      deleted = true
     }
   }
 
   revalidatePath('/chat')
-  return { success: true }
+  return { success: true, deleted }
 }

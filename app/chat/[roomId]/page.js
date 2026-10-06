@@ -10,6 +10,7 @@ import { inviteMoreMembers } from './memberActions'
 import MessageForm from './MessageForm'
 import FinalDeletionNotice from './FinalDeletionNotice'
 import RoomMembersButton from './RoomMembersButton'
+import { cancelInvitation } from '../actions'
 import { buildTranscriptText } from './transcriptUtil'
 import AddMemberButton from './AddMemberButton'
 import MessageBubble from './MessageBubble'
@@ -62,7 +63,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
   const currentMemberUserIds = new Set((members || []).filter((m) => !m.left_at).map((m) => m.user_id))
   const { data: pendingInvites } = await supabase
     .from('chat_room_invitations')
-    .select('invitee_id, invitee_oc_id, ocs:invitee_oc_id(name, icon_url)')
+    .select('id, inviter_id, invitee_id, invitee_oc_id, ocs:invitee_oc_id(name, icon_url)')
     .eq('room_id', roomId)
     .eq('status', 'pending')
   const pendingUserIds = new Set((pendingInvites || []).map((p) => p.invitee_id))
@@ -213,7 +214,9 @@ export default async function ChatRoomPage({ params, searchParams }) {
             {isGroup && <AddMemberButton roomId={room.id} action={inviteMoreMembers} friendOcs={invitableFriendOcs} />}
             <RoomMembersButton
               members={activeMembers.map((m) => ({ id: m.oc_id, name: m.ocs?.name, icon_url: m.ocs?.icon_url }))}
-              pendingMembers={(pendingInvites || []).map((p) => ({ id: p.invitee_oc_id, name: p.ocs?.name, icon_url: p.ocs?.icon_url }))}
+              pendingMembers={(pendingInvites || []).map((p) => ({ id: p.invitee_oc_id, name: p.ocs?.name, icon_url: p.ocs?.icon_url, invitationId: p.id, canCancel: p.inviter_id === user.id }))}
+              roomId={room.id}
+              cancelAction={cancelInvitation}
               hasUnread={hasUnreadMembers}
             />
           </div>
