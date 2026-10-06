@@ -27,7 +27,7 @@ export default function MessageForm({
   action, roomId, myOcs, npcs, myUserId, myDisplayName, addNpcAction, deleteNpcAction, frogAction,
   oocMessages, oocSendAction, hasUnreadOoc, drawSituationAction, proposeSituationAction, respondSituationAction, pendingSituation, initialOcId,
   sceneProps, deleteLabel, deleteAction, transcript, hasUnreadFrog, hasUnreadScene,
-  showGachaTutorial, markGachaTutorialSeenAction, logAction, showLogTutorial, markLogTutorialSeenAction,
+  showGachaTutorial, markGachaTutorialSeenAction, logAction, showLogTutorial, markLogTutorialSeenAction, strangerProps,
 }) {
   const t = useT()
   const inputRef = useRef(null)
@@ -86,6 +86,7 @@ export default function MessageForm({
           showGachaTutorial={showGachaTutorial} markGachaTutorialSeenAction={markGachaTutorialSeenAction}
           logAction={logAction}
           showLogTutorial={showLogTutorial} markLogTutorialSeenAction={markLogTutorialSeenAction}
+          strangerProps={strangerProps}
         />
       )}
 

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
 import { getT } from '@/lib/i18n/server'
+import { getActorLabel } from '@/lib/strangerRoom'
 
 const DORMS = ['グリフィンドール', 'ハッフルパフ', 'レイブンクロー', 'スリザリン']
 
@@ -327,7 +328,7 @@ export async function proposeSituation(roomId, place, time, text) {
     return { success: true, posted: true }
   }
 
-  const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+  const actorLabel = await getActorLabel(supabase, user.id, roomId, t)
   await supabase.from('chat_rooms').update({
     pending_situation_place: place || null,
     pending_situation_time: time || null,
@@ -336,7 +337,7 @@ export async function proposeSituation(roomId, place, time, text) {
   }).eq('id', roomId)
   await supabase.from('room_ooc_messages').insert({
     room_id: roomId, user_id: user.id, is_system: true, log_type: 'situation_proposal',
-    content: t('{name}さんがシチュエーションを提案しました', { name: profile?.display_name || t('名前未設定') }),
+    content: t('{name}さんがシチュエーションを提案しました', { name: actorLabel }),
   })
   revalidatePath(`/chat/${roomId}`)
   return { success: true, posted: false }

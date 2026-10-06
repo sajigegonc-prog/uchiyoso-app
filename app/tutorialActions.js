@@ -51,4 +51,5 @@ export async function markFeatureSeen(featureKey) {
   if (!user) return
   await supabase.from('feature_tutorials_seen').upsert({ user_id: user.id, feature_key: featureKey, seen_at: new Date().toISOString() })
   revalidatePath('/chat/[roomId]', 'page')
+  revalidatePath('/chat')
 }

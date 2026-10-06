@@ -10,6 +10,7 @@ export async function confirmRandomMatch(formData) {
   const timePeriod = formData.get('time_period')?.toString()
   const situationText = formData.get('situation_text')?.toString()
   const note = formData.get('note')?.toString()
+  const strangerMatch = formData.get('stranger_match') === '1'
 
   const roomForm = new FormData()
   roomForm.set('oc_id', myOcId)
@@ -17,6 +18,7 @@ export async function confirmRandomMatch(formData) {
   roomForm.set('location', location)
   roomForm.set('time_period', timePeriod)
   roomForm.set('note', note)
+  if (strangerMatch) roomForm.set('stranger_match', '1')
   roomForm.append('friend_oc_ids', friendOcId)
 
   const result = await createRoom(roomForm)

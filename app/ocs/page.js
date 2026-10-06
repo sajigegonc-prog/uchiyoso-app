@@ -13,6 +13,7 @@ import { updateDisplayNameLimited } from '../settings/actions'
 import DreamPartnerSection from './DreamPartnerSection'
 import { saveDreamPartner, deleteDreamPartner } from './dreamPartnerActions'
 import { getT } from '@/lib/i18n/server'
+import { setStrangerMatchEnabled, unblockUser } from './strangerSettingsActions'
 
 export default async function OCsPage() {
   const t = getT()
@@ -43,6 +44,14 @@ export default async function OCsPage() {
     .order('created_at', { ascending: true })
 
   const { data: myProfile } = await supabase.from('profiles').select('display_name, emoji, bio').eq('id', user.id).maybeSingle()
+
+  const { data: strangerProfile } = await supabase.from('profiles').select('stranger_match_enabled').eq('id', user.id).maybeSingle()
+  const strangerEnabled = strangerProfile?.stranger_match_enabled !== false
+  const { data: blocks } = await supabase
+    .from('user_blocks')
+    .select('id, blocked_label, created_at')
+    .eq('blocker_id', user.id)
+    .order('created_at', { ascending: true })
 
   const { data: avoidedPartners } = await supabase
     .from('avoided_partners')
@@ -185,7 +194,48 @@ export default async function OCsPage() {
             ))}
           </div>
         )}
-        <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>{t('各一配慮などにお使いください。（ランダムマッチングは近日公開予定です）')}</p>
+        <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>{t('各種配慮などにお使いください。ここに登録した名前が、相手の「お相手」設定と重なるアカウントとは、知らない人とのランダムマッチで出会いません。')}</p>
+
+        <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 22 }}>
+          {t('知らない人とのマッチング設定')}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginTop: 10 }}>
+          <span style={{ fontSize: 13, color: '#211d17', fontWeight: 700 }}>
+            {strangerEnabled ? t('現在：ON') : t('現在：OFF')}
+          </span>
+          <form action={setStrangerMatchEnabled}>
+            <input type="hidden" name="enabled" value={strangerEnabled ? '0' : '1'} />
+            <SubmitButton
+              style={{
+                padding: '8px 16px', border: '1px solid #211d17',
+                background: strangerEnabled ? '#fff' : '#211d17', color: strangerEnabled ? '#211d17' : '#f4eee0',
+                fontWeight: 700, fontSize: 12, cursor: 'pointer',
+              }}
+              pendingText="…"
+            >
+              {strangerEnabled ? t('OFFにする') : t('ONにする')}
+            </SubmitButton>
+          </form>
+        </div>
+        <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 8, lineHeight: 1.7 }}>
+          {t('ONの間、友達以外の人とランダムマッチできます。相手にはOCの名前と情報だけが見え、友達になるまで中の人の名前や発言はできません。OFFにすると、あなたのOCは他の人のランダムマッチに出てこなくなります（自分も使えなくなります）。')}
+        </p>
+        {blocks && blocks.length > 0 && (
+          <>
+            <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', marginTop: 14 }}>{t('ブロック中の相手')}</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+              {blocks.map((b) => (
+                <span key={b.id} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: '1px solid #211d17', padding: '5px 6px 5px 12px', fontSize: 12, color: '#211d17' }}>
+                  {b.blocked_label || t('名前未設定')}
+                  <form action={unblockUser}>
+                    <input type="hidden" name="id" value={b.id} />
+                    <button type="submit" style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#8a2418', fontSize: 11, padding: 0, textDecoration: 'underline' }}>{t('解除')}</button>
+                  </form>
+                </span>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       <Link href="/home" style={{ ...lightBackLinkStyle, display: 'block', marginTop: 30, textAlign: 'center', fontSize: 11.5 }}>

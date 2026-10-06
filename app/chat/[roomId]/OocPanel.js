@@ -29,6 +29,7 @@ export default function OocPanel({
   roomId, myUserId, myDisplayName, messages, sendAction, onClose,
   drawAction, proposeAction, respondAction, pendingSituation,
   showGachaTutorial, markGachaTutorialSeenAction, logAction, showLogTutorial, markLogTutorialSeenAction,
+  strangerProps,
 }) {
   const t = useT()
   const inputRef = useRef(null)
@@ -58,6 +59,10 @@ export default function OocPanel({
   const [customText, setCustomText] = useState('')
   const [proposing, setProposing] = useState(false)
   const [respondPending, setRespondPending] = useState(false)
+  const [friendBusy, setFriendBusy] = useState(false)
+  const [friendError, setFriendError] = useState(null)
+  const [blockConfirming, setBlockConfirming] = useState(false)
+  const locked = !!strangerProps
 
   const LINE_HEIGHT = 20
   const MAX_LINES = 5
@@ -188,6 +193,17 @@ export default function OocPanel({
     setRespondPending(true)
     await respondAction(roomId, decision)
     setRespondPending(false)
+  }
+
+  async function handleFriendAction(fn) {
+    setFriendBusy(true)
+    setFriendError(null)
+    try {
+      const res = await fn()
+      if (res?.error) setFriendError(res.error)
+    } finally {
+      setFriendBusy(false)
+    }
   }
 
   async function handleShowLog() {
@@ -331,7 +347,7 @@ export default function OocPanel({
             }}
             aria-label={t('シチュエーションを自由記入')}
           >✏️</button>
-          <button
+          {!locked && <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             style={{
@@ -339,7 +355,7 @@ export default function OocPanel({
               border: 'none', background: '#2f3a5c', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
             }}
             aria-label={t('画像を添付')}
-          >📎</button>
+          >📎</button>}
           <button
             id="coach-ooc-log-btn"
             type="button"
@@ -353,7 +369,64 @@ export default function OocPanel({
         </div>
       </div>
 
-      <form id="ooc-input-row" action={sendAction} onSubmit={handleFormSubmit} style={{
+      {locked && (
+        <div style={{
+          flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 8, padding: '12px 16px',
+          background: '#12151f', borderTop: '1px solid #3a4360',
+          paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
+        }}>
+          <p style={{ margin: 0, fontSize: 11, color: '#8a92b5', lineHeight: 1.7 }}>
+            {t('友達になるまで、中の人チャットでは発言できません。友達申請を送り、承認されると発言できるようになります。')}
+          </p>
+          {friendError && <p style={{ margin: 0, fontSize: 11, color: '#e08a80' }}>{friendError}</p>}
+          {strangerProps.friendRequestState === 'none' && (
+            <button type="button" disabled={friendBusy} onClick={() => handleFriendAction(() => strangerProps.sendRequestAction(roomId))}
+              style={{ padding: 10, background: '#4a5580', border: 'none', color: '#e8eaf5', fontSize: 12.5, fontWeight: 700, cursor: 'pointer' }}>
+              {friendBusy ? '…' : t('友達申請する')}
+            </button>
+          )}
+          {strangerProps.friendRequestState === 'sent' && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ flex: 1, fontSize: 12, color: '#b8c0da' }}>{t('友達申請中です。相手の返事を待っています')}</span>
+              <button type="button" disabled={friendBusy} onClick={() => handleFriendAction(() => strangerProps.cancelRequestAction(roomId))}
+                style={{ padding: '7px 12px', background: 'none', border: '1px solid #5a6a8a', color: '#b8c0da', fontSize: 11.5, cursor: 'pointer' }}>
+                {t('取り消す')}
+              </button>
+            </div>
+          )}
+          {strangerProps.friendRequestState === 'received' && (
+            <div>
+              <div style={{ fontSize: 12, color: '#e4e8f2', marginBottom: 8 }}>{t('お相手から友達申請が届いています')}</div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button type="button" disabled={friendBusy} onClick={() => handleFriendAction(() => strangerProps.respondRequestAction(roomId, 'declined'))}
+                  style={{ flex: 1, padding: 9, background: 'none', border: '1px solid #5a6a8a', color: '#b8c0da', fontSize: 12, cursor: 'pointer' }}>{t('断る')}</button>
+                <button type="button" disabled={friendBusy} onClick={() => handleFriendAction(() => strangerProps.respondRequestAction(roomId, 'accepted'))}
+                  style={{ flex: 1, padding: 9, background: '#4a5580', border: 'none', color: '#e8eaf5', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>{t('承認する')}</button>
+              </div>
+            </div>
+          )}
+          <button type="button" onClick={() => setBlockConfirming(true)}
+            style={{ alignSelf: 'flex-start', background: 'none', border: 'none', color: '#7a82a0', fontSize: 10.5, textDecoration: 'underline', cursor: 'pointer', padding: 0 }}>
+            {t('この相手をブロックして退室する')}
+          </button>
+        </div>
+      )}
+
+      {blockConfirming && (
+        <div onClick={() => setBlockConfirming(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: '#12151f', border: '1px solid #3a4360', borderRadius: 4, padding: 18, maxWidth: 300, width: '90%' }}>
+            <p style={{ fontSize: 13, color: '#e4e8f2', marginBottom: 6 }}>{t('この相手をブロックして退室しますか？')}</p>
+            <p style={{ fontSize: 11, color: '#8a92b5', lineHeight: 1.7, marginBottom: 14 }}>{t('今後、この相手とはランダムマッチで出会わなくなります。ブロックはOCページの「マッチング設定」から解除できます。')}</p>
+            <form action={strangerProps?.blockAction} style={{ display: 'flex', gap: 8 }}>
+              <input type="hidden" name="room_id" value={roomId} />
+              <button type="button" onClick={() => setBlockConfirming(false)} style={{ flex: 1, padding: 9, background: 'none', border: '1px solid #3a4360', color: '#8a92b5', borderRadius: 3, fontSize: 12 }}>{t('キャンセル')}</button>
+              <button type="submit" style={{ flex: 1, padding: 9, background: '#8a2418', border: 'none', color: '#fff', borderRadius: 3, fontSize: 12, fontWeight: 700 }}>{t('ブロックして退室')}</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {!locked && <form id="ooc-input-row" action={sendAction} onSubmit={handleFormSubmit} style={{
         flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 6, padding: '12px 16px',
         background: '#12151f', borderTop: '1px solid #3a4360',
         paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
@@ -397,7 +470,7 @@ export default function OocPanel({
             ▼
           </button>
         </div>
-      </form>
+      </form>}
 
       {situationOpen && (
         <div onClick={() => setSituationOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110 }}>

@@ -26,6 +26,8 @@ import { drawSituation, proposeSituation, respondToSituation } from './situation
 import { exportRoomLog } from './logActions'
 import WelcomePartnerModal from './WelcomePartnerModal'
 import { getT } from '@/lib/i18n/server'
+import { hasNonFriendMember } from '@/lib/strangerRoom'
+import { sendRoomFriendRequest, cancelRoomFriendRequest, respondRoomFriendRequest, blockPartnerAndLeave } from './strangerActions'
 
 export default async function ChatRoomPage({ params, searchParams }) {
   const t = getT()
@@ -46,7 +48,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
   const showLogTutorial = !seenFeatureKeys.has('ooc_log_button')
   const { data: room } = await supabase
     .from('chat_rooms')
-    .select('id, location, time_period, primary_oc_id, pending_deletion_by, pending_deletion_reason, deleted_at, title, transition_requested_at, transition_requested_by, room_type, pending_situation_place, pending_situation_time, pending_situation_text, pending_situation_by')
+    .select('id, location, time_period, primary_oc_id, pending_deletion_by, pending_deletion_reason, deleted_at, title, transition_requested_at, transition_requested_by, room_type, pending_situation_place, pending_situation_time, pending_situation_text, pending_situation_by, stranger_match')
     .eq('id', roomId)
     .maybeSingle()
   if (!room) {
@@ -87,11 +89,16 @@ export default async function ChatRoomPage({ params, searchParams }) {
     .select('id, content, is_system, created_at, user_id, log_type, image_url')
     .eq('room_id', roomId)
     .order('created_at', { ascending: true })
+  const strangerLocked = room.stranger_match ? await hasNonFriendMember(supabase, user.id, roomId) : false
+  const ocNameByUser = new Map((members || []).map((m) => [m.user_id, m.ocs?.name]))
   const oocUserIds = [...new Set((oocMessagesRaw || []).map((m) => m.user_id))]
-  const { data: oocProfiles } = oocUserIds.length > 0
+  const { data: oocProfiles } = oocUserIds.length > 0 && !strangerLocked
     ? await supabase.rpc('get_display_names', { _ids: oocUserIds })
     : { data: [] }
   const oocNameMap = new Map((oocProfiles || []).map((p) => [p.id, p.display_name]))
+  if (strangerLocked) {
+    for (const id of oocUserIds) oocNameMap.set(id, ocNameByUser.get(id) || null)
+  }
   const oocMessages = (oocMessagesRaw || []).map((m) => ({
     ...m,
     senderName: oocNameMap.get(m.user_id) || t('名前未設定'),
@@ -132,7 +139,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
   const showInviteOnlyTutorial = !showFullTutorial && inviteVisible && !tutorialProfile?.seen_invite_tutorial
   const myMembership = (members || []).find((m) => m.user_id === user.id)
   const { data: myProfileForTyping } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
-  const myDisplayName = myProfileForTyping?.display_name || t('名前未設定')
+  const myDisplayName = (strangerLocked ? ocNameByUser.get(user.id) : null) || myProfileForTyping?.display_name || t('名前未設定')
   const lastOocRead = myMembership?.ooc_last_read_at
   function hasUnreadLogType(type) {
     return (oocMessagesRaw || []).some((m) =>
@@ -148,7 +155,9 @@ export default async function ChatRoomPage({ params, searchParams }) {
   if (room.transition_requested_at) {
     if (room.transition_requested_by) {
       const { data: reqProfile } = await supabase.from('profiles').select('display_name').eq('id', room.transition_requested_by).maybeSingle()
-      requestedByName = reqProfile?.display_name || null
+      requestedByName = strangerLocked
+        ? (ocNameByUser.get(room.transition_requested_by) || null)
+        : (reqProfile?.display_name || null)
     }
     const { data: myApproval } = await supabase
       .from('scene_transition_approvals')
@@ -157,6 +166,17 @@ export default async function ChatRoomPage({ params, searchParams }) {
       .eq('user_id', user.id)
       .maybeSingle()
     alreadyApprovedTransition = !!myApproval
+  }
+  let friendRequestState = 'none'
+  if (strangerLocked) {
+    const { data: roomReq } = await supabase
+      .from('friendships')
+      .select('requester_id, addressee_id')
+      .eq('via_room_id', roomId)
+      .eq('status', 'pending')
+      .limit(1)
+      .maybeSingle()
+    if (roomReq) friendRequestState = roomReq.requester_id === user.id ? 'sent' : 'received'
   }
   const myTranscriptPreview = buildTranscriptText(messages, myOcIdSet, { roomType: room.room_type, primaryOcId: room.primary_oc_id })
   const showFinalNotice = room.pending_deletion_by && room.pending_deletion_by !== user.id && !myMembership?.left_at
@@ -339,6 +359,13 @@ export default async function ChatRoomPage({ params, searchParams }) {
           markLogTutorialSeenAction={markFeatureSeen.bind(null, 'ooc_log_button')}
           roomMembers={activeMembers.map((m) => ({ id: m.oc_id, name: m.ocs?.name, icon_url: m.ocs?.icon_url }))}
           pendingMembers={(pendingInvites || []).map((p) => ({ id: p.invitee_oc_id, name: p.ocs?.name, icon_url: p.ocs?.icon_url }))}
+          strangerProps={strangerLocked ? {
+            friendRequestState,
+            sendRequestAction: sendRoomFriendRequest,
+            cancelRequestAction: cancelRoomFriendRequest,
+            respondRequestAction: respondRoomFriendRequest,
+            blockAction: blockPartnerAndLeave,
+          } : null}
         />
       ) : (
         <p style={{ fontSize: 12, color: '#8a8168', textAlign: 'center', padding: 16, flexShrink: 0, fontStyle: 'italic' }}>{t('あなたはこの部屋のメンバーではありません。')}</p>

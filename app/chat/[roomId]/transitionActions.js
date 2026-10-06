@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
 import { getT } from '@/lib/i18n/server'
 import { buildTranscriptText } from './transcriptUtil'
+import { getActorLabel } from '@/lib/strangerRoom'
 
 async function generateTranscript(supabase, roomId, viewerId) {
   const { data: room } = await supabase.from('chat_rooms').select('room_type, primary_oc_id').eq('id', roomId).maybeSingle()
@@ -66,10 +67,10 @@ export async function requestSceneTransition(roomId) {
     transition_requested_by: user.id,
   }).eq('id', roomId)
   await supabase.from('scene_transition_approvals').insert({ room_id: roomId, user_id: user.id })
-  const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+  const actorLabel = await getActorLabel(supabase, user.id, roomId, t)
   await supabase.from('room_ooc_messages').insert({
     room_id: roomId, user_id: user.id, is_system: true, log_type: 'scene_transition',
-    content: t('{name}さんが場面転換を申請しました', { name: profile?.display_name || t('名前未設定') }),
+    content: t('{name}さんが場面転換を申請しました', { name: actorLabel }),
   })
 
     const completed = await checkAndComplete(supabase, roomId)

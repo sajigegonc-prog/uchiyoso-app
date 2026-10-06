@@ -1,15 +1,21 @@
 import { getT } from '@/lib/i18n/server'
+import { declineAndBlock } from './actions'
 
 export default function InvitationRow({ invitation, action }) {
   const t = getT()
   return (
     <div style={{ border: '1px solid #211d17', padding: 12, marginBottom: 10, background: '#fff' }}>
       <div style={{ fontSize: 13, color: '#211d17', lineHeight: 1.7 }}>
-        {t('{inviter}さん宅の{inviterOc}が、{inviteeOc}と話したがっています', {
-          inviter: invitation.inviter_name || t('名前未設定'),
-          inviterOc: invitation.inviter_oc_name || t('名前未設定'),
-          inviteeOc: invitation.invitee_oc_name || t('あなたのOC'),
-        })}
+        {invitation.is_stranger
+          ? t('見知らぬ誰かの{inviterOc}が、{inviteeOc}と話したがっています', {
+            inviterOc: invitation.inviter_oc_name || t('名前未設定'),
+            inviteeOc: invitation.invitee_oc_name || t('あなたのOC'),
+          })
+          : t('{inviter}さん宅の{inviterOc}が、{inviteeOc}と話したがっています', {
+            inviter: invitation.inviter_name || t('名前未設定'),
+            inviterOc: invitation.inviter_oc_name || t('名前未設定'),
+            inviteeOc: invitation.invitee_oc_name || t('あなたのOC'),
+          })}
       </div>
       {(invitation.location || invitation.time_period || invitation.situation) && (
         <div style={{ background: '#f4eee0', border: '1px dashed #8a8168', padding: '8px 10px', marginTop: 8 }}>
@@ -34,6 +40,7 @@ export default function InvitationRow({ invitation, action }) {
         <input type="hidden" name="invitation_id" value={invitation.invitation_id} />
         <input type="hidden" name="room_id" value={invitation.room_id} />
         <input type="hidden" name="oc_id" value={invitation.invitee_oc_id} />
+        <input type="hidden" name="inviter_oc_name" value={invitation.inviter_oc_name || ''} />
         <button type="submit" name="decision" value="accepted"
           style={{ border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', fontSize: 12, fontWeight: 700, padding: '6px 14px', cursor: 'pointer' }}>
           {t('承認する')}
@@ -42,6 +49,12 @@ export default function InvitationRow({ invitation, action }) {
           style={{ border: '1px solid #8a8168', background: '#fff', color: '#6b6250', fontSize: 12, fontWeight: 700, padding: '6px 14px', cursor: 'pointer' }}>
           {t('断る')}
         </button>
+        {invitation.is_stranger && (
+          <button type="submit" formAction={declineAndBlock}
+            style={{ border: '1px solid #8a2418', background: '#fff', color: '#8a2418', fontSize: 12, fontWeight: 700, padding: '6px 14px', cursor: 'pointer' }}>
+            {t('断ってブロック')}
+          </button>
+        )}
       </form>
     </div>
   )

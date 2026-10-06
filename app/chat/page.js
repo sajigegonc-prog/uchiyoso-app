@@ -6,7 +6,7 @@ import { respondToChatInvitation, cancelInvitation } from './actions'
 import CancelInvitationButton from './CancelInvitationButton'
 import RealtimeRefresh from '@/components/AutoRefresh'
 import CoachMark from '@/components/CoachMark'
-import { markUpdate1TutorialSeen } from '../tutorialActions'
+import { markUpdate1TutorialSeen, markFeatureSeen } from '../tutorialActions'
 import Image from 'next/image'
 import { getT } from '@/lib/i18n/server'
 
@@ -22,6 +22,13 @@ export default async function ChatListPage() {
     .eq('id', user.id)
     .maybeSingle()
   const showUpdate1Tutorial = !tutorialProfile?.seen_update1_tutorial
+  const { data: strangerSeen } = await supabase
+    .from('feature_tutorials_seen')
+    .select('feature_key')
+    .eq('user_id', user.id)
+    .eq('feature_key', 'stranger_match_intro')
+    .maybeSingle()
+  const showStrangerTutorial = !showUpdate1Tutorial && !strangerSeen
 
   const { data: memberships } = await supabase
     .from('chat_room_members')
@@ -195,6 +202,15 @@ export default async function ChatListPage() {
           onFinish={markUpdate1TutorialSeen}
         />
       )}
+      {showStrangerTutorial && (
+        <CoachMark
+          steps={[
+            { targetId: 'coach-stranger-btn', text: t('友達以外の人とも、ランダムでお話できる新機能です。お相手には、あなたのOCの名前と情報だけが見えます（友達になるまで、中の人の名前は分かりません）。') },
+            { targetId: 'coach-stranger-btn', text: t('嫌であれば、OCページの「マッチング設定」からいつでもOFFにできます。') },
+          ]}
+          onFinish={markFeatureSeen.bind(null, 'stranger_match_intro')}
+        />
+      )}
       <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
         <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO CLUB</div>
         <div style={{ fontSize: 26, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>
@@ -222,6 +238,17 @@ export default async function ChatListPage() {
         }}
       >
         {t('話したことない友達とおしゃべりしてみる')}
+      </Link>
+      <Link
+        id="coach-stranger-btn"
+        href="/chat/random?mode=stranger"
+        style={{
+          display: 'block', textAlign: 'center', marginTop: 8,
+          background: '#d8cdb0', color: '#3d2717', fontWeight: 700, fontSize: 11,
+          padding: 8, letterSpacing: '.05em', textDecoration: 'none',
+        }}
+      >
+        {t('知らない人とおしゃべりしてみる')}
       </Link>
 
       {invitations && invitations.length > 0 && (

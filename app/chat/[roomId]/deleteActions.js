@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
 import { getT } from '@/lib/i18n/server'
+import { getActorLabel } from '@/lib/strangerRoom'
 
 export async function fullyDeleteRoom(supabase, roomId) {
   await supabase.from('messages').delete().eq('room_id', roomId)
@@ -10,6 +11,7 @@ export async function fullyDeleteRoom(supabase, roomId) {
   await supabase.from('room_ooc_messages').delete().eq('room_id', roomId)
   await supabase.from('chat_room_invitations').delete().eq('room_id', roomId)
   await supabase.from('scene_transition_approvals').delete().eq('room_id', roomId)
+  await supabase.from('friendships').delete().eq('via_room_id', roomId).eq('status', 'pending')
   await supabase.from('chat_room_members').delete().eq('room_id', roomId)
   await supabase.from('chat_rooms').delete().eq('id', roomId)
 }
@@ -21,10 +23,10 @@ export async function confirmLeaveOrDelete(formData) {
   if (!user) redirect('/')
   const roomId = formData.get('room_id')?.toString()
   if (!roomId) redirect('/chat')
-  const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
+  const actorLabel = await getActorLabel(supabase, user.id, roomId, t)
   await supabase.from('room_ooc_messages').insert({
     room_id: roomId, user_id: user.id, is_system: true, log_type: 'member_leave',
-    content: t('{name}さんが退室しました', { name: profile?.display_name || t('名前未設定') }),
+    content: t('{name}さんが退室しました', { name: actorLabel }),
   })
   await supabase
     .from('chat_room_members')

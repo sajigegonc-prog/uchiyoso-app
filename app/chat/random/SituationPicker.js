@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useT } from '@/lib/i18n/client'
 
-export default function SituationPicker({ myOcId, friendOcId, gachaPick, noteExamples, confirmAction }) {
+export default function SituationPicker({ myOcId, friendOcId, gachaPick, noteExamples, confirmAction, strangerMode }) {
   const t = useT()
   const [mode, setMode] = useState('gacha')
   const [noteOpen, setNoteOpen] = useState(false)
@@ -44,6 +44,7 @@ export default function SituationPicker({ myOcId, friendOcId, gachaPick, noteExa
       <form action={confirmAction} style={{ marginTop: 16 }}>
         <input type="hidden" name="my_oc_id" value={myOcId} />
         <input type="hidden" name="friend_oc_id" value={friendOcId} />
+        {strangerMode && <input type="hidden" name="stranger_match" value="1" />}
         <input type="hidden" name="location" value={mode === 'gacha' ? gachaPick.place : customPlace} />
         <input type="hidden" name="time_period" value={mode === 'gacha' ? gachaPick.time : customTime} />
         <input type="hidden" name="situation_text" value={mode === 'gacha' ? gachaPick.text : customText} />

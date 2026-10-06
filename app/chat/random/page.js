@@ -226,37 +226,59 @@ const NOTE_EXAMPLES = [
   '初対面という設定で大丈夫です。緊張しつつ挨拶する感じから始められたら',
 ]
 
-export default async function RandomMatchPage() {
+export default async function RandomMatchPage({ searchParams }) {
   const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
 
   const { data: myOcs } = await supabase.from('ocs').select('id, name, house, career, birth_date, icon_url').eq('user_id', user.id).eq('is_dream_partner', false)
-  const { data: friendOcs } = await supabase.rpc('list_friend_ocs')
-  const friendOcIds = (friendOcs || []).map((f) => f.oc_id)
-  const { data: friendOcDetails } = friendOcIds.length > 0
-    ? await supabase.from('ocs').select('id, name, house, career, birth_date, icon_url').in('id', friendOcIds)
-    : { data: [] }
+  const strangerMode = searchParams?.mode === 'stranger'
+  let eligibleFriendOcs = []
 
-  const { data: existing1on1 } = await supabase
-    .from('chat_room_members')
-    .select('room_id, chat_rooms!inner(room_type)')
-    .eq('user_id', user.id)
-    .eq('chat_rooms.room_type', 'friend_1on1')
-  const roomIds = (existing1on1 || []).map((r) => r.room_id)
-  const { data: existingPartners } = roomIds.length > 0
-    ? await supabase.from('chat_room_members').select('oc_id').in('room_id', roomIds).neq('user_id', user.id)
-    : { data: [] }
-  const excludedOcIds = new Set((existingPartners || []).map((p) => p.oc_id))
+  if (strangerMode) {
+    const { data: meProfile } = await supabase.from('profiles').select('stranger_match_enabled').eq('id', user.id).maybeSingle()
+    if (meProfile && meProfile.stranger_match_enabled === false) {
+      return (
+        <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px', textAlign: 'center' }}>
+          <p style={{ fontSize: 13, color: '#8a8168', marginTop: 40, fontStyle: 'italic', lineHeight: 1.8 }}>
+            {t('「知らない人とのマッチング」がOFFになっています。')}
+          </p>
+          <Link href="/ocs" style={{ display: 'block', marginTop: 16, fontSize: 12, color: '#3d2717', textDecoration: 'underline' }}>{t('OC一覧の「マッチング設定」でONにできます')}</Link>
+          <Link href="/chat" style={{ display: 'block', marginTop: 20, fontSize: 12, color: '#6b6250' }}>{t('← 一覧に戻る')}</Link>
+        </div>
+      )
+    }
+    const { data: candidates } = await supabase.rpc('list_stranger_match_candidates')
+    eligibleFriendOcs = (candidates || []).map((c) => ({
+      id: c.oc_id, name: c.name, house: c.house, career: c.career, birth_date: c.birth_date, icon_url: c.icon_url,
+    }))
+  } else {
+    const { data: friendOcs } = await supabase.rpc('list_friend_ocs')
+    const friendOcIds = (friendOcs || []).map((f) => f.oc_id)
+    const { data: friendOcDetails } = friendOcIds.length > 0
+      ? await supabase.from('ocs').select('id, name, house, career, birth_date, icon_url').in('id', friendOcIds)
+      : { data: [] }
 
-  const eligibleFriendOcs = (friendOcDetails || []).filter((f) => !excludedOcIds.has(f.id))
+    const { data: existing1on1 } = await supabase
+      .from('chat_room_members')
+      .select('room_id, chat_rooms!inner(room_type)')
+      .eq('user_id', user.id)
+      .eq('chat_rooms.room_type', 'friend_1on1')
+    const roomIds = (existing1on1 || []).map((r) => r.room_id)
+    const { data: existingPartners } = roomIds.length > 0
+      ? await supabase.from('chat_room_members').select('oc_id').in('room_id', roomIds).neq('user_id', user.id)
+      : { data: [] }
+    const excludedOcIds = new Set((existingPartners || []).map((p) => p.oc_id))
+
+    eligibleFriendOcs = (friendOcDetails || []).filter((f) => !excludedOcIds.has(f.id))
+  }
 
   if (!myOcs || myOcs.length === 0 || eligibleFriendOcs.length === 0) {
     return (
       <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px', textAlign: 'center' }}>
         <p style={{ fontSize: 13, color: '#8a8168', marginTop: 40, fontStyle: 'italic' }}>
-          {t('今マッチングできるお相手がいません。（すでに全員と1:1のお部屋があるか、OCが未登録です）')}
+          {strangerMode ? t('今マッチングできるお相手がいません。（条件の合う方がいないか、OCが未登録です）') : t('今マッチングできるお相手がいません。（すでに全員と1:1のお部屋があるか、OCが未登録です）')}
         </p>
         <Link href="/chat" style={{ display: 'block', marginTop: 20, fontSize: 12, color: '#6b6250' }}>{t('← 一覧に戻る')}</Link>
       </div>
@@ -309,8 +331,13 @@ export default async function RandomMatchPage() {
     <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px 60px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div style={{ width: '100%', maxWidth: 360, textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
         <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO GAZETTE</div>
-        <div style={{ fontSize: 24, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{t('ランダムマッチング')}</div>
+        <div style={{ fontSize: 24, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{strangerMode ? t('知らない人とのマッチング') : t('ランダムマッチング')}</div>
       </div>
+      {strangerMode && (
+        <div style={{ width: '100%', maxWidth: 360, background: '#fff', border: '1px dashed #8a8168', padding: '9px 12px', marginTop: 14, fontSize: 10.5, color: '#6b6250', lineHeight: 1.8 }}>
+          {t('お相手の名前などは、友達になるまで分かりません。友達になるまでは、中の人チャットでの発言はできません（ログのみ表示されます）。')}
+        </div>
+      )}
 
       <div style={{ width: '100%', maxWidth: 360, border: '4px double #211d17', padding: 18, textAlign: 'center', marginTop: 20, background: '#fff' }}>
         <div style={{ fontSize: 9, color: '#8a8168', letterSpacing: '.1em', marginBottom: 8 }}>{t('🔒 お相手はランダムで決定済み・固定')}</div>
@@ -329,10 +356,11 @@ export default async function RandomMatchPage() {
         gachaPick={gachaPick}
         noteExamples={NOTE_EXAMPLES}
         confirmAction={confirmRandomMatch}
+        strangerMode={strangerMode}
       />
 
       <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 14, textAlign: 'center', fontStyle: 'italic', lineHeight: 1.8 }}>
-        {t('別の友達を探したい場合は、画面を上にスワイプして更新してください')}
+        {strangerMode ? t('別のお相手を探したい場合は、画面を上にスワイプして更新してください') : t('別の友達を探したい場合は、画面を上にスワイプして更新してください')}
       </p>
       <Link href="/chat" style={{ display: 'block', marginTop: 20, marginBottom: 30, fontSize: 11.5, color: '#6b6250' }}>{t('やっぱりやめる')}</Link>
     </div>
