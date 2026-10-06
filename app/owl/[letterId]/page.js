@@ -4,8 +4,10 @@ import Link from 'next/link'
 import MarkReadOnMount from './MarkReadOnMount'
 import { deleteLetter } from '../actions'
 import DeleteLetterButton from '../DeleteLetterButton'
+import { getT } from '@/lib/i18n/server'
 
 export default async function LetterDetailPage({ params }) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -31,7 +33,7 @@ export default async function LetterDetailPage({ params }) {
   let otherOcName = myOcNameMap.get(otherOcId)
   if (!otherOcName) {
     const { data: otherOc } = await supabase.from('ocs').select('name').eq('id', otherOcId).maybeSingle()
-    otherOcName = otherOc?.name || '名前未設定'
+    otherOcName = otherOc?.name || t('名前未設定')
   }
   const myOcId = direction === 'received' ? letter.recipient_oc_id : letter.sender_oc_id
   const myOcName = myOcNameMap.get(myOcId)
@@ -45,7 +47,7 @@ export default async function LetterDetailPage({ params }) {
         padding: '28px 20px 100px', display: 'flex', flexDirection: 'column', alignItems: 'center',
       }}>
         <div style={{ width: '100%', maxWidth: 380 }}>
-          <Link href="/owl" style={{ fontSize: 12, color: '#c9a876', textDecoration: 'none' }}>← ふくろう便に戻る</Link>
+          <Link href="/owl" style={{ fontSize: 12, color: '#c9a876', textDecoration: 'none' }}>{t('← ふくろう便に戻る')}</Link>
         </div>
 
         <div style={{
@@ -60,7 +62,7 @@ export default async function LetterDetailPage({ params }) {
             position: 'absolute', inset: 6, border: '1px dashed rgba(92,58,33,.3)', borderRadius: 2, pointerEvents: 'none',
           }} />
           <div style={{ fontSize: 13, color: '#5c3a21', lineHeight: 1.8 }}>
-            {direction === 'received' ? `${myOcName} へ` : `${otherOcName} へ`}
+            {direction === 'received' ? t('{name} へ', { name: myOcName }) : t('{name} へ', { name: otherOcName })}
           </div>
           <div style={{
             marginTop: 18, paddingTop: 18, borderTop: '1px solid rgba(92,58,33,.25)',
@@ -70,7 +72,7 @@ export default async function LetterDetailPage({ params }) {
             {letter.content}
           </div>
           <div style={{ marginTop: 22, textAlign: 'right', fontSize: 12.5, color: '#5c3a21' }}>
-            {direction === 'received' ? otherOcName : myOcName} より
+            {t('{name} より', { name: direction === 'received' ? otherOcName : myOcName })}
           </div>
         </div>
 
@@ -84,7 +86,7 @@ export default async function LetterDetailPage({ params }) {
               border: '2px solid #3d2717', boxShadow: '0 3px 0 #3d2717',
             }}
           >
-            返事を出す
+            {t('返事を出す')}
           </Link>
         )}
           <DeleteLetterButton letterId={letter.id} action={deleteLetter} />

@@ -7,8 +7,11 @@ import CreditsModal from '../CreditsModal'
 import CoachMark from '@/components/CoachMark'
 import { markHomeTutorialSeen } from '../tutorialActions'
 import { signOutOnly } from '../dev/reset/actions'
+import { getT } from '@/lib/i18n/server'
+import LanguageSwitcher from '@/lib/i18n/LanguageSwitcher'
 
 export default async function HomePage() {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
@@ -25,13 +28,13 @@ export default async function HomePage() {
   const notifications = await getNotifications(supabase, user.id)
 
   const today = new Date()
-  const dateline = today.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })
+  const dateline = today.toLocaleDateString(t.locale === 'ja' ? 'ja-JP' : t.locale === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 
     const noticeItems = [
-    notifications.chat && { href: '/chat', text: 'あなたに話しかけた人がいるようです' },
-    notifications.owl && { href: '/owl', text: 'あなたの部屋にフクロウが来ています' },
-    notifications.matching && { href: '/chat', text: 'あなたと偶然すれ違った方がいるようです' },
-    notifications.friends && { href: '/friends', text: '誰かがあなたと友達になりたがっています' },
+    notifications.chat && { href: '/chat', text: t('あなたに話しかけた人がいるようです') },
+    notifications.owl && { href: '/owl', text: t('あなたの部屋にフクロウが来ています') },
+    notifications.matching && { href: '/chat', text: t('あなたと偶然すれ違った方がいるようです') },
+    notifications.friends && { href: '/friends', text: t('誰かがあなたと友達になりたがっています') },
   ].filter(Boolean)
 
   return (
@@ -39,9 +42,9 @@ export default async function HomePage() {
       {!profile?.seen_home_tutorial && (
         <CoachMark
           steps={[
-            { text: 'ここがあなたのホーム画面です。届いた便りは、ここに速報として並びます。' },
-            { targetId: 'coach-bottomnav', text: 'ここから遊べます。' },
-            { targetId: 'coach-replay-link', text: '場面転換で発行したログを貼ると、チャット画面風に再現して見返せます。' },
+            { text: t('ここがあなたのホーム画面です。届いた便りは、ここに速報として並びます。') },
+            { targetId: 'coach-bottomnav', text: t('ここから遊べます。') },
+            { targetId: 'coach-replay-link', text: t('場面転換で発行したログを貼ると、チャット画面風に再現して見返せます。') },
           ]}
           onFinish={markHomeTutorialSeen}
         />
@@ -53,7 +56,7 @@ export default async function HomePage() {
         <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
           <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO CLUB</div>
           <div style={{ fontSize: 28, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>
-            ホーム
+            {t('ホーム')}
           </div>
           <div style={{ fontSize: 9.5, color: '#8a8168', marginTop: 8, letterSpacing: '.1em' }}>
             {dateline}
@@ -69,10 +72,10 @@ export default async function HomePage() {
           </svg>
           <div>
             <p style={{ fontSize: 14, color: '#3d2717', fontStyle: 'italic', lineHeight: 1.6 }}>
-              ようこそ、{profile?.display_name || user.email} さん。
+              {t('ようこそ、{name} さん。', { name: profile?.display_name || user.email })}
             </p>
             <p style={{ fontSize: 12, color: '#6b6250', fontStyle: 'italic', marginTop: 2 }}>
-              ここはあなたの寝室です。
+              {t('ここはあなたの寝室です。')}
             </p>
           </div>
         </div>
@@ -80,7 +83,7 @@ export default async function HomePage() {
         {noticeItems.length > 0 ? (
           <div style={{ marginTop: 24 }}>
             <div style={{ fontSize: 11, letterSpacing: '.15em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6 }}>
-              速報
+              {t('速報')}
             </div>
             {noticeItems.map((item, i) => (
               <Link
@@ -99,7 +102,7 @@ export default async function HomePage() {
           </div>
         ) : (
           <p style={{ fontSize: 12.5, color: '#8a8168', marginTop: 24, fontStyle: 'italic', textAlign: 'center' }}>
-            — 新しい報せはありません —
+            {t('— 新しい報せはありません —')}
           </p>
         )}
 
@@ -112,14 +115,15 @@ export default async function HomePage() {
             border: '1px solid #211d17', padding: 11, textDecoration: 'none', letterSpacing: '.05em',
           }}
         >
-          過去のおしゃべりを思い出す
+          {t('過去のおしゃべりを思い出す')}
         </Link>
 
         <form action={signOutOnly} style={{ marginTop: 40, textAlign: 'center' }}>
           <button type="submit" style={{ background: 'none', border: 'none', color: '#8a8168', fontSize: 11.5, textDecoration: 'underline', cursor: 'pointer', fontStyle: 'italic' }}>
-            ログアウト
+            {t('ログアウト')}
           </button>
         </form>
+        <div style={{ marginTop: 24 }}><LanguageSwitcher /></div>
         <PrivacyPolicyModal />
         <CreditsModal />
       </div>

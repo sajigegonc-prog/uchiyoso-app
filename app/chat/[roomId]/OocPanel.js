@@ -9,8 +9,10 @@ import TypingDots from '@/components/TypingDots'
 import useKeyboardOffset from '@/components/useKeyboardOffset'
 import { resizeImageFile } from './resizeImage'
 import { createClient } from '@/lib/supabaseClient'
+import { useT } from '@/lib/i18n/client'
 
 function SubmitBtn({ cooldown }) {
+  const t = useT()
   const { pending } = useFormStatus()
   const disabled = pending || cooldown
   return (
@@ -18,7 +20,7 @@ function SubmitBtn({ cooldown }) {
       border: '1px solid #5a6a8a', borderRadius: 3, background: disabled ? '#3a4360' : '#4a5580',
       color: '#e8eaf5', fontWeight: 700, fontSize: 13, padding: '0 16px', letterSpacing: '.03em',
     }}>
-      {pending ? '…' : '送信'}
+      {pending ? '…' : t('送信')}
     </button>
   )
 }
@@ -28,6 +30,7 @@ export default function OocPanel({
   drawAction, proposeAction, respondAction, pendingSituation,
   showGachaTutorial, markGachaTutorialSeenAction, logAction, showLogTutorial, markLogTutorialSeenAction,
 }) {
+  const t = useT()
   const inputRef = useRef(null)
   const submittingRef = useRef(false)
   const lastSentRef = useRef(0)
@@ -66,7 +69,7 @@ export default function OocPanel({
     el.style.height = Math.min(el.scrollHeight, maxHeight) + 'px'
   }
   const now = new Date()
-  const timeLabel = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
+  const timeLabel = now.toLocaleTimeString(t.locale === 'ko' ? 'ko-KR' : t.locale === 'en' ? 'en-US' : 'ja-JP', { hour: '2-digit', minute: '2-digit' })
 
   useEffect(() => {
     setMounted(true)
@@ -212,7 +215,7 @@ export default function OocPanel({
       {showGachaTutorial && (
         <CoachMark
           steps={[
-            { targetId: 'coach-ooc-gacha-btn', text: 'シチュエーションガチャです。結果を確認してから採用するか選べます。' },
+            { targetId: 'coach-ooc-gacha-btn', text: t('シチュエーションガチャです。結果を確認してから採用するか選べます。') },
           ]}
           onFinish={markGachaTutorialSeenAction}
         />
@@ -220,13 +223,13 @@ export default function OocPanel({
       {!showGachaTutorial && showLogTutorial && (
         <CoachMark
           steps={[
-            { targetId: 'coach-ooc-log-btn', text: '場面転換や退出をしなくても、今のログをいつでも書き出せます。書き出したログはホームの「過去のおしゃべりを思い出す」に貼ると、後から見返せます。' },
+            { targetId: 'coach-ooc-log-btn', text: t('場面転換や退出をしなくても、今のログをいつでも書き出せます。書き出したログはホームの「過去のおしゃべりを思い出す」に貼ると、後から見返せます。') },
           ]}
           onFinish={markLogTutorialSeenAction}
         />
       )}
       <div style={{ background: '#12151f', color: '#c7ccdd', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0, borderBottom: '1px solid #3a4360' }}>
-        <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '.1em', fontFamily: "'Courier New', monospace" }}>MEMO — 中の人チャット</span>
+        <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '.1em', fontFamily: "'Courier New', monospace" }}>{t('MEMO — 中の人チャット')}</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ fontSize: 11, color: '#7a82a0', fontFamily: "'Courier New', monospace" }}>{timeLabel}</span>
           <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', color: '#c7ccdd', fontSize: 18, cursor: 'pointer' }}>×</button>
@@ -238,7 +241,7 @@ export default function OocPanel({
         WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain',
       }}>
         {(!messages || messages.length === 0) && (
-          <p style={{ fontSize: 12.5, color: '#7a82a0', textAlign: 'center', marginTop: 20, fontFamily: "'Courier New', monospace" }}>まだメッセージがありません。</p>
+          <p style={{ fontSize: 12.5, color: '#7a82a0', textAlign: 'center', marginTop: 20, fontFamily: "'Courier New', monospace" }}>{t('まだメッセージがありません。')}</p>
         )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {messages && messages.map((msg, idx) => {
@@ -269,7 +272,7 @@ export default function OocPanel({
 
       {hasPending && (
         <div style={{ flexShrink: 0, background: '#252b40', borderTop: '1px solid #4a5580', padding: '10px 16px' }}>
-          <div style={{ fontSize: 9.5, color: '#7a82a0', marginBottom: 5, fontFamily: "'Courier New', monospace" }}>提案中のシチュエーション</div>
+          <div style={{ fontSize: 9.5, color: '#7a82a0', marginBottom: 5, fontFamily: "'Courier New', monospace" }}>{t('提案中のシチュエーション')}</div>
           <div style={{ fontSize: 11.5, color: '#e4e8f2', lineHeight: 1.6, marginBottom: 8 }}>
             {pendingSituation.place && pendingSituation.time ? `${pendingSituation.place}／${pendingSituation.time}` : (pendingSituation.place || pendingSituation.time)}
             {(pendingSituation.place || pendingSituation.time) && <br />}
@@ -277,7 +280,7 @@ export default function OocPanel({
           </div>
                     {isProposer ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <p style={{ fontSize: 10.5, color: '#8a92b5', fontStyle: 'italic', margin: 0 }}>相手の判断を待っています</p>
+              <p style={{ fontSize: 10.5, color: '#8a92b5', fontStyle: 'italic', margin: 0 }}>{t('相手の判断を待っています')}</p>
               <button
                 type="button"
                 disabled={respondPending}
@@ -288,15 +291,15 @@ export default function OocPanel({
                   fontSize: 11, fontWeight: 700, lineHeight: 1, padding: 0, cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
-                aria-label="提案を取り消す"
+                aria-label={t('提案を取り消す')}
               >
                 ×
               </button>
             </div>
           ) : (
             <div style={{ display: 'flex', gap: 8 }}>
-              <button type="button" disabled={respondPending} onClick={() => handleRespond('reject')} style={{ flex: 1, padding: 8, background: 'none', border: '1px solid #5a6a8a', color: '#b8c0da', fontSize: 11.5, cursor: 'pointer' }}>不採用</button>
-              <button type="button" disabled={respondPending} onClick={() => handleRespond('approve')} style={{ flex: 1, padding: 8, background: '#4a5580', border: 'none', color: '#e8eaf5', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>採用</button>
+              <button type="button" disabled={respondPending} onClick={() => handleRespond('reject')} style={{ flex: 1, padding: 8, background: 'none', border: '1px solid #5a6a8a', color: '#b8c0da', fontSize: 11.5, cursor: 'pointer' }}>{t('不採用')}</button>
+              <button type="button" disabled={respondPending} onClick={() => handleRespond('approve')} style={{ flex: 1, padding: 8, background: '#4a5580', border: 'none', color: '#e8eaf5', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>{t('採用')}</button>
             </div>
           )}
         </div>
@@ -326,7 +329,7 @@ export default function OocPanel({
               flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
               border: 'none', background: '#2f3a5c', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
             }}
-            aria-label="シチュエーションを自由記入"
+            aria-label={t('シチュエーションを自由記入')}
           >✏️</button>
           <button
             type="button"
@@ -335,7 +338,7 @@ export default function OocPanel({
               flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
               border: 'none', background: '#2f3a5c', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
             }}
-            aria-label="画像を添付"
+            aria-label={t('画像を添付')}
           >📎</button>
           <button
             id="coach-ooc-log-btn"
@@ -345,7 +348,7 @@ export default function OocPanel({
               flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
               border: 'none', background: '#2f3a5c', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
             }}
-            aria-label="ログを書き出す"
+            aria-label={t('ログを書き出す')}
           >📋</button>
         </div>
       </div>
@@ -368,7 +371,7 @@ export default function OocPanel({
             ref={inputRef}
             name="content"
             rows={1}
-            placeholder="中の人として発言"
+            placeholder={t('中の人として発言')}
             onFocus={() => setExtrasOpen(false)}
             onChange={() => sendTyping(myDisplayName)}
             onInput={autoResize}
@@ -383,7 +386,7 @@ export default function OocPanel({
           <button
             type="button"
             onClick={() => setExtrasOpen((v) => !v)}
-            aria-label="メニューの開閉"
+            aria-label={t('メニューの開閉')}
             style={{
               flexShrink: 0, width: 28, height: 38, border: 'none', background: 'none',
               color: '#8a92b5', fontSize: 13, cursor: 'pointer',
@@ -402,7 +405,7 @@ export default function OocPanel({
             {situationMode === 'gacha' ? (
               <div style={{ background: '#252b40', border: '1px solid #3a4360', padding: 14 }}>
                 {drawing || !drawResult ? (
-                  <p style={{ fontSize: 12, color: '#8a92b5', textAlign: 'center', padding: 20 }}>{drawing ? '抽選中…' : '結果がありません'}</p>
+                  <p style={{ fontSize: 12, color: '#8a92b5', textAlign: 'center', padding: 20 }}>{drawing ? t('抽選中…') : t('結果がありません')}</p>
                 ) : (
                   <>
                     <div style={{ fontSize: 10, color: '#7a82a0', marginBottom: 6, display: 'flex', gap: 8 }}>
@@ -412,22 +415,22 @@ export default function OocPanel({
                   </>
                 )}
                 <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>
-                  <button type="button" disabled={drawing} onClick={handleDraw} style={{ flex: 1, padding: 9, background: 'none', border: '1px solid #5a6a8a', color: '#b8c0da', fontSize: 11.5, cursor: 'pointer' }}>もう一回</button>
-                  <button type="button" disabled={drawing || proposing || !drawResult} onClick={handleAdopt} style={{ flex: 1, padding: 9, background: '#4a5580', border: 'none', color: '#e8eaf5', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>{proposing ? '…' : '採用'}</button>
+                  <button type="button" disabled={drawing} onClick={handleDraw} style={{ flex: 1, padding: 9, background: 'none', border: '1px solid #5a6a8a', color: '#b8c0da', fontSize: 11.5, cursor: 'pointer' }}>{t('もう一回')}</button>
+                  <button type="button" disabled={drawing || proposing || !drawResult} onClick={handleAdopt} style={{ flex: 1, padding: 9, background: '#4a5580', border: 'none', color: '#e8eaf5', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>{proposing ? '…' : t('採用')}</button>
                 </div>
               </div>
             ) : (
               <div>
-                <div style={{ fontSize: 10.5, color: '#8a92b5', marginBottom: 5 }}>場所(任意)</div>
-                <input value={customPlace} onChange={(e) => setCustomPlace(e.target.value)} placeholder="例:天文台" style={{ width: '100%', padding: 8, fontSize: 12.5, border: '1px solid #3a4360', background: '#252b40', color: '#e8eaf5', boxSizing: 'border-box' }} />
-                <div style={{ fontSize: 10.5, color: '#8a92b5', margin: '10px 0 5px' }}>時間帯(任意)</div>
-                <input value={customTime} onChange={(e) => setCustomTime(e.target.value)} placeholder="例:夜" style={{ width: '100%', padding: 8, fontSize: 12.5, border: '1px solid #3a4360', background: '#252b40', color: '#e8eaf5', boxSizing: 'border-box' }} />
-                <div style={{ fontSize: 10.5, color: '#8a92b5', margin: '10px 0 5px' }}>シチュエーション</div>
-                <textarea value={customText} onChange={(e) => setCustomText(e.target.value)} placeholder="自由に書いてください" style={{ width: '100%', minHeight: 70, padding: 8, fontSize: 12.5, border: '1px solid #3a4360', background: '#252b40', color: '#e8eaf5', resize: 'none', boxSizing: 'border-box' }} />
-                <button type="button" disabled={proposing || !customText.trim()} onClick={handleAdopt} style={{ display: 'block', width: '100%', marginTop: 12, padding: 9, background: '#4a5580', border: 'none', color: '#e8eaf5', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>{proposing ? '…' : '採用'}</button>
+                <div style={{ fontSize: 10.5, color: '#8a92b5', marginBottom: 5 }}>{t('場所(任意)')}</div>
+                <input value={customPlace} onChange={(e) => setCustomPlace(e.target.value)} placeholder={t('例:天文台')} style={{ width: '100%', padding: 8, fontSize: 12.5, border: '1px solid #3a4360', background: '#252b40', color: '#e8eaf5', boxSizing: 'border-box' }} />
+                <div style={{ fontSize: 10.5, color: '#8a92b5', margin: '10px 0 5px' }}>{t('時間帯(任意)')}</div>
+                <input value={customTime} onChange={(e) => setCustomTime(e.target.value)} placeholder={t('例:夜')} style={{ width: '100%', padding: 8, fontSize: 12.5, border: '1px solid #3a4360', background: '#252b40', color: '#e8eaf5', boxSizing: 'border-box' }} />
+                <div style={{ fontSize: 10.5, color: '#8a92b5', margin: '10px 0 5px' }}>{t('シチュエーション')}</div>
+                <textarea value={customText} onChange={(e) => setCustomText(e.target.value)} placeholder={t('自由に書いてください')} style={{ width: '100%', minHeight: 70, padding: 8, fontSize: 12.5, border: '1px solid #3a4360', background: '#252b40', color: '#e8eaf5', resize: 'none', boxSizing: 'border-box' }} />
+                <button type="button" disabled={proposing || !customText.trim()} onClick={handleAdopt} style={{ display: 'block', width: '100%', marginTop: 12, padding: 9, background: '#4a5580', border: 'none', color: '#e8eaf5', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>{proposing ? '…' : t('採用')}</button>
               </div>
             )}
-            <button type="button" onClick={() => setSituationOpen(false)} style={{ display: 'block', width: '100%', marginTop: 10, background: 'none', border: 'none', color: '#7a82a0', fontSize: 10.5, textDecoration: 'underline', cursor: 'pointer' }}>やっぱりやめておく</button>
+            <button type="button" onClick={() => setSituationOpen(false)} style={{ display: 'block', width: '100%', marginTop: 10, background: 'none', border: 'none', color: '#7a82a0', fontSize: 10.5, textDecoration: 'underline', cursor: 'pointer' }}>{t('やっぱりやめておく')}</button>
           </div>
         </div>
       )}
@@ -435,11 +438,11 @@ export default function OocPanel({
       {logConfirming && (
         <div onClick={() => setLogConfirming(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
           <div onClick={(e) => e.stopPropagation()} style={{ background: '#12151f', border: '1px solid #3a4360', borderRadius: 4, padding: 18, maxWidth: 300 }}>
-            <p style={{ fontSize: 13, color: '#e4e8f2', marginBottom: 6 }}>現在のログを書き出しますか？</p>
-            <p style={{ fontSize: 11, color: '#8a92b5', lineHeight: 1.7, marginBottom: 14 }}>場面転換や退出をしなくても、今の会話ログをいつでもコピーできます。</p>
+            <p style={{ fontSize: 13, color: '#e4e8f2', marginBottom: 6 }}>{t('現在のログを書き出しますか？')}</p>
+            <p style={{ fontSize: 11, color: '#8a92b5', lineHeight: 1.7, marginBottom: 14 }}>{t('場面転換や退出をしなくても、今の会話ログをいつでもコピーできます。')}</p>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button type="button" onClick={() => setLogConfirming(false)} style={{ flex: 1, padding: 9, background: 'none', border: '1px solid #3a4360', color: '#8a92b5', borderRadius: 3, fontSize: 12 }}>キャンセル</button>
-              <button type="button" onClick={handleShowLog} style={{ flex: 1, padding: 9, background: '#4a5580', border: 'none', color: '#e8eaf5', borderRadius: 3, fontSize: 12 }}>ログを表示</button>
+              <button type="button" onClick={() => setLogConfirming(false)} style={{ flex: 1, padding: 9, background: 'none', border: '1px solid #3a4360', color: '#8a92b5', borderRadius: 3, fontSize: 12 }}>{t('キャンセル')}</button>
+              <button type="button" onClick={handleShowLog} style={{ flex: 1, padding: 9, background: '#4a5580', border: 'none', color: '#e8eaf5', borderRadius: 3, fontSize: 12 }}>{t('ログを表示')}</button>
             </div>
           </div>
         </div>
@@ -448,12 +451,12 @@ export default function OocPanel({
       {logTranscript !== null && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
           <div style={{ background: '#12151f', border: '1px solid #3a4360', borderRadius: 4, padding: 18, maxWidth: 340, width: '90%', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
-            <p style={{ fontSize: 13, color: '#e4e8f2', marginBottom: 6 }}>現在のログ</p>
-            <p style={{ fontSize: 10.5, color: '#8a92b5', lineHeight: 1.7, marginBottom: 8 }}>ホームの「過去のおしゃべりを思い出す」に貼ると、いつでも見返せます。★の付いた発言があなたのキャラです。</p>
+            <p style={{ fontSize: 13, color: '#e4e8f2', marginBottom: 6 }}>{t('現在のログ')}</p>
+            <p style={{ fontSize: 10.5, color: '#8a92b5', lineHeight: 1.7, marginBottom: 8 }}>{t('ホームの「過去のおしゃべりを思い出す」に貼ると、いつでも見返せます。★の付いた発言があなたのキャラです。')}</p>
             <textarea readOnly value={logTranscript} style={{ flex: 1, minHeight: 160, fontSize: 12, padding: 10, border: '1px solid #3a4360', background: '#252b40', color: '#e8eaf5', resize: 'none', borderRadius: 3 }} />
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-              <button type="button" onClick={() => { setLogTranscript(null); setLogCopied(false) }} style={{ flex: 1, padding: 9, background: 'none', border: '1px solid #3a4360', color: '#8a92b5', borderRadius: 3, fontSize: 12 }}>閉じる</button>
-              <button type="button" onClick={handleCopyLog} style={{ flex: 1, padding: 9, background: '#4a5580', border: 'none', color: '#e8eaf5', borderRadius: 3, fontSize: 12 }}>{logCopied ? 'コピーしました' : 'コピーする'}</button>
+              <button type="button" onClick={() => { setLogTranscript(null); setLogCopied(false) }} style={{ flex: 1, padding: 9, background: 'none', border: '1px solid #3a4360', color: '#8a92b5', borderRadius: 3, fontSize: 12 }}>{t('閉じる')}</button>
+              <button type="button" onClick={handleCopyLog} style={{ flex: 1, padding: 9, background: '#4a5580', border: 'none', color: '#e8eaf5', borderRadius: 3, fontSize: 12 }}>{logCopied ? t('コピーしました') : t('コピーする')}</button>
             </div>
           </div>
         </div>

@@ -2,8 +2,10 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
+import { getT } from '@/lib/i18n/server'
 
 export async function sendMessage(formData) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -53,7 +55,7 @@ export async function sendMessage(formData) {
       room_id: roomId,
       user_id: user.id,
       is_system: true,
-      content: '状況が追加されました',
+      content: t('状況が追加されました'),
     })
     revalidatePath(`/chat/${roomId}`)
     return

@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { useT } from '@/lib/i18n/client'
 
 const labelStyle = { fontSize: 11, color: '#6b6250', display: 'block', marginBottom: 5, letterSpacing: '.05em' }
 const inputStyle = {
@@ -14,6 +15,7 @@ const btnStyle = {
 }
 
 export default function NameChangeForm({ action, currentName }) {
+  const t = useT()
   const [pending, setPending] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
@@ -32,15 +34,15 @@ export default function NameChangeForm({ action, currentName }) {
 
   return (
     <form action={handleSubmit} style={{ marginTop: 16 }}>
-      <label style={labelStyle}>表示名</label>
+      <label style={labelStyle}>{t('表示名')}</label>
       <input name="display_name" defaultValue={currentName} style={inputStyle} />
       {error && <p style={{ fontSize: 12, color: '#8a2418', marginTop: 10, lineHeight: 1.7 }}>{error}</p>}
-      {success && <p style={{ fontSize: 12, color: '#3d5c33', marginTop: 10 }}>変更しました。</p>}
+      {success && <p style={{ fontSize: 12, color: '#3d5c33', marginTop: 10 }}>{t('変更しました。')}</p>}
       <button type="submit" disabled={pending} style={btnStyle}>
-        {pending ? '変更中…' : '変更する'}
+        {pending ? t('変更中…') : t('変更する')}
       </button>
       <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>
-        変更は30日に1回までです。
+        {t('変更は30日に1回までです。')}
       </p>
     </form>
   )

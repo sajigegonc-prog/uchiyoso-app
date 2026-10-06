@@ -3,8 +3,10 @@ import { useState, useCallback } from 'react'
 import Cropper from 'react-easy-crop'
 import { createClient } from '@/lib/supabaseClient'
 import { getCroppedImg } from './[id]/cropImage'
+import { useT } from '@/lib/i18n/client'
 
 export default function DreamPartnerSection({ dreamPartners, dreamerOcs, userId, saveAction, deleteAction }) {
+  const t = useT()
   const [editingId, setEditingId] = useState(null)
   const [creating, setCreating] = useState(false)
   const [name, setName] = useState('')
@@ -54,8 +56,8 @@ export default function DreamPartnerSection({ dreamPartners, dreamerOcs, userId,
   const onCropComplete = useCallback((_, pixels) => setCroppedAreaPixels(pixels), [])
 
   async function handleSave() {
-    if (!name.trim()) { setError('お名前を入力してください'); return }
-    if (!pairedOcId) { setError('どのOCのお相手か選んでください'); return }
+    if (!name.trim()) { setError(t('お名前を入力してください')); return }
+    if (!pairedOcId) { setError(t('どのOCのお相手か選んでください')); return }
     setPending(true)
     setError(null)
     try {
@@ -88,7 +90,7 @@ export default function DreamPartnerSection({ dreamPartners, dreamerOcs, userId,
   }
 
   async function handleDelete(id) {
-    if (!confirm('お相手の登録を削除しますか？')) return
+    if (!confirm(t('お相手の登録を削除しますか？'))) return
     const formData = new FormData()
     formData.set('id', id)
     await deleteAction(formData)
@@ -99,7 +101,7 @@ export default function DreamPartnerSection({ dreamPartners, dreamerOcs, userId,
   return (
     <div style={{ marginTop: 32 }}>
       <div style={{ fontSize: 15, fontWeight: 700, color: '#211d17', fontFamily: 'Georgia, serif', borderBottom: '3px double #211d17', paddingBottom: 8 }}>
-        お相手
+        {t('お相手')}
       </div>
 
       {dreamPartners.map((p) => (
@@ -114,9 +116,9 @@ export default function DreamPartnerSection({ dreamPartners, dreamerOcs, userId,
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: '#211d17' }}>{p.name}</div>
-            <div style={{ fontSize: 10, color: '#b3a98f', marginTop: 2 }}>× {pairedOcMap.get(p.paired_with_oc_id) || '不明'}</div>
+            <div style={{ fontSize: 10, color: '#b3a98f', marginTop: 2 }}>× {pairedOcMap.get(p.paired_with_oc_id) || t('不明')}</div>
           </div>
-          <button type="button" onClick={() => startEdit(p)} style={{ fontSize: 11, color: '#6b6250', background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer' }}>編集</button>
+          <button type="button" onClick={() => startEdit(p)} style={{ fontSize: 11, color: '#6b6250', background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer' }}>{t('編集')}</button>
         </div>
       ))}
 
@@ -130,19 +132,19 @@ export default function DreamPartnerSection({ dreamPartners, dreamerOcs, userId,
             color: '#3d2717', fontWeight: 700, fontSize: 13, cursor: 'pointer', letterSpacing: '.05em',
           }}
         >
-          + 夢のお相手を登録する
+          {t('+ 夢のお相手を登録する')}
         </button>
       )}
 
       {isFormOpen && (
         <div style={{ marginTop: 10 }}>
-          <label style={{ fontSize: 11, color: '#6b6250', display: 'block', marginBottom: 5 }}>どのOCのお相手ですか</label>
+          <label style={{ fontSize: 11, color: '#6b6250', display: 'block', marginBottom: 5 }}>{t('どのOCのお相手ですか')}</label>
           <select value={pairedOcId} onChange={(e) => setPairedOcId(e.target.value)} style={{ width: '100%', padding: '10px 12px', fontSize: 14, background: '#fff', border: '1px solid #211d17', color: '#211d17', boxSizing: 'border-box' }}>
-            <option value="">選んでください</option>
+            <option value="">{t('選んでください')}</option>
             {availableOcs.map((oc) => <option key={oc.id} value={oc.id}>{oc.name}</option>)}
           </select>
 
-          <label style={{ fontSize: 11, color: '#6b6250', display: 'block', marginTop: 12, marginBottom: 5 }}>アイコン画像(任意)</label>
+          <label style={{ fontSize: 11, color: '#6b6250', display: 'block', marginTop: 12, marginBottom: 5 }}>{t('アイコン画像(任意)')}</label>
           <input type="file" accept="image/*" onChange={onFileChange} style={{ fontSize: 12.5 }} />
           {imageSrc && (
             <div style={{ marginTop: 10 }}>
@@ -153,24 +155,24 @@ export default function DreamPartnerSection({ dreamPartners, dreamerOcs, userId,
             </div>
           )}
 
-          <label style={{ fontSize: 11, color: '#6b6250', display: 'block', marginTop: 12, marginBottom: 5 }}>お名前</label>
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="例:フレッド・ウィーズリー" style={{ width: '100%', padding: '10px 12px', fontSize: 15, background: '#fff', border: '1px solid #211d17', color: '#211d17', boxSizing: 'border-box' }} />
+          <label style={{ fontSize: 11, color: '#6b6250', display: 'block', marginTop: 12, marginBottom: 5 }}>{t('お名前')}</label>
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('例:フレッド・ウィーズリー')} style={{ width: '100%', padding: '10px 12px', fontSize: 15, background: '#fff', border: '1px solid #211d17', color: '#211d17', boxSizing: 'border-box' }} />
 
           {error && <p style={{ fontSize: 11.5, color: '#8a2418', marginTop: 8 }}>{error}</p>}
           <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-            <button type="button" onClick={cancel} disabled={pending} style={{ flex: 1, padding: 10, border: '1px solid #8a8168', background: '#fff', color: '#6b6250', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>キャンセル</button>
+            <button type="button" onClick={cancel} disabled={pending} style={{ flex: 1, padding: 10, border: '1px solid #8a8168', background: '#fff', color: '#6b6250', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>{t('キャンセル')}</button>
             {editingId && (
-              <button type="button" onClick={() => handleDelete(editingId)} disabled={pending} style={{ flex: 1, padding: 10, border: '1px solid #8a2418', background: '#fff', color: '#8a2418', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>削除</button>
+              <button type="button" onClick={() => handleDelete(editingId)} disabled={pending} style={{ flex: 1, padding: 10, border: '1px solid #8a2418', background: '#fff', color: '#8a2418', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>{t('削除')}</button>
             )}
             <button type="button" onClick={handleSave} disabled={pending} style={{ flex: 1, padding: 10, border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
-              {pending ? '保存中…' : '保存'}
+              {pending ? t('保存中…') : t('保存')}
             </button>
           </div>
         </div>
       )}
 
       <p style={{ fontSize: 10, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>
-        お相手はあなただけに表示され、他の人からは見えません。登録できる人数は夢主OCの人数分までです。おしゃべりは「うちの子同士でおしゃべりする」から可能です。
+        {t('お相手はあなただけに表示され、他の人からは見えません。登録できる人数は夢主OCの人数分までです。おしゃべりは「うちの子同士でおしゃべりする」から可能です。')}
       </p>
     </div>
   )

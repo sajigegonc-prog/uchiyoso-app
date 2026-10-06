@@ -1,7 +1,9 @@
 'use client'
 import { removeAvoidedPartner } from './actions'
+import { useT } from '@/lib/i18n/client'
 
 export default function AvoidedPartnerTag({ partner }) {
+  const t = useT()
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 6,
@@ -17,7 +19,7 @@ export default function AvoidedPartnerTag({ partner }) {
             border: 'none', background: 'none', cursor: 'pointer',
             color: '#6b6250', fontSize: 14, lineHeight: 1, padding: 0,
           }}
-          aria-label="削除"
+          aria-label={t('削除')}
         >
           ×
         </button>

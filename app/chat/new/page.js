@@ -3,8 +3,10 @@ import { createClient } from '@/lib/supabaseServer'
 import { createRoom } from '../actions'
 import NewRoomForm from './NewRoomForm'
 import Link from 'next/link'
+import { getT } from '@/lib/i18n/server'
 
 export default async function NewChatPage({ searchParams }) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -32,12 +34,12 @@ export default async function NewChatPage({ searchParams }) {
       <div style={{ width: '100%', maxWidth: 360, textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
         <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO CLUB</div>
         <div style={{ fontSize: 24, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>
-          誰かとおしゃべりする！
+          {t('誰かとおしゃべりする！')}
         </div>
       </div>
       {(!ocs || ocs.length === 0) ? (
         <p style={{ fontSize: 13, color: '#8a8168', marginTop: 24, maxWidth: 360, textAlign: 'center', fontStyle: 'italic' }}>
-          おしゃべりするには、まずOCを1人登録してください。
+          {t('おしゃべりするには、まずOCを1人登録してください。')}
         </p>
       ) : (
         <NewRoomForm
@@ -48,7 +50,7 @@ export default async function NewChatPage({ searchParams }) {
         />
       )}
       <Link href="/chat" style={{ display: 'block', marginTop: 24, marginBottom: 10, padding: '10px 0', textAlign: 'center', fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>
-        ← おしゃべり一覧に戻る
+        {t('← おしゃべり一覧に戻る')}
       </Link>
     </div>
   )

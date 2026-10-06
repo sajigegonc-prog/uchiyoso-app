@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Image from 'next/image'
+import { useT } from '@/lib/i18n/client'
 
 const NAVY = '#22335c'
 const NAVY_DEEP = '#182647'
@@ -9,6 +10,7 @@ const GOLD_SOFT = '#dbb84a'
 const CREAM = '#f4eee0'
 
 export default function FrogChocolateButton({ roomId, action, speakerName, hasUnread }) {
+  const t = useT()
   const [confirming, setConfirming] = useState(false)
   const [pending, setPending] = useState(false)
   const [result, setResult] = useState(null)
@@ -38,7 +40,7 @@ export default function FrogChocolateButton({ roomId, action, speakerName, hasUn
           border: 'none', background: 'none',
           fontSize: 15, cursor: 'pointer', marginBottom: 2,
         }}
-        aria-label="蛙チョコを開ける"
+        aria-label={t('蛙チョコを開ける')}
       >
         <Image src="/images/frog-choc-button.png" alt="" fill sizes="44px" style={{ objectFit: 'contain', objectPosition: 'center 40%' }} />
         {hasUnread && (
@@ -64,10 +66,10 @@ export default function FrogChocolateButton({ roomId, action, speakerName, hasUn
               </div>
             </div>
             <p style={{ fontSize: 13.5, lineHeight: 1.85, textAlign: 'center', color: CREAM, margin: '0 0 4px' }}>
-              {speakerName}として蛙チョコを開けますか？
+              {t('{name}として蛙チョコを開けますか？', { name: speakerName })}
             </p>
             <p style={{ fontSize: 11, color: '#c7bfa4', textAlign: 'center', margin: '6px 0 0', fontStyle: 'italic' }}>
-              (結果は中の人チャットにログとして残ります)
+              {t('(結果は中の人チャットにログとして残ります)')}
             </p>
             <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
               <button
@@ -75,7 +77,7 @@ export default function FrogChocolateButton({ roomId, action, speakerName, hasUn
                 onClick={() => setConfirming(false)}
                 style={{ flex: 1, padding: 11, border: '1px solid rgba(244,238,224,.45)', background: 'transparent', color: '#d9d2bd', fontWeight: 700, fontSize: 12.5, borderRadius: 2, cursor: 'pointer' }}
               >
-                キャンセル
+                {t('キャンセル')}
               </button>
               <button
                 type="button"
@@ -93,7 +95,7 @@ export default function FrogChocolateButton({ roomId, action, speakerName, hasUn
                   boxShadow: '0 2px 0 #8f721c',
                 }}
               >
-                {pending ? '開けています…' : 'はい'}
+                {pending ? t('開けています…') : t('はい')}
               </button>
             </div>
           </div>
@@ -135,7 +137,7 @@ export default function FrogChocolateButton({ roomId, action, speakerName, hasUn
                 boxShadow: '0 2px 0 #8f721c',
               }}
             >
-              閉じる
+              {t('閉じる')}
             </button>
           </div>
         </div>
@@ -155,7 +157,7 @@ export default function FrogChocolateButton({ roomId, action, speakerName, hasUn
               onClick={() => setError(null)}
               style={{ marginTop: 14, padding: '8px 20px', border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
             >
-              閉じる
+              {t('閉じる')}
             </button>
           </div>
         </div>

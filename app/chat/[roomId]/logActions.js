@@ -1,10 +1,12 @@
 'use server'
 import { createClient } from '@/lib/supabaseServer'
+import { getT } from '@/lib/i18n/server'
 
 export async function exportRoomLog(roomId) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'ログインしていません' }
+  if (!user) return { error: t('ログインしていません') }
   const { data: room } = await supabase.from('chat_rooms').select('room_type, primary_oc_id').eq('id', roomId).maybeSingle()
   const { data: myOcs } = await supabase.from('ocs').select('id').eq('user_id', user.id)
   const myOcIds = new Set((myOcs || []).map((o) => o.id))

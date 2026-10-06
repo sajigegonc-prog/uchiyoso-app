@@ -1,6 +1,8 @@
 import Link from 'next/link'
+import { getT } from '@/lib/i18n/server'
 
 export default function LetterCard({ letter }) {
+  const t = getT()
   const isUnread = !letter.read_at && letter.direction === 'received'
 
   return (
@@ -23,10 +25,10 @@ export default function LetterCard({ letter }) {
       }} />
       <div>
         <div style={{ fontSize: 13, fontWeight: isUnread ? 700 : 400, color: '#3d2c14', fontFamily: 'Georgia, serif' }}>
-          {letter.direction === 'received' ? `${letter.senderName} より` : `${letter.recipientName} へ`}
+          {letter.direction === 'received' ? t('{name} より', { name: letter.senderName }) : t('{name} へ', { name: letter.recipientName })}
         </div>
         {isUnread && (
-          <div style={{ fontSize: 9.5, color: '#7a6537', marginTop: 2, fontStyle: 'italic' }}>未開封</div>
+          <div style={{ fontSize: 9.5, color: '#7a6537', marginTop: 2, fontStyle: 'italic' }}>{t('未開封')}</div>
         )}
       </div>
     </Link>

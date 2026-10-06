@@ -1,7 +1,9 @@
 'use client'
 import { useState } from 'react'
+import { useT } from '@/lib/i18n/client'
 
 export default function RoomTitleEditor({ roomId, title, fallback, action }) {
+  const t = useT()
   const [editing, setEditing] = useState(false)
   const [value, setValue] = useState(title || '')
   const [pending, setPending] = useState(false)
@@ -22,7 +24,7 @@ export default function RoomTitleEditor({ roomId, title, fallback, action }) {
         style={{ flex: 1, fontSize: 14, padding: '6px 8px', border: '1px solid #211d17', background: '#fff', color: '#211d17' }} />
       <button type="button" disabled={pending}
         onClick={async () => { setPending(true); await action(roomId, value); setPending(false); setEditing(false) }}
-        style={{ fontSize: 12, padding: '6px 10px', background: '#211d17', color: '#f4eee0', border: 'none', cursor: 'pointer' }}>保存</button>
+        style={{ fontSize: 12, padding: '6px 10px', background: '#211d17', color: '#f4eee0', border: 'none', cursor: 'pointer' }}>{t('保存')}</button>
       <button type="button" onClick={() => setEditing(false)}
         style={{ fontSize: 12, padding: '6px 10px', background: '#fff', color: '#6b6250', border: '1px solid #8a8168', cursor: 'pointer' }}>×</button>
     </div>

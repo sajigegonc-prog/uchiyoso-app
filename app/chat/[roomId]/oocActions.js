@@ -2,6 +2,7 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
+import { getT } from '@/lib/i18n/server'
 
 export async function sendOocMessage(formData) {
   const supabase = await createClient()
@@ -35,21 +36,23 @@ export async function markOocRead(roomId) {
 }
 
 export async function openFrogCard(formData) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
   const roomId = formData.get('room_id')?.toString()
-  if (!roomId) return { error: '部屋情報が取得できませんでした。' }
-  const openerName = formData.get('speaker_name')?.toString() || '名前未設定'
+  if (!roomId) return { error: t('部屋情報が取得できませんでした。') }
+  const openerName = formData.get('speaker_name')?.toString() || t('名前未設定')
   const { count, error: countError } = await supabase.from('frog_cards').select('id', { count: 'exact', head: true })
-  if (countError || !count) return { error: 'カードデータが見つかりませんでした。' }
+  if (countError || !count) return { error: t('カードデータが見つかりませんでした。') }
   const randomOffset = Math.floor(Math.random() * count)
   const { data: cards, error: cardError } = await supabase.from('frog_cards').select('name, description').range(randomOffset, randomOffset)
-  const card = cards?.[0]
-  if (cardError || !card) return { error: 'カードの取得に失敗しました。' }
+  const rawCard = cards?.[0]
+  const card = rawCard ? { ...rawCard, name: t(rawCard.name), description: t(rawCard.description) } : rawCard
+  if (cardError || !card) return { error: t('カードの取得に失敗しました。') }
   await supabase.from('room_ooc_messages').insert({
     room_id: roomId, user_id: user.id,
-    content: `${openerName} が、蛙チョコを開けました → ${card.name}\n${card.description}`,
+    content: t('{opener} が、蛙チョコを開けました → {card}', { opener: openerName, card: `${card.name}\n${card.description}` }),
     is_system: true, log_type: 'frog_choc',
   })
   revalidatePath(`/chat/${roomId}`)

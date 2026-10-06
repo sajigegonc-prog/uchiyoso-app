@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createRoom } from '../actions'
+import { useT } from '@/lib/i18n/client'
 
 const labelStyle = { fontSize: 11, color: '#6b6250', display: 'block', marginBottom: 5, letterSpacing: '.05em' }
 const inputStyle = {
@@ -23,6 +24,7 @@ const typeBtnStyle = (active) => ({
 })
 
     export default function NewRoomForm({ ocs, friendOcs, initialFriendOcId, dreamPartner }) {
+  const t = useT()
   const router = useRouter()
   const initialFriendUserId = friendOcs.find((f) => f.oc_id === initialFriendOcId)?.friend_user_id || ''
   const [step, setStep] = useState(0)
@@ -47,7 +49,7 @@ const typeBtnStyle = (active) => ({
   for (const f of friendOcs) {
     if (!seenFriend.has(f.friend_user_id)) {
       seenFriend.add(f.friend_user_id)
-      friendGroups.push({ userId: f.friend_user_id, label: f.friend_display_name || '名前未設定' })
+      friendGroups.push({ userId: f.friend_user_id, label: f.friend_display_name || t('名前未設定') })
     }
   }
   function ocsOfFriend(userId) {
@@ -130,23 +132,23 @@ const typeBtnStyle = (active) => ({
       {step === 0 && (
         <div>
           <button type="button" style={typeBtnStyle(roomType === 'one')} onClick={() => { setRoomType('one'); setStep(1) }}>
-            お友達とおしゃべり
+            {t('お友達とおしゃべり')}
           </button>
           <button type="button" style={typeBtnStyle(roomType === 'group')} onClick={() => { setRoomType('group'); setStep(1) }}>
-            複数のお友達とおしゃべり
+            {t('複数のお友達とおしゃべり')}
           </button>
           <button type="button" style={typeBtnStyle(roomType === 'self')} onClick={() => { setRoomType('self'); setStep(1) }}>
-            うちの子同士でおしゃべり
+            {t('うちの子同士でおしゃべり')}
           </button>
           <button type="button" style={typeBtnStyle(roomType === 'solo')} onClick={() => { setRoomType('solo'); setStep(1) }}>
-            独り言・NPCとおしゃべり
+            {t('独り言・NPCとおしゃべり')}
           </button>
         </div>
       )}
 
       {step === 1 && (
         <div>
-          <label style={labelStyle}>どのキャラでおしゃべりしますか?</label>
+          <label style={labelStyle}>{t('どのキャラでおしゃべりしますか?')}</label>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 8, marginBottom: 8 }}>
             {ocs.map((oc) => (
               <button key={oc.id} type="button" onClick={() => setSpeakerOcId(oc.id)}
@@ -170,22 +172,22 @@ const typeBtnStyle = (active) => ({
           </div>
           {roomType === 'solo' ? (
             <p style={{ fontSize: 11, color: '#8a8168', lineHeight: 1.7, fontStyle: 'italic' }}>
-              このキャラだけの部屋です。あとからNPCを自由に追加できます。
+              {t('このキャラだけの部屋です。あとからNPCを自由に追加できます。')}
             </p>
           ) : (
             <p style={{ fontSize: 11, color: '#8a8168', lineHeight: 1.7, fontStyle: 'italic' }}>
-              おしゃべりの中でいつでも他の子に切り替えることができます。
+              {t('おしゃべりの中でいつでも他の子に切り替えることができます。')}
             </p>
           )}
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 18 }}>
-            <button type="button" style={btnGhostStyle} onClick={() => setStep(0)}>戻る</button>
+            <button type="button" style={btnGhostStyle} onClick={() => setStep(0)}>{t('戻る')}</button>
             <button
               type="button"
               style={btnStyle}
               onClick={() => (roomType === 'solo' ? setStep(2) : setStep(2))}
               disabled={!speakerOcId}
             >
-              次へ
+              {t('次へ')}
             </button>
           </div>
         </div>
@@ -194,28 +196,28 @@ const typeBtnStyle = (active) => ({
       {step === 2 && (
         <div>
           <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>場所(任意)</label>
-            <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="例:図書室3階" style={inputStyle} />
+            <label style={labelStyle}>{t('場所(任意)')}</label>
+            <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder={t('例:図書室3階')} style={inputStyle} />
           </div>
           <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>時間帯(任意)</label>
-            <input value={timePeriod} onChange={(e) => setTimePeriod(e.target.value)} placeholder="例:放課後、夜" style={inputStyle} />
+            <label style={labelStyle}>{t('時間帯(任意)')}</label>
+            <input value={timePeriod} onChange={(e) => setTimePeriod(e.target.value)} placeholder={t('例:放課後、夜')} style={inputStyle} />
           </div>
 
           {roomType === 'group' && (
             <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>部屋のタイトル</label>
-              <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="例:談話室" style={inputStyle} />
+              <label style={labelStyle}>{t('部屋のタイトル')}</label>
+              <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('例:談話室')} style={inputStyle} />
             </div>
           )}
 
           {roomType === 'self' && (
   <div style={{ marginBottom: 14 }}>
-    <label style={labelStyle}>一緒に参加させるOC</label>
+    <label style={labelStyle}>{t('一緒に参加させるOC')}</label>
 
     {otherOcs.length === 0 && (
       <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic' }}>
-        他に登録済みのOCがありません。
+        {t('他に登録済みのOCがありません。')}
       </p>
     )}
 
@@ -295,7 +297,7 @@ const typeBtnStyle = (active) => ({
             marginBottom: 6,
           }}
         >
-          夢相手
+          {t('夢相手')}
         </div>
 
         <label
@@ -364,24 +366,24 @@ const typeBtnStyle = (active) => ({
 
           {roomType === 'solo' && (
             <p style={{ fontSize: 11.5, color: '#8a8168', marginBottom: 14, fontStyle: 'italic', lineHeight: 1.8 }}>
-              このまま作成すると、あなただけの部屋になります。作成後、部屋の中でNPCを追加しておしゃべりできます。
+              {t('このまま作成すると、あなただけの部屋になります。作成後、部屋の中でNPCを追加しておしゃべりできます。')}
             </p>
           )}
 
           {roomType === 'one' && (
             <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>中の人</label>
+              <label style={labelStyle}>{t('中の人')}</label>
               <select
                 value={oneFriendUserId}
                 onChange={(e) => { setOneFriendUserId(e.target.value); setOneFriendOcId('') }}
                 style={inputStyle}
               >
-                <option value="">選んでください</option>
+                <option value="">{t('選んでください')}</option>
                 {friendGroups.map((f) => (
                   <option key={f.userId} value={f.userId}>{f.label}</option>
                 ))}
               </select>
-              {friendGroups.length === 0 && <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic', marginTop: 8 }}>まだ友達がいません。</p>}
+              {friendGroups.length === 0 && <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic', marginTop: 8 }}>{t('まだ友達がいません。')}</p>}
 
               {oneFriendUserId && (
                 <div style={{ marginTop: 12 }}>
@@ -405,8 +407,8 @@ const typeBtnStyle = (active) => ({
 
           {roomType === 'group' && (
             <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>招待する友達(2人以上・全員が友達である必要があります)</label>
-              {friendGroups.length === 0 && <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic' }}>まだ友達がいません。</p>}
+              <label style={labelStyle}>{t('招待する友達(2人以上・全員が友達である必要があります)')}</label>
+              {friendGroups.length === 0 && <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic' }}>{t('まだ友達がいません。')}</p>}
               {groupSlots.map((slot, index) => (
                 <div key={index} style={{ marginTop: 10, padding: 10, border: '1px solid #8a8168', background: '#fff' }}>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -415,7 +417,7 @@ const typeBtnStyle = (active) => ({
                       onChange={(e) => updateSlotFriend(index, e.target.value)}
                       style={{ ...inputStyle, flex: 1 }}
                     >
-                      <option value="">中の人を選んでください</option>
+                      <option value="">{t('中の人を選んでください')}</option>
                       {friendGroups.map((f) => (
                         <option key={f.userId} value={f.userId}>{f.label}</option>
                       ))}
@@ -445,24 +447,24 @@ const typeBtnStyle = (active) => ({
                 onClick={addSlot}
                 style={{ display: 'block', width: '100%', textAlign: 'center', marginTop: 10, padding: 10, border: '1px dashed #6b6250', background: 'none', color: '#3d2717', fontSize: 12.5, fontWeight: 700, cursor: 'pointer' }}
               >
-                + 友達を追加
+                {t('+ 友達を追加')}
               </button>
               <p style={{ fontSize: 11, color: '#8a8168', marginTop: 10, lineHeight: 1.7, fontStyle: 'italic' }}>
-                1人の中の人につき、選べるOCは1人までです。
+                {t('1人の中の人につき、選べるOCは1人までです。')}
               </p>
             </div>
           )}
           {(roomType === 'one' || roomType === 'group') && (
             <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>一言メモ(任意)</label>
+              <label style={labelStyle}>{t('一言メモ(任意)')}</label>
               <textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="お相手への一言があれば書いてください"
+                placeholder={t('お相手への一言があれば書いてください')}
                 style={{ ...inputStyle, minHeight: 56, resize: 'none' }}
               />
               <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 6, lineHeight: 1.7, fontStyle: 'italic' }}>
-                例: テンポ重視より、じっくり関係を築いていくタイプの子です。気長にお付き合いいただけると助かります
+                {t('例: テンポ重視より、じっくり関係を築いていくタイプの子です。気長にお付き合いいただけると助かります')}
               </p>
             </div>
           )}
@@ -470,9 +472,9 @@ const typeBtnStyle = (active) => ({
           {error && <p style={{ fontSize: 12, color: '#8a2418', marginTop: 8, lineHeight: 1.7 }}>{error}</p>}
 
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 18 }}>
-            <button type="button" style={btnGhostStyle} onClick={() => setStep(1)} disabled={pending}>戻る</button>
+            <button type="button" style={btnGhostStyle} onClick={() => setStep(1)} disabled={pending}>{t('戻る')}</button>
             <button type="button" style={btnStyle} onClick={handleSubmit} disabled={!canSubmit || pending}>
-              {pending ? 'おしゃべり作成中…' : 'この内容で作成する'}
+              {pending ? t('おしゃべり作成中…') : t('この内容で作成する')}
             </button>
           </div>
         </div>

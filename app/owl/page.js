@@ -2,10 +2,12 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
 import RealtimeRefresh from '@/components/RealtimeRefresh'
+import { getT } from '@/lib/i18n/server'
 
 const VISIBLE_COUNT = 3
 
 export default async function OwlMailPage({ searchParams }) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -18,9 +20,9 @@ export default async function OwlMailPage({ searchParams }) {
     return (
       <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px 110px' }}>
         <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
-          <div style={{ fontSize: 26, color: '#211d17', fontWeight: 700, fontFamily: 'Georgia, serif' }}>ふくろう便</div>
+          <div style={{ fontSize: 26, color: '#211d17', fontWeight: 700, fontFamily: 'Georgia, serif' }}>{t('ふくろう便')}</div>
         </div>
-        <p style={{ fontSize: 13, color: '#8a8168', marginTop: 20, fontStyle: 'italic', textAlign: 'center' }}>先にOCを登録してください。</p>
+        <p style={{ fontSize: 13, color: '#8a8168', marginTop: 20, fontStyle: 'italic', textAlign: 'center' }}>{t('先にOCを登録してください。')}</p>
       </div>
     )
   }
@@ -38,7 +40,7 @@ export default async function OwlMailPage({ searchParams }) {
   const otherOcNameMap = new Map((otherOcs || []).map((oc) => [oc.id, oc.name]))
 
   function nameOf(id) {
-    return myOcNameMap.get(id) || otherOcNameMap.get(id) || '名前未設定'
+    return myOcNameMap.get(id) || otherOcNameMap.get(id) || t('名前未設定')
   }
 
   const enriched = (letters || []).map((l) => {
@@ -89,10 +91,10 @@ export default async function OwlMailPage({ searchParams }) {
           <span style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: !showAsSent && letter.unread ? '#8a2418' : 'transparent' }} />
           <div>
             <div style={{ fontSize: 12.5, fontWeight: !showAsSent && letter.unread ? 700 : 400, color: '#3d2c14', fontFamily: 'Georgia, serif' }}>
-              {showAsSent ? `${letter.otherOcName} へ` : `${letter.otherOcName} より`}
+              {showAsSent ? t('{name} へ', { name: letter.otherOcName }) : t('{name} より', { name: letter.otherOcName })}
             </div>
             {!showAsSent && letter.unread && (
-              <div style={{ fontSize: 9.5, color: '#7a6537', marginTop: 2, fontStyle: 'italic' }}>未開封</div>
+              <div style={{ fontSize: 9.5, color: '#7a6537', marginTop: 2, fontStyle: 'italic' }}>{t('未開封')}</div>
             )}
           </div>
         </Link>
@@ -105,7 +107,7 @@ export default async function OwlMailPage({ searchParams }) {
       <RealtimeRefresh tables={['owl_letters']} fallbackMs={15000} />
       <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
         <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO CLUB</div>
-        <div style={{ fontSize: 26, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>ふくろう便</div>
+        <div style={{ fontSize: 26, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{t('ふくろう便')}</div>
       </div>
 
       <Link
@@ -116,15 +118,15 @@ export default async function OwlMailPage({ searchParams }) {
           padding: 13, textDecoration: 'none', letterSpacing: '.05em',
         }}
       >
-        + 手紙を送る
+        {t('+ 手紙を送る')}
       </Link>
 
       <div style={{ marginTop: 24 }}>
         <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6 }}>
-          もらったもの
+          {t('もらったもの')}
         </div>
         {receivedGroups.length === 0 && (
-          <p style={{ fontSize: 12.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>まだ届いていません。</p>
+          <p style={{ fontSize: 12.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>{t('まだ届いていません。')}</p>
         )}
         {receivedGroups.map((g) => {
           const isExpanded = expandedIds.has(g.myOcId)
@@ -133,7 +135,7 @@ export default async function OwlMailPage({ searchParams }) {
           return (
             <div key={g.myOcId} style={{ marginTop: 16 }}>
               <div style={{ fontSize: 11, color: '#3d2717', fontWeight: 700, fontFamily: 'Georgia, serif' }}>
-                {g.myOcName} 宛
+                {t('{name} 宛', { name: g.myOcName })}
               </div>
               {visibleLetters.map((letter, i) => (
                 <LetterRow key={letter.id} letter={letter} delay={i >= VISIBLE_COUNT ? (i - VISIBLE_COUNT) * 0.08 : 0} />
@@ -143,7 +145,7 @@ export default async function OwlMailPage({ searchParams }) {
                   href={`/owl?expand=${expandParam}`}
                   style={{ display: 'block', textAlign: 'center', marginTop: 8, fontSize: 11, color: '#6b6250', textDecoration: 'underline' }}
                 >
-                  もっと見る({g.letters.length - VISIBLE_COUNT}件)
+                  {t('もっと見る({count}件)', { count: g.letters.length - VISIBLE_COUNT })}
                 </Link>
               )}
               {isExpanded && g.letters.length > VISIBLE_COUNT && (
@@ -151,7 +153,7 @@ export default async function OwlMailPage({ searchParams }) {
                   href={`/owl?expand=${[...expandedIds].filter((id) => id !== g.myOcId).join(',')}`}
                   style={{ display: 'block', textAlign: 'center', marginTop: 8, fontSize: 11, color: '#6b6250', textDecoration: 'underline' }}
                 >
-                  閉じる
+                  {t('閉じる')}
                 </Link>
               )}
             </div>
@@ -161,10 +163,10 @@ export default async function OwlMailPage({ searchParams }) {
 
       <div style={{ marginTop: 24 }}>
         <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6 }}>
-          送ったもの
+          {t('送ったもの')}
         </div>
         {sent.length === 0 && (
-          <p style={{ fontSize: 12.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>まだ送っていません。</p>
+          <p style={{ fontSize: 12.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>{t('まだ送っていません。')}</p>
         )}
         {sent.map((letter) => <LetterRow key={letter.id} letter={letter} forceSentView />)} 
       </div>

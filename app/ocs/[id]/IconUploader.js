@@ -5,8 +5,10 @@ import Cropper from 'react-easy-crop'
 import { createClient } from '@/lib/supabaseClient'
 import { getCroppedImg } from './cropImage'
 import { updateOcIcon } from './actions'
+import { useT } from '@/lib/i18n/client'
 
 export default function IconUploader({ ocId, userId }) {
+  const t = useT()
   const router = useRouter()
   const [imageSrc, setImageSrc] = useState(null)
   const [crop, setCrop] = useState({ x: 0, y: 0 })
@@ -37,7 +39,7 @@ export default function IconUploader({ ocId, userId }) {
         .from('oc-icons')
         .upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
       if (uploadError) {
-        alert('アップロードに失敗しました: ' + uploadError.message)
+        alert(t('アップロードに失敗しました: {message}', { message: uploadError.message }))
         return
       }
       const { data } = supabase.storage.from('oc-icons').getPublicUrl(path)
@@ -76,13 +78,13 @@ export default function IconUploader({ ocId, userId }) {
               flex: 1, padding: 10, borderRadius: 3, border: 'none',
               background: '#8b5a2b', color: '#f3e9d8', fontWeight: 700, fontSize: 13, cursor: 'pointer',
             }}>
-              {uploading ? '保存中…' : 'この位置・サイズで保存'}
+              {uploading ? t('保存中…') : t('この位置・サイズで保存')}
             </button>
             <button type="button" onClick={() => setImageSrc(null)} style={{
               flex: 1, padding: 10, borderRadius: 3, border: '2px solid #d8c7ac',
               background: '#fff', color: '#8b7355', fontWeight: 700, fontSize: 13, cursor: 'pointer',
             }}>
-              キャンセル
+              {t('キャンセル')}
             </button>
           </div>
         </div>

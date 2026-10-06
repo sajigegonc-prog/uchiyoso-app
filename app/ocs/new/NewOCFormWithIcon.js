@@ -5,6 +5,7 @@ import Cropper from 'react-easy-crop'
 import { createClient } from '@/lib/supabaseClient'
 import { getCroppedImg } from '../[id]/cropImage'
 import { updateOcIcon } from '../[id]/actions'
+import { useT } from '@/lib/i18n/client'
 
 const currentYear = new Date().getFullYear()
 const HOUSES = ['グリフィンドール', 'ハッフルパフ', 'レイブンクロー', 'スリザリン']
@@ -31,6 +32,7 @@ const btnGhostStyle = {
 }
 
 export default function NewOCFormWithIcon({ action, userId }) {
+  const t = useT()
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [ocType, setOcType] = useState('creation')
@@ -108,45 +110,45 @@ export default function NewOCFormWithIcon({ action, userId }) {
       {step === 1 && (
         <form onSubmit={(e) => e.preventDefault()}>
           <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>キャラクター名</label>
-            <input name="name" placeholder="例:ミラ・トウドウ" style={inputStyle} />
+            <label style={labelStyle}>{t('キャラクター名')}</label>
+            <input name="name" placeholder={t('例:ミラ・トウドウ')} style={inputStyle} />
           </div>
           <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>タイプ</label>
+            <label style={labelStyle}>{t('タイプ')}</label>
             <select name="oc_type" style={inputStyle} value={ocType} onChange={(e) => setOcType(e.target.value)}>
-              <option value="creation">創作キャラ</option>
-              <option value="dreamer">夢主</option>
+              <option value="creation">{t('創作キャラ')}</option>
+              <option value="dreamer">{t('夢主')}</option>
             </select>
           </div>
           {ocType === 'dreamer' && (
             <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>お相手(必須)</label>
-              <input name="paired_character" placeholder="例:フレッド・ウィーズリー" style={inputStyle} />
+              <label style={labelStyle}>{t('お相手(必須)')}</label>
+              <input name="paired_character" placeholder={t('例:フレッド・ウィーズリー')} style={inputStyle} />
             </div>
           )}
           <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>寮</label>
+            <label style={labelStyle}>{t('寮')}</label>
             <select value={house} onChange={(e) => setHouse(e.target.value)} style={inputStyle}>
-              <option value="">選んでください</option>
-              {HOUSES.map((h) => <option key={h} value={h}>{h}</option>)}
-              <option value="その他">その他(自由記入)</option>
+              <option value="">{t('選んでください')}</option>
+              {HOUSES.map((h) => <option key={h} value={h}>{t(h)}</option>)}
+              <option value="その他">{t('その他(自由記入)')}</option>
             </select>
             {house === 'その他' && (
               <input
                 value={customHouse}
                 onChange={(e) => setCustomHouse(e.target.value)}
-                placeholder="例:魔法史担当教授"
+                placeholder={t('例:魔法史担当教授')}
                 style={{ ...inputStyle, marginTop: 8 }}
               />
             )}
             <input type="hidden" name="house" value={house === 'その他' ? customHouse : house} />
           </div>
                        <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>卒業後の進路(任意)</label>
-            <input name="career" placeholder="例:魔法薬学の研究者" style={inputStyle} />
+            <label style={labelStyle}>{t('卒業後の進路(任意)')}</label>
+            <input name="career" placeholder={t('例:魔法薬学の研究者')} style={inputStyle} />
           </div>
           <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>メインで活動する時代</label>
+            <label style={labelStyle}>{t('メインで活動する時代')}</label>
             <div style={{ display: 'flex', border: '1px solid #211d17' }}>
               <div
                 onClick={() => setEraFocus('student')}
@@ -157,7 +159,7 @@ export default function NewOCFormWithIcon({ action, userId }) {
                   fontWeight: eraFocus === 'student' ? 700 : 400,
                 }}
               >
-                在学中メイン
+                {t('在学中メイン')}
               </div>
               <div
                 onClick={() => setEraFocus('career')}
@@ -168,43 +170,43 @@ export default function NewOCFormWithIcon({ action, userId }) {
                   fontWeight: eraFocus === 'career' ? 700 : 400,
                 }}
               >
-                卒業後メイン
+                {t('卒業後メイン')}
               </div>
             </div>
             <p style={{ fontSize: 10, color: '#8a8168', marginTop: 6, lineHeight: 1.6, fontStyle: 'italic' }}>
-              選んだ方が一覧で先に表示されます(いつでも切り替え可能です)
+              {t('選んだ方が一覧で先に表示されます(いつでも切り替え可能です)')}
             </p>
             <input type="hidden" name="era_focus" value={eraFocus} />
           </div>
           <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>生年月日</label>
+            <label style={labelStyle}>{t('生年月日')}</label>
             <div style={{ display: 'flex', gap: 8 }}>
               <select style={{ ...selectStyle, flex: 1.3 }} value={year} onChange={(e) => setYear(e.target.value)}>
-                <option value="">年</option>
+                <option value="">{t('年')}</option>
                 {years.map((y) => <option key={y} value={y}>{y}</option>)}
               </select>
               <select style={{ ...selectStyle, flex: 1 }} value={month} onChange={(e) => setMonth(e.target.value)}>
-                <option value="">月</option>
+                <option value="">{t('月')}</option>
                 {months.map((m) => <option key={m} value={m}>{m}</option>)}
               </select>
               <select style={{ ...selectStyle, flex: 1 }} value={day} onChange={(e) => setDay(e.target.value)}>
-                <option value="">日</option>
+                <option value="">{t('日')}</option>
                 {days.map((d) => <option key={d} value={d}>{d}</option>)}
               </select>
             </div>
             <input type="hidden" name="birth_date" value={year && month && day ? `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}` : ''} />
           </div>
           <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>設定・紹介文</label>
-            <textarea name="description" placeholder="性格や特徴など自由にどうぞ" style={{ ...inputStyle, minHeight: 80, resize: 'none' }} />
+            <label style={labelStyle}>{t('設定・紹介文')}</label>
+            <textarea name="description" placeholder={t('性格や特徴など自由にどうぞ')} style={{ ...inputStyle, minHeight: 80, resize: 'none' }} />
           </div>
-          <button type="button" style={btnStyle} onClick={handleNext}>次へ(画像設定)</button>
+          <button type="button" style={btnStyle} onClick={handleNext}>{t('次へ(画像設定)')}</button>
         </form>
       )}
 
       {step === 2 && (
         <div>
-          <label style={labelStyle}>アイコン画像(任意)</label>
+          <label style={labelStyle}>{t('アイコン画像(任意)')}</label>
           <input type="file" accept="image/*" onChange={onFileChange} style={{ fontSize: 12.5 }} />
           {imageSrc && (
             <div style={{ marginTop: 12 }}>
@@ -229,9 +231,9 @@ export default function NewOCFormWithIcon({ action, userId }) {
           )}
           {error && <p style={{ fontSize: 12.5, color: '#8a2418', marginTop: 12 }}>{error}</p>}
           <div style={{ display: 'flex', gap: 8, marginTop: 18 }}>
-            <button type="button" style={btnGhostStyle} onClick={() => setStep(1)} disabled={submitting}>戻る</button>
+            <button type="button" style={btnGhostStyle} onClick={() => setStep(1)} disabled={submitting}>{t('戻る')}</button>
             <button type="button" style={btnStyle} onClick={handleFinish} disabled={submitting}>
-              {submitting ? '登録中…' : '登録してはじめる'}
+              {submitting ? t('登録中…') : t('登録してはじめる')}
             </button>
           </div>
         </div>

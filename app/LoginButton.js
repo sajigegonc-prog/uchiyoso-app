@@ -1,6 +1,8 @@
 'use client'
 import { createClient } from '@/lib/supabaseClient'
+import { useT } from '@/lib/i18n/client'
 export default function LoginButton() {
+  const t = useT()
   const supabase = createClient()
   async function handleLogin() {
     await supabase.auth.signInWithOAuth({
@@ -19,7 +21,7 @@ export default function LoginButton() {
         background: '#f4eee0', color: '#211d17', letterSpacing: '.05em',
       }}
     >
-      Google でログイン / 新規登録
+      {t('Google でログイン / 新規登録')}
     </button>
   )
 }

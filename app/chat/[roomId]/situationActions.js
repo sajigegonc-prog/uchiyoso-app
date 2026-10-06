@@ -2,6 +2,7 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
+import { getT } from '@/lib/i18n/server'
 
 const DORMS = ['グリフィンドール', 'ハッフルパフ', 'レイブンクロー', 'スリザリン']
 
@@ -188,6 +189,7 @@ const BOOKS = [
   '『イギリスにおけるマグルの家庭生活と社会的習慣』',
 ]
 
+// 日本語のまま選んだ後、最後の出力段階で t() に通す（抽選・条件判定は日本語データのまま）
 function resolveRandomTokens(item) {
   const floor = String(1 + Math.floor(Math.random() * 7))
   const time3 = pickRandom(['朝', '昼', '夜'])
@@ -196,14 +198,16 @@ function resolveRandomTokens(item) {
   const drug = pickRandom(DRUGS)
   const book = pickRandom(BOOKS)
   return {
-    place: item.place
-      .replace('{floor}', floor),
+    place: item.place.replace('{floor}', floor),
     time: item.time
       .replace('{time3}', time3)
       .replace('{time_lunch_dinner}', timeLunchDinner)
       .replace('{time_noon_night}', timeNoonNight),
     text: item.text.replace('{drug}', drug).replace('{book}', book),
     excludeIf: item.excludeIf,
+    // 翻訳用: トークン置換前の原文と、置換値
+    raw: { place: item.place, time: item.time, text: item.text },
+    vars: { floor, time3, time_lunch_dinner: timeLunchDinner, time_noon_night: timeNoonNight, drug, book },
   }
 }
 
@@ -241,24 +245,26 @@ function buildPool(ocA, ocB) {
 }
 
 async function getPairOcs(supabase, roomId, userId) {
+  const t = getT()
   const { data: room } = await supabase.from('chat_rooms').select('room_type').eq('id', roomId).maybeSingle()
   const { data: members } = await supabase
     .from('chat_room_members')
     .select('user_id, ocs(name, house, birth_date)')
     .eq('room_id', roomId)
     .is('left_at', null)
-  if (!members || members.length < 2) return { error: 'この機能は2人以上いる部屋で使えます' }
+  if (!members || members.length < 2) return { error: t('この機能は2人以上いる部屋で使えます') }
   if (room?.room_type === 'self') {
     const shuffled = [...members].sort(() => Math.random() - 0.5)
     return { ocA: shuffled[0].ocs, ocB: shuffled[1].ocs, room }
   }
   const mine = members.find((m) => m.user_id === userId)
   const other = members.find((m) => m.user_id !== userId)
-  if (!mine || !other) return { error: '判定に失敗しました' }
+  if (!mine || !other) return { error: t('判定に失敗しました') }
   return { ocA: mine.ocs, ocB: other.ocs, room }
 }
 
 export async function drawSituation(roomId) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -267,10 +273,25 @@ export async function drawSituation(roomId) {
   const pool = buildPool(ocA, ocB)
   const picked = pickRandom(pool)
   const pick = resolveRandomTokens(picked)
-  const text = pick.text
-    .replace(/〇〇（申請した側）/g, ocA?.name || '???')
-    .replace(/〇〇（申請された側）/g, ocB?.name || '???')
-  return { place: pick.place, time: pick.time, text }
+  // 翻訳は最後に行う。トークン値（階数・時間帯・薬・本）も個別に翻訳して差し込む
+  const v = pick.vars
+  const tv = {
+    floor: v.floor,
+    time3: t(v.time3),
+    time_lunch_dinner: t(v.time_lunch_dinner),
+    time_noon_night: t(v.time_noon_night),
+    drug: t(v.drug),
+    book: t(v.book),
+  }
+  const nameA = ocA?.name || '???'
+  const nameB = ocB?.name || '???'
+  const place = pick.raw.place ? t(pick.raw.place, tv) : ''
+  const time = pick.raw.time ? t(pick.raw.time, tv) : ''
+  // 日本語は原文のマーカーを置換、英語・韓国語は訳文中の {A}/{B} に差し込む
+  const text = t(pick.raw.text, { ...tv, A: nameA, B: nameB })
+    .replace(/〇〇（申請した側）/g, nameA)
+    .replace(/〇〇（申請された側）/g, nameB)
+  return { place, time, text }
 }
 
 async function postSituationMessages(supabase, roomId, place, time, text) {
@@ -289,7 +310,8 @@ export async function proposeSituation(roomId, place, time, text) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
-  if (!text || !text.trim()) return { error: 'シチュエーションを入力してください' }
+  const t = getT()
+  if (!text || !text.trim()) return { error: t('シチュエーションを入力してください') }
 
   const { data: members } = await supabase
     .from('chat_room_members')
@@ -314,13 +336,14 @@ export async function proposeSituation(roomId, place, time, text) {
   }).eq('id', roomId)
   await supabase.from('room_ooc_messages').insert({
     room_id: roomId, user_id: user.id, is_system: true, log_type: 'situation_proposal',
-    content: `${profile?.display_name || '名前未設定'}さんがシチュエーションを提案しました`,
+    content: t('{name}さんがシチュエーションを提案しました', { name: profile?.display_name || t('名前未設定') }),
   })
   revalidatePath(`/chat/${roomId}`)
   return { success: true, posted: false }
 }
 
 export async function respondToSituation(roomId, decision) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -329,18 +352,18 @@ export async function respondToSituation(roomId, decision) {
     .select('pending_situation_place, pending_situation_time, pending_situation_text, pending_situation_by')
     .eq('id', roomId)
     .maybeSingle()
-  if (!room?.pending_situation_by) return { error: '提案が見つかりません' }
+  if (!room?.pending_situation_by) return { error: t('提案が見つかりません') }
 
   if (decision === 'approve') {
     await postSituationMessages(supabase, roomId, room.pending_situation_place, room.pending_situation_time, room.pending_situation_text)
     await supabase.from('room_ooc_messages').insert({
       room_id: roomId, user_id: user.id, is_system: true, log_type: 'situation_result',
-      content: 'シチュエーションが採用されました',
+      content: t('シチュエーションが採用されました'),
     })
   } else {
     await supabase.from('room_ooc_messages').insert({
       room_id: roomId, user_id: user.id, is_system: true, log_type: 'situation_result',
-      content: 'このシチュエーションはキャンセルされました',
+      content: t('このシチュエーションはキャンセルされました'),
     })
   }
   await supabase.from('chat_rooms').update({

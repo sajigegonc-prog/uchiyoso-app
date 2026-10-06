@@ -2,8 +2,10 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
+import { getT } from '@/lib/i18n/server'
 
 export async function saveDreamPartner(formData) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -13,8 +15,8 @@ export async function saveDreamPartner(formData) {
   const pairedOcId = formData.get('paired_with_oc_id')?.toString()
   const iconUrl = formData.get('icon_url')?.toString()
 
-  if (!name) return { error: 'お名前を入力してください' }
-  if (!pairedOcId) return { error: 'どのOCのお相手か選んでください' }
+  if (!name) return { error: t('お名前を入力してください') }
+  if (!pairedOcId) return { error: t('どのOCのお相手か選んでください') }
 
   if (id) {
     const { data: existing } = await supabase.from('ocs').select('icon_url').eq('id', id).maybeSingle()
@@ -23,7 +25,7 @@ export async function saveDreamPartner(formData) {
       .update({ name, paired_with_oc_id: pairedOcId, icon_url: iconUrl || existing?.icon_url || null })
       .eq('id', id)
       .eq('user_id', user.id)
-    if (error) return { error: '保存に失敗しました' }
+    if (error) return { error: t('保存に失敗しました') }
     revalidatePath('/ocs')
     return { success: true, id }
   }
@@ -42,7 +44,7 @@ export async function saveDreamPartner(formData) {
     .eq('is_dream_partner', true)
 
   if ((currentPartnersCount || 0) >= (dreamerCount || 0)) {
-    return { error: '登録できるお相手は、夢主OCの人数分までです。' }
+    return { error: t('登録できるお相手は、夢主OCの人数分までです。') }
   }
 
   const { data, error } = await supabase
@@ -50,7 +52,7 @@ export async function saveDreamPartner(formData) {
     .insert({ user_id: user.id, name, icon_url: iconUrl || null, is_dream_partner: true, paired_with_oc_id: pairedOcId, oc_type: 'creation' })
     .select('id')
     .single()
-  if (error) return { error: '保存に失敗しました' }
+  if (error) return { error: t('保存に失敗しました') }
   revalidatePath('/ocs')
   return { success: true, id: data.id }
 }

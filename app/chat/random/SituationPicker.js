@@ -1,7 +1,9 @@
 'use client'
 import { useState } from 'react'
+import { useT } from '@/lib/i18n/client'
 
 export default function SituationPicker({ myOcId, friendOcId, gachaPick, noteExamples, confirmAction }) {
+  const t = useT()
   const [mode, setMode] = useState('gacha')
   const [noteOpen, setNoteOpen] = useState(false)
   const [customPlace, setCustomPlace] = useState('')
@@ -16,25 +18,25 @@ export default function SituationPicker({ myOcId, friendOcId, gachaPick, noteExa
   return (
     <div style={{ width: '100%', maxWidth: 360 }}>
       <div style={{ display: 'flex', border: '1px solid #211d17', marginTop: 16, marginBottom: 12 }}>
-        <div style={tabStyle(mode === 'gacha')} onClick={() => setMode('gacha')}>ガチャで決める</div>
-        <div style={tabStyle(mode === 'custom')} onClick={() => setMode('custom')}>自分で入力する</div>
+        <div style={tabStyle(mode === 'gacha')} onClick={() => setMode('gacha')}>{t('ガチャで決める')}</div>
+        <div style={tabStyle(mode === 'custom')} onClick={() => setMode('custom')}>{t('自分で入力する')}</div>
       </div>
 
       {mode === 'gacha' ? (
         <div style={{ width: '100%', border: '4px double #211d17', padding: 18, textAlign: 'center', background: '#fff' }}>
-          <div style={{ fontSize: 10.5, color: '#8a8168' }}>{gachaPick.place}／{gachaPick.time}</div>
+          <div style={{ fontSize: 10.5, color: '#8a8168' }}>{gachaPick.place}{t('／')}{gachaPick.time}</div>
           <div style={{ fontSize: 12.5, color: '#211d17', marginTop: 8, lineHeight: 1.8 }}>{gachaPick.text}</div>
         </div>
       ) : (
         <div>
-          <label style={{ fontSize: 11, color: '#6b6250', display: 'block', marginBottom: 5 }}>場所(任意)</label>
-          <input value={customPlace} onChange={(e) => setCustomPlace(e.target.value)} placeholder="例:天文台"
+          <label style={{ fontSize: 11, color: '#6b6250', display: 'block', marginBottom: 5 }}>{t('場所(任意)')}</label>
+          <input value={customPlace} onChange={(e) => setCustomPlace(e.target.value)} placeholder={t('例:天文台')}
             style={{ width: '100%', padding: '9px 11px', fontSize: 13, border: '1px solid #211d17', background: '#fff', color: '#211d17', boxSizing: 'border-box' }} />
-          <label style={{ fontSize: 11, color: '#6b6250', display: 'block', margin: '10px 0 5px' }}>時間帯(任意)</label>
-          <input value={customTime} onChange={(e) => setCustomTime(e.target.value)} placeholder="例:夜"
+          <label style={{ fontSize: 11, color: '#6b6250', display: 'block', margin: '10px 0 5px' }}>{t('時間帯(任意)')}</label>
+          <input value={customTime} onChange={(e) => setCustomTime(e.target.value)} placeholder={t('例:夜')}
             style={{ width: '100%', padding: '9px 11px', fontSize: 13, border: '1px solid #211d17', background: '#fff', color: '#211d17', boxSizing: 'border-box' }} />
-          <label style={{ fontSize: 11, color: '#6b6250', display: 'block', margin: '10px 0 5px' }}>シチュエーション</label>
-          <textarea value={customText} onChange={(e) => setCustomText(e.target.value)} placeholder="自由に書いてください"
+          <label style={{ fontSize: 11, color: '#6b6250', display: 'block', margin: '10px 0 5px' }}>{t('シチュエーション')}</label>
+          <textarea value={customText} onChange={(e) => setCustomText(e.target.value)} placeholder={t('自由に書いてください')}
             style={{ width: '100%', minHeight: 70, padding: '9px 11px', fontSize: 13, border: '1px solid #211d17', background: '#fff', color: '#211d17', resize: 'none', boxSizing: 'border-box' }} />
         </div>
       )}
@@ -54,19 +56,19 @@ export default function SituationPicker({ myOcId, friendOcId, gachaPick, noteExa
             fontWeight: 700, fontSize: 12, letterSpacing: '.05em', cursor: 'pointer',
           }}
         >
-          {noteOpen ? '− 一言メモを閉じる' : '+ 一言メモを添える'}
+          {noteOpen ? t('− 一言メモを閉じる') : t('+ 一言メモを添える')}
         </button>
         {noteOpen && (
-          <textarea name="note" placeholder="お相手への一言があれば書いてください"
+          <textarea name="note" placeholder={t('お相手への一言があれば書いてください')}
             style={{ width: '100%', minHeight: 56, padding: 10, fontSize: 12.5, border: '1px solid #211d17', background: '#fff', color: '#211d17', resize: 'none', boxSizing: 'border-box', marginTop: 8, fontFamily: "'BIZ UDPGothic', sans-serif" }} />
         )}
         <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 6, marginBottom: 0, lineHeight: 1.7, fontStyle: 'italic' }}>
-          {noteExamples.map((ex, i) => <span key={i}>例: {ex}<br /></span>)}
+          {noteExamples.map((ex, i) => <span key={i}>{t('例: {ex}', { ex: t(ex) })}<br /></span>)}
         </p>
         <hr style={{ border: 'none', borderTop: '1px solid #d8cdb0', margin: '16px 0 14px' }} />
         <button type="submit" disabled={mode === 'custom' && !customText.trim()}
           style={{ width: '100%', padding: 13, background: '#211d17', color: '#f4eee0', border: 'none', fontWeight: 700, fontSize: 13, marginTop: 10 }}>
-          このお部屋を作る
+          {t('このお部屋を作る')}
         </button>
       </form>
     </div>

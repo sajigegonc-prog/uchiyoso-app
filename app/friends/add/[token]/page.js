@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabaseServer'
 import { sendFriendRequestByToken, unfriendUser } from '../../actions'
 import Link from 'next/link'
+import { getT } from '@/lib/i18n/server'
 
 export default async function ProfilePage({ params }) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   const { token } = params
@@ -13,7 +15,7 @@ export default async function ProfilePage({ params }) {
   if (!owner) {
     return (
       <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '40px 20px', textAlign: 'center' }}>
-        <p style={{ fontSize: 13, color: '#8a8168', fontStyle: 'italic' }}>このリンクは無効です。</p>
+        <p style={{ fontSize: 13, color: '#8a8168', fontStyle: 'italic' }}>{t('このリンクは無効です。')}</p>
       </div>
     )
   }
@@ -35,7 +37,7 @@ export default async function ProfilePage({ params }) {
     <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px 60px' }}>
       <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
         <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO GAZETTE</div>
-        <div style={{ fontSize: 22, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>プロフィール</div>
+        <div style={{ fontSize: 22, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{t('プロフィール')}</div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
@@ -49,19 +51,19 @@ export default async function ProfilePage({ params }) {
         </div>
       </div>
       <div style={{ fontSize: 17, fontWeight: 700, textAlign: 'center', marginTop: 10, fontFamily: 'Georgia, serif', color: '#211d17' }}>
-        {owner.emoji ? `${owner.emoji} ` : ''}{owner.display_name || '名前未設定'}
+        {owner.emoji ? `${owner.emoji} ` : ''}{owner.display_name || t('名前未設定')}
       </div>
       {owner.bio ? (
         <div style={{ fontSize: 12, color: '#6b6250', textAlign: 'center', marginTop: 6, fontStyle: 'italic', lineHeight: 1.6 }}>{owner.bio}</div>
       ) : (
-        <div style={{ fontSize: 10.5, color: '#8a8168', textAlign: 'center', marginTop: 4, fontStyle: 'italic' }}>うちよそユーザー</div>
+        <div style={{ fontSize: 10.5, color: '#8a8168', textAlign: 'center', marginTop: 4, fontStyle: 'italic' }}>{t('うちよそユーザー')}</div>
       )}
 
       <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 26 }}>
-        登録OC
+        {t('登録OC')}
       </div>
       {(!ocs || ocs.length === 0) && (
-        <p style={{ fontSize: 12.5, color: '#8a8168', marginTop: 12, fontStyle: 'italic' }}>まだOCが登録されていません。</p>
+        <p style={{ fontSize: 12.5, color: '#8a8168', marginTop: 12, fontStyle: 'italic' }}>{t('まだOCが登録されていません。')}</p>
       )}
       {ocs && ocs.map((oc) => (
         <Link
@@ -84,19 +86,19 @@ export default async function ProfilePage({ params }) {
             {oc.era_focus === 'career' ? (
               <>
                 <div style={{ fontSize: 10.5, color: '#6b6250', marginTop: 2, fontStyle: 'italic' }}>
-                  {oc.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{oc.career ? ` ・ ${oc.career}` : ''}
+                  {oc.oc_type === 'dreamer' ? t('夢主') : t('創作キャラ')}{oc.career ? ` ・ ${oc.career}` : ''}
                 </div>
                 {oc.house && (
-                  <div style={{ fontSize: 9.5, color: '#8a8168', marginTop: 2 }}>在学時└ {oc.house}卒</div>
+                  <div style={{ fontSize: 9.5, color: '#8a8168', marginTop: 2 }}>{t('在学時└ {house}卒', { house: oc.house })}</div>
                 )}
               </>
             ) : (
               <>
                 <div style={{ fontSize: 10.5, color: '#6b6250', marginTop: 2, fontStyle: 'italic' }}>
-                  {oc.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{oc.house ? ` ・ ${oc.house}` : ''}
+                  {oc.oc_type === 'dreamer' ? t('夢主') : t('創作キャラ')}{oc.house ? ` ・ ${oc.house}` : ''}
                 </div>
                 {oc.career && (
-                  <div style={{ fontSize: 9.5, color: '#8a8168', marginTop: 2 }}>卒後└ {oc.career}</div>
+                  <div style={{ fontSize: 9.5, color: '#8a8168', marginTop: 2 }}>{t('卒後└ {career}', { career: oc.career })}</div>
                 )}
               </>
             )}
@@ -109,7 +111,7 @@ export default async function ProfilePage({ params }) {
           href="/"
           style={{ display: 'block', marginTop: 24, textAlign: 'center', padding: 13, border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 14, letterSpacing: '.05em', textDecoration: 'none' }}
         >
-          ログインしてフレンド申請を送る
+          {t('ログインしてフレンド申請を送る')}
         </Link>
       )}
 
@@ -121,14 +123,14 @@ export default async function ProfilePage({ params }) {
             type="submit"
             style={{ display: 'block', width: '100%', padding: 13, border: '1px solid #8a2418', background: '#fff', color: '#8a2418', fontWeight: 700, fontSize: 14, letterSpacing: '.05em', cursor: 'pointer' }}
           >
-            友達を解除する
+            {t('友達を解除する')}
           </button>
         </form>
       )}
 
       {user && !isSelf && friendshipStatus === 'pending' && (
         <p style={{ fontSize: 12.5, color: '#8a8168', marginTop: 24, textAlign: 'center', fontStyle: 'italic' }}>
-          申請中です。相手の承認をお待ちください。
+          {t('申請中です。相手の承認をお待ちください。')}
         </p>
       )}
 
@@ -139,14 +141,14 @@ export default async function ProfilePage({ params }) {
             type="submit"
             style={{ display: 'block', width: '100%', padding: 13, border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 14, letterSpacing: '.05em', cursor: 'pointer' }}
           >
-            フレンド申請を送る
+            {t('フレンド申請を送る')}
           </button>
         </form>
       )}
 
       {user && (
         <Link href="/friends" style={{ display: 'block', marginTop: 24, marginBottom: 10, padding: '10px 0', textAlign: 'center', fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>
-          ← 友達一覧に戻る
+          {t('← 友達一覧に戻る')}
         </Link>
       )}
     </div>

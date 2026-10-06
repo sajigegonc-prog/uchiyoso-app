@@ -2,6 +2,7 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
+import { getT } from '@/lib/i18n/server'
 
 export async function fullyDeleteRoom(supabase, roomId) {
   await supabase.from('messages').delete().eq('room_id', roomId)
@@ -14,6 +15,7 @@ export async function fullyDeleteRoom(supabase, roomId) {
 }
 
 export async function confirmLeaveOrDelete(formData) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -22,7 +24,7 @@ export async function confirmLeaveOrDelete(formData) {
   const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
   await supabase.from('room_ooc_messages').insert({
     room_id: roomId, user_id: user.id, is_system: true, log_type: 'member_leave',
-    content: `${profile?.display_name || '名前未設定'}さんが退室しました`,
+    content: t('{name}さんが退室しました', { name: profile?.display_name || t('名前未設定') }),
   })
   await supabase
     .from('chat_room_members')

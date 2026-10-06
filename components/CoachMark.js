@@ -1,8 +1,10 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useT } from '@/lib/i18n/client'
 
 export default function CoachMark({ steps, onFinish }) {
+  const t = useT()
   const [index, setIndex] = useState(0)
   const [rect, setRect] = useState(null)
   const [mounted, setMounted] = useState(false)
@@ -100,7 +102,7 @@ export default function CoachMark({ steps, onFinish }) {
               onClick={handleNext}
               style={{ padding: '7px 18px', border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}
             >
-              {isLast ? 'わかった' : '次へ'}
+              {isLast ? t('わかった') : t('次へ')}
             </button>
           </div>
         </div>

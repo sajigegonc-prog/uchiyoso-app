@@ -1,7 +1,9 @@
 'use server'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
+import { getT } from '@/lib/i18n/server'
 export async function updateDisplayName(formData) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { session } } = await supabase.auth.getSession()
   const user = session?.user
@@ -15,7 +17,7 @@ export async function updateDisplayName(formData) {
       .neq('id', user.id)
       .maybeSingle()
     if (duplicate) {
-      return { error: 'その表示名はすでに使われています。別の名前を入力してください。' }
+      return { error: t('その表示名はすでに使われています。別の名前を入力してください。') }
     }
   }
   await supabase

@@ -2,6 +2,7 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
+import { getT } from '@/lib/i18n/server'
 import { buildTranscriptText } from './transcriptUtil'
 
 async function generateTranscript(supabase, roomId, viewerId) {
@@ -19,6 +20,7 @@ async function generateTranscript(supabase, roomId, viewerId) {
 }
 
 async function checkAndComplete(supabase, roomId) {
+  const t = getT()
   const { data: activeMembers } = await supabase
     .from('chat_room_members')
     .select('user_id')
@@ -38,7 +40,7 @@ async function checkAndComplete(supabase, roomId) {
     await supabase.from('messages').delete().eq('room_id', roomId)
     await supabase.from('room_ooc_messages').insert({
       room_id: roomId, user_id: null, is_system: true, log_type: 'scene_transition',
-      content: '場面転換が完了しました',
+      content: t('場面転換が完了しました'),
     })
     await supabase.from('chat_rooms').update({
       location: null,
@@ -53,6 +55,7 @@ async function checkAndComplete(supabase, roomId) {
 }
 
 export async function requestSceneTransition(roomId) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -66,7 +69,7 @@ export async function requestSceneTransition(roomId) {
   const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
   await supabase.from('room_ooc_messages').insert({
     room_id: roomId, user_id: user.id, is_system: true, log_type: 'scene_transition',
-    content: `${profile?.display_name || '名前未設定'}さんが場面転換を申請しました`,
+    content: t('{name}さんが場面転換を申請しました', { name: profile?.display_name || t('名前未設定') }),
   })
 
     const completed = await checkAndComplete(supabase, roomId)
@@ -87,6 +90,7 @@ export async function approveSceneTransition(roomId) {
 }
 
 export async function cancelSceneTransition(roomId) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -98,7 +102,7 @@ export async function cancelSceneTransition(roomId) {
   await supabase.from('scene_transition_approvals').delete().eq('room_id', roomId)
   await supabase.from('room_ooc_messages').insert({
     room_id: roomId, user_id: user.id, is_system: true,
-    content: '場面転換の申請が取り消されました',
+    content: t('場面転換の申請が取り消されました'),
   })
   return { success: true }
 }

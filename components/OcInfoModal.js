@@ -1,8 +1,10 @@
 'use client'
 import { createPortal } from 'react-dom'
 import { useEffect, useState } from 'react'
+import { useT } from '@/lib/i18n/client'
 
 export default function OcInfoModal({ onClose, children }) {
+  const t = useT()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
   if (!mounted) return null
@@ -12,7 +14,7 @@ export default function OcInfoModal({ onClose, children }) {
         <div style={{ overflowY: 'auto', flex: '1 1 auto', minHeight: 0 }}>
           {children}
         </div>
-        <button type="button" onClick={onClose} style={{ display: 'block', width: '100%', marginTop: 16, padding: 9, border: '1px solid #211d17', background: '#fff', color: '#211d17', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>閉じる</button>
+        <button type="button" onClick={onClose} style={{ display: 'block', width: '100%', marginTop: 16, padding: 9, border: '1px solid #211d17', background: '#fff', color: '#211d17', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>{t('閉じる')}</button>
       </div>
     </div>,
     document.body

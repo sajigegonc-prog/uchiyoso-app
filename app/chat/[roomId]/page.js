@@ -25,8 +25,10 @@ import { updateRoomTitle } from './titleActions'
 import { drawSituation, proposeSituation, respondToSituation } from './situationActions'
 import { exportRoomLog } from './logActions'
 import WelcomePartnerModal from './WelcomePartnerModal'
+import { getT } from '@/lib/i18n/server'
 
 export default async function ChatRoomPage({ params, searchParams }) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -50,8 +52,8 @@ export default async function ChatRoomPage({ params, searchParams }) {
   if (!room) {
     return (
       <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px' }}>
-        <Link href="/chat" style={{ fontSize: 12, color: '#6b6250', textDecoration: 'none' }}>← 一覧に戻る</Link>
-        <p style={{ fontSize: 13, color: '#8a8168', marginTop: 20, fontStyle: 'italic' }}>この部屋は見つからないか、参加していません。</p>
+        <Link href="/chat" style={{ fontSize: 12, color: '#6b6250', textDecoration: 'none' }}>{t('← 一覧に戻る')}</Link>
+        <p style={{ fontSize: 13, color: '#8a8168', marginTop: 20, fontStyle: 'italic' }}>{t('この部屋は見つからないか、参加していません。')}</p>
       </div>
     )
   }
@@ -92,7 +94,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
   const oocNameMap = new Map((oocProfiles || []).map((p) => [p.id, p.display_name]))
   const oocMessages = (oocMessagesRaw || []).map((m) => ({
     ...m,
-    senderName: oocNameMap.get(m.user_id) || '名前未設定',
+    senderName: oocNameMap.get(m.user_id) || t('名前未設定'),
   }))
   let myOcs = (members || [])
     .filter((m) => m.user_id === user.id)
@@ -130,7 +132,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
   const showInviteOnlyTutorial = !showFullTutorial && inviteVisible && !tutorialProfile?.seen_invite_tutorial
   const myMembership = (members || []).find((m) => m.user_id === user.id)
   const { data: myProfileForTyping } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
-  const myDisplayName = myProfileForTyping?.display_name || '名前未設定'
+  const myDisplayName = myProfileForTyping?.display_name || t('名前未設定')
   const lastOocRead = myMembership?.ooc_last_read_at
   function hasUnreadLogType(type) {
     return (oocMessagesRaw || []).some((m) =>
@@ -158,7 +160,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
   }
   const myTranscriptPreview = buildTranscriptText(messages, myOcIdSet, { roomType: room.room_type, primaryOcId: room.primary_oc_id })
   const showFinalNotice = room.pending_deletion_by && room.pending_deletion_by !== user.id && !myMembership?.left_at
-  const deleteButtonLabel = '退出'
+  const deleteButtonLabel = t('退出')
   const { data: latestOocMsg } = await supabase
     .from('room_ooc_messages')
     .select('created_at, user_id')
@@ -182,16 +184,16 @@ export default async function ChatRoomPage({ params, searchParams }) {
       {showFullTutorial && (
         <CoachMark
           steps={[
-            { targetId: 'coach-speaker-btn', text: 'タップすると話すキャラを切り替えられます。NPCの追加もここから。' },
-            { text: '自分の発言をタップすると、編集や削除ができます。' },
-            { targetId: 'coach-title-btn', text: 'タップすると、部屋の名前を自由に変更できます。' },
-            { targetId: 'coach-members-btn', text: '今この部屋にいるメンバーを確認できます。' },
-            { targetId: 'coach-menu-toggle-btn', text: 'ここを押すと、蛙チョコ・場面転換・中の人チャット・退出のメニューを開閉できます。' },
-            { targetId: 'coach-frog-btn', text: '気になったら開けてみて。中身はお楽しみです。' },
-            { targetId: 'coach-scene-btn', text: '会話が一区切りついたら、ここで次の場面に切り替えられます。' },
-            { targetId: 'coach-ooc-btn', text: 'キャラではなく、中の人同士でこっそり話せる場所です。' },
-            ...(inviteVisible ? [{ targetId: 'coach-invite-btn', text: '新しい友達をこの部屋に招待できます。' }] : []),
-            { targetId: 'coach-exit-btn', text: 'この部屋を抜けたいときはこちらから。' },
+            { targetId: 'coach-speaker-btn', text: t('タップすると話すキャラを切り替えられます。NPCの追加もここから。') },
+            { text: t('自分の発言をタップすると、編集や削除ができます。') },
+            { targetId: 'coach-title-btn', text: t('タップすると、部屋の名前を自由に変更できます。') },
+            { targetId: 'coach-members-btn', text: t('今この部屋にいるメンバーを確認できます。') },
+            { targetId: 'coach-menu-toggle-btn', text: t('ここを押すと、蛙チョコ・場面転換・中の人チャット・退出のメニューを開閉できます。') },
+            { targetId: 'coach-frog-btn', text: t('気になったら開けてみて。中身はお楽しみです。') },
+            { targetId: 'coach-scene-btn', text: t('会話が一区切りついたら、ここで次の場面に切り替えられます。') },
+            { targetId: 'coach-ooc-btn', text: t('キャラではなく、中の人同士でこっそり話せる場所です。') },
+            ...(inviteVisible ? [{ targetId: 'coach-invite-btn', text: t('新しい友達をこの部屋に招待できます。') }] : []),
+            { targetId: 'coach-exit-btn', text: t('この部屋を抜けたいときはこちらから。') },
           ]}
           onFinish={markChatTutorialSeen.bind(null, inviteVisible)}
         />
@@ -199,7 +201,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
       {showInviteOnlyTutorial && (
         <CoachMark
           steps={[
-            { targetId: 'coach-invite-btn', text: '新しい友達をこの部屋に招待できます。' },
+            { targetId: 'coach-invite-btn', text: t('新しい友達をこの部屋に招待できます。') },
           ]}
           onFinish={markInviteTutorialSeen}
         />
@@ -209,7 +211,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
       )}
       <div style={{ background: '#f4eee0', padding: '14px 18px', flexShrink: 0, borderBottom: '4px double #211d17' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <Link href="/chat" style={{ fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>← 一覧に戻る</Link>
+          <Link href="/chat" style={{ fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>{t('← 一覧に戻る')}</Link>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
             {isGroup && <AddMemberButton roomId={room.id} action={inviteMoreMembers} friendOcs={invitableFriendOcs} />}
             <RoomMembersButton
@@ -221,16 +223,16 @@ export default async function ChatRoomPage({ params, searchParams }) {
             />
           </div>
         </div>
-        <RoomTitleEditor roomId={room.id} title={room.title} fallback={memberNames.join('、')} action={updateRoomTitle} />
+        <RoomTitleEditor roomId={room.id} title={room.title} fallback={memberNames.join(t.locale === 'ja' ? '、' : ', ')} action={updateRoomTitle} />
         {(room.location || room.time_period) && (
           <div style={{ fontSize: 11, opacity: .85, marginTop: 5, display: 'flex', gap: 12, color: '#6b6250', fontStyle: 'italic' }}>
-            {room.location && <span>場所: {room.location}</span>}
-            {room.time_period && <span>時間帯: {room.time_period}</span>}
+            {room.location && <span>{t('場所: {value}', { value: room.location })}</span>}
+            {room.time_period && <span>{t('時間帯: {value}', { value: room.time_period })}</span>}
           </div>
         )}
         {!(room.location && room.time_period) && (
           <p style={{ fontSize: 9.5, opacity: .7, marginTop: 5, color: '#8a8168' }}>
-            変更は「/場所 ○○」「/時間帯 ○○」と発言すると反映されます
+            {t('変更は「/場所 ○○」「/時間帯 ○○」と発言すると反映されます')}
           </p>
         )}
       </div>
@@ -239,7 +241,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
         WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain',
       }}>
         {(!messages || messages.length === 0) && (
-          <p style={{ fontSize: 12.5, color: '#8a8168', textAlign: 'center', marginTop: 20, fontStyle: 'italic' }}>まだメッセージがありません。</p>
+          <p style={{ fontSize: 12.5, color: '#8a8168', textAlign: 'center', marginTop: 20, fontStyle: 'italic' }}>{t('まだメッセージがありません。')}</p>
         )}
         {messages && messages.map((msg, idx) => {
           if (msg.is_system) {
@@ -287,11 +289,11 @@ export default async function ChatRoomPage({ params, searchParams }) {
         if (!other) return null
         const myBirth = mine?.ocs?.birth_date
         const otherBirth = other.ocs?.birth_date
-        let ageDiffLabel = '年齢は不明です'
+        let ageDiffLabel = t('年齢は不明です')
         if (myBirth && otherBirth) {
           const diff = (new Date(myBirth) - new Date(otherBirth)) / (365.25 * 24 * 60 * 60 * 1000)
           const rounded = Math.round(Math.abs(diff))
-          ageDiffLabel = rounded === 0 ? '同い年です' : diff > 0 ? `あなたより${rounded}歳年下です` : `あなたより${rounded}歳年上です`
+          ageDiffLabel = rounded === 0 ? t('同い年です') : diff > 0 ? t('あなたより{n}歳年下です', { n: rounded }) : t('あなたより{n}歳年上です', { n: rounded })
         }
         return <WelcomePartnerModal oc={other.ocs} roomId={room.id} ageDiffLabel={ageDiffLabel} />
       })()}
@@ -339,7 +341,7 @@ export default async function ChatRoomPage({ params, searchParams }) {
           pendingMembers={(pendingInvites || []).map((p) => ({ id: p.invitee_oc_id, name: p.ocs?.name, icon_url: p.ocs?.icon_url }))}
         />
       ) : (
-        <p style={{ fontSize: 12, color: '#8a8168', textAlign: 'center', padding: 16, flexShrink: 0, fontStyle: 'italic' }}>あなたはこの部屋のメンバーではありません。</p>
+        <p style={{ fontSize: 12, color: '#8a8168', textAlign: 'center', padding: 16, flexShrink: 0, fontStyle: 'italic' }}>{t('あなたはこの部屋のメンバーではありません。')}</p>
       )}
     </div>
   )

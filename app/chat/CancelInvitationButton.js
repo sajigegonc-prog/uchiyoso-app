@@ -1,12 +1,14 @@
 'use client'
 import { useTransition } from 'react'
+import { useT } from '@/lib/i18n/client'
 
 export default function CancelInvitationButton({ invitationId, roomId, action }) {
+  const t = useT()
   const [isPending, startTransition] = useTransition()
 
   function handleClick(e) {
     e.preventDefault()
-    if (!confirm('この申請を取り消しますか？')) return
+    if (!confirm(t('この申請を取り消しますか？'))) return
     const formData = new FormData()
     formData.set('invitation_id', invitationId)
     formData.set('room_id', roomId)
@@ -26,7 +28,7 @@ export default function CancelInvitationButton({ invitationId, roomId, action })
         fontFamily: 'inherit',
       }}
     >
-      {isPending ? '取り消し中…' : '取り消す'}
+      {isPending ? t('取り消し中…') : t('取り消す')}
     </button>
   )
 }

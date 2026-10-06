@@ -1,7 +1,9 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import Link from 'next/link'
+import { getT } from '@/lib/i18n/server'
 export default async function PublicOCDetailPage({ params }) {
+  const t = getT()
   const supabase = await createClient()
   const { token, ocId } = params
   const { data: oc } = await supabase
@@ -10,7 +12,7 @@ export default async function PublicOCDetailPage({ params }) {
   if (!oc) notFound()
   return (
     <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px 100px' }}>
-      <Link href={`/friends/add/${token}`} style={{ fontSize: 11, color: '#6b6250', textDecoration: 'none' }}>← プロフィールに戻る</Link>
+      <Link href={`/friends/add/${token}`} style={{ fontSize: 11, color: '#6b6250', textDecoration: 'none' }}>{t('← プロフィールに戻る')}</Link>
       <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17', marginTop: 12 }}>
         <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO GAZETTE</div>
       </div>
@@ -30,25 +32,25 @@ export default async function PublicOCDetailPage({ params }) {
         {oc.name}
       </div>
       <div style={{ fontSize: 10.5, color: '#8a8168', marginTop: 6, fontStyle: 'italic', textAlign: 'center' }}>
-        {oc.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{oc.house ? ` ・ ${oc.house}` : ''}
+        {oc.oc_type === 'dreamer' ? t('夢主') : t('創作キャラ')}{oc.house ? ` ・ ${oc.house}` : ''}
       </div>
         {oc.career && (
         <div style={{ marginTop: 16 }}>
-          <div style={{ fontSize: 10, color: '#6b6250', letterSpacing: '.05em' }}>卒業後の進路</div>
+          <div style={{ fontSize: 10, color: '#6b6250', letterSpacing: '.05em' }}>{t('卒業後の進路')}</div>
           <div style={{ fontSize: 13, color: '#211d17', marginTop: 4 }}>{oc.career}</div>
         </div>
       )}
       {oc.birth_date && (
         <div style={{ marginTop: 16 }}>
-          <div style={{ fontSize: 10, color: '#6b6250', letterSpacing: '.05em' }}>生年月日</div>
+          <div style={{ fontSize: 10, color: '#6b6250', letterSpacing: '.05em' }}>{t('生年月日')}</div>
           <div style={{ fontSize: 13, color: '#211d17', marginTop: 4 }}>
-            {new Date(oc.birth_date).getFullYear()}年{new Date(oc.birth_date).getMonth() + 1}月{new Date(oc.birth_date).getDate()}日
+            {t('{year}年{month}月{day}日', { year: new Date(oc.birth_date).getFullYear(), month: new Date(oc.birth_date).getMonth() + 1, day: new Date(oc.birth_date).getDate() })}
           </div>
         </div>
       )}
       {oc.description && (
         <div style={{ marginTop: 16 }}>
-          <div style={{ fontSize: 10, color: '#6b6250', letterSpacing: '.05em' }}>設定・紹介文</div>
+          <div style={{ fontSize: 10, color: '#6b6250', letterSpacing: '.05em' }}>{t('設定・紹介文')}</div>
           <div style={{ fontSize: 13, color: '#211d17', marginTop: 4, lineHeight: 1.9, whiteSpace: 'pre-wrap' }}>{oc.description}</div>
         </div>
       )}
@@ -58,14 +60,14 @@ export default async function PublicOCDetailPage({ params }) {
           background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 13,
           textDecoration: 'none', letterSpacing: '.05em',
         }}>
-          この子とお話する
+          {t('この子とお話する')}
         </Link>
         <Link href={`/owl/new?to=${oc.id}`} style={{
           flex: 1, textAlign: 'center', padding: 12,
           border: '1px solid #211d17', color: '#211d17', fontWeight: 700, fontSize: 13,
           textDecoration: 'none', letterSpacing: '.05em',
         }}>
-          ふくろう便を送る
+          {t('ふくろう便を送る')}
         </Link>
       </div>
     </div>

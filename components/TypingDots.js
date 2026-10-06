@@ -1,6 +1,10 @@
+'use client'
+import { useT } from '@/lib/i18n/client'
+
 export default function TypingDots({ names, dark }) {
+  const t = useT()
   if (!names || names.length === 0) return null
-  const label = names.join('、') + ' が入力中…'
+  const label = t('{names} が入力中…', { names: names.join(t.locale === 'ja' ? '、' : ', ') })
   return (
     <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 4 }}>
       <div style={{

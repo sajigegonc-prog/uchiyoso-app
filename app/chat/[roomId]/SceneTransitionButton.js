@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { requestSceneTransition, approveSceneTransition, cancelSceneTransition } from './transitionActions'
+import { useT } from '@/lib/i18n/client'
 
 export default function SceneTransitionButton({ roomId, pending, alreadyApproved, requestedByName, isRequester, hasUnread }) {
+  const t = useT()
   const router = useRouter()
   const [confirming, setConfirming] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -58,13 +60,13 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
       <div style={{ position: 'fixed', inset: 0, background: 'rgba(33,29,23,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 120 }}>
         <div style={{ background: '#f4eee0', border: '1px solid #211d17', padding: 20, maxWidth: 340, width: '90%', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
                       <div style={{ fontSize: 13, fontWeight: 700, color: '#211d17', fontFamily: 'Georgia, serif' }}>
-              {completed ? '場面転換が完了しました' : 'ログをコピーしてください'}
+              {completed ? t('場面転換が完了しました') : t('ログをコピーしてください')}
             </div>
             <p style={{ fontSize: 11, color: '#8a2418', marginTop: 8, lineHeight: 1.7 }}>
-              このログはこの場でのみ表示され、データベースには保存されません。再発行はできませんので、必ずコピーして保存してください。
+              {t('このログはこの場でのみ表示され、データベースには保存されません。再発行はできませんので、必ずコピーして保存してください。')}
             </p>
             <p style={{ fontSize: 10.5, color: '#6b6250', marginTop: 6, lineHeight: 1.7, fontStyle: 'italic' }}>
-              ホーム画面の「過去のおしゃべりを思い出す」に貼ると、いつでも見返せます。★の付いた発言があなたのキャラです。
+              {t('ホーム画面の「過去のおしゃべりを思い出す」に貼ると、いつでも見返せます。★の付いた発言があなたのキャラです。')}
             </p>
           <textarea
             readOnly
@@ -73,14 +75,14 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
           />
           <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
             <button type="button" onClick={handleCopy} style={{ flex: 1, padding: 10, border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
-              {copied ? 'コピーしました' : 'コピーする'}
+              {copied ? t('コピーしました') : t('コピーする')}
             </button>
                         <button type="button" onClick={() => { setTranscript(null); router.refresh() }} style={{ flex: 1, padding: 10, border: '1px solid #8a8168', background: '#fff', color: '#6b6250', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
-              閉じる
+              {t('閉じる')}
             </button>
        </div>
           {!completed && (
-            <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>他のメンバーの承諾を待っています。</p>
+            <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>{t('他のメンバーの承諾を待っています。')}</p>
           )}
         </div>
       </div>
@@ -95,7 +97,7 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
           height: 36, padding: '0 10px 0 16px', borderRadius: 4,
           background: '#d8cdb0', border: '1px solid #8a8168', color: '#6b6250', fontSize: 12.5, whiteSpace: 'nowrap',
         }}>
-          場面転換：承諾待ち…
+          {t('場面転換：承諾待ち…')}
           {isRequester && (
             <button
               type="button"
@@ -107,7 +109,7 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
                 fontSize: 11, fontWeight: 700, lineHeight: 1, padding: 0, cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
-              aria-label="申請を取り消す"
+              aria-label={t('申請を取り消す')}
             >
               ×
             </button>
@@ -118,7 +120,7 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
         return (
       <button type="button" onClick={handleApprove} disabled={busy}
         style={{ flexShrink: 0, padding: '0 16px', height: 36, background: '#211d17', border: '1px solid #211d17', color: '#f4eee0', fontSize: 12.5, fontWeight: 700, borderRadius: 4, cursor: 'pointer' }}>
-        {busy ? '処理中…' : '場面転換に承諾する'}
+        {busy ? t('処理中…') : t('場面転換に承諾する')}
       </button>
     )
   }
@@ -127,7 +129,7 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
     <>
       <button id="coach-scene-btn" type="button" onClick={() => setConfirming(true)}
         style={{ position: 'relative', flexShrink: 0, fontSize: 12.5, color: '#211d17', background: '#fff', border: '1px solid #211d17', borderRadius: 4, padding: '0 14px', height: 36, cursor: 'pointer' }}>
-        場面転換
+        {t('場面転換')}
         {hasUnread && (
           <span style={{ position: 'absolute', top: -3, right: -3, width: 8, height: 8, borderRadius: '50%', background: '#8a2418', border: '1px solid #f4eee0' }} />
         )}
@@ -135,11 +137,11 @@ export default function SceneTransitionButton({ roomId, pending, alreadyApproved
       {confirming && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(33,29,23,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110 }}>
           <div style={{ background: '#f4eee0', border: '1px solid #211d17', padding: 20, maxWidth: 300, textAlign: 'center' }}>
-            <p style={{ fontSize: 13, color: '#211d17', lineHeight: 1.8 }}>この場面を終わりますか？<br />これまでのログはリセットされます。</p>
+            <p style={{ fontSize: 13, color: '#211d17', lineHeight: 1.8 }}>{t('この場面を終わりますか？')}<br />{t('これまでのログはリセットされます。')}</p>
             <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-              <button type="button" onClick={() => setConfirming(false)} style={{ flex: 1, padding: 9, border: '1px solid #8a8168', background: '#fff', color: '#6b6250', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>キャンセル</button>
+              <button type="button" onClick={() => setConfirming(false)} style={{ flex: 1, padding: 9, border: '1px solid #8a8168', background: '#fff', color: '#6b6250', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>{t('キャンセル')}</button>
               <button type="button" onClick={handleStart} disabled={busy} style={{ flex: 1, padding: 9, border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
-                {busy ? '処理中…' : 'はい'}
+                {busy ? t('処理中…') : t('はい')}
               </button>
             </div>
           </div>

@@ -2,13 +2,20 @@ import { createClient } from '@/lib/supabaseServer'
 import { getNotifications } from '@/lib/notifications'
 import BottomNav from '@/components/BottomNav'
 import PullToRefresh from '@/components/PullToRefresh'
+import { getT } from '@/lib/i18n/server'
+import { I18nProvider } from '@/lib/i18n/client'
 
-export const metadata = {
-  title: 'うちよそクラブ',
-  description: '紳士、淑女、そしてゴーストの皆さん、全てのうちよそ魔人に捧げます。',
+export function generateMetadata() {
+  const t = getT()
+  return {
+    title: t('うちよそクラブ'),
+    description: t('紳士、淑女、そしてゴーストの皆さん、全てのうちよそ魔人に捧げます。'),
+  }
 }
 
 export default async function RootLayout({ children }) {
+  const t = getT()
+  const locale = t.locale
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -18,7 +25,7 @@ export default async function RootLayout({ children }) {
   }
 
   return (
-    <html lang="ja">
+    <html lang={locale}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
@@ -56,13 +63,17 @@ export default async function RootLayout({ children }) {
             boxShadow: '0 0 50px rgba(0,0,0,.5)',
           }}
         >
-          <PullToRefresh />
-          {children}
+          <I18nProvider locale={locale}>
+            <PullToRefresh />
+            {children}
+          </I18nProvider>
         </div>
         {user && (
           <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 50 }}>
             <div style={{ maxWidth: 480, margin: '0 auto' }}>
-              <BottomNav notifications={notifications} />
+              <I18nProvider locale={locale}>
+                <BottomNav notifications={notifications} />
+              </I18nProvider>
             </div>
           </div>
         )}

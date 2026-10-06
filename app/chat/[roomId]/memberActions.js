@@ -2,21 +2,23 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
+import { getT } from '@/lib/i18n/server'
 
 export async function inviteMoreMembers(formData) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
   const roomId = formData.get('room_id')?.toString()
   const friendOcIds = formData.getAll('friend_oc_ids').map((v) => v.toString()).filter(Boolean)
-  if (!roomId || friendOcIds.length === 0) return { error: '招待するOCを選んでください' }
+  if (!roomId || friendOcIds.length === 0) return { error: t('招待するOCを選んでください') }
   const { data: currentCount } = await supabase
     .from('chat_room_members')
     .select('user_id', { count: 'exact', head: true })
     .eq('room_id', roomId)
     .is('left_at', null)
   if ((currentCount?.length || 0) + friendOcIds.length > 10) {
-    return { error: 'グループチャットの参加人数は10人までです' }
+    return { error: t('グループチャットの参加人数は10人までです') }
   }
 
   const ownerIds = []
@@ -39,7 +41,7 @@ export async function inviteMoreMembers(formData) {
 
   const { data: allFriends, error: checkErr } = await supabase.rpc('check_all_mutual_friends', { user_ids: participantIds })
   if (checkErr || !allFriends) {
-    return { error: '招待するメンバー全員が、既存メンバー全員と友達である必要があります。' }
+    return { error: t('招待するメンバー全員が、既存メンバー全員と友達である必要があります。') }
   }
 
   const { data: currentOcIds } = await supabase
@@ -50,7 +52,7 @@ export async function inviteMoreMembers(formData) {
   const ocIdsForCheck = [...new Set([...(currentOcIds || []).map((m) => m.oc_id), ...friendOcIds])]
   const { data: dup } = await supabase.rpc('room_with_exact_members_exists', { _oc_ids: ocIdsForCheck, _room_type: 'friend_group', _exclude_room_id: roomId })
   if (dup) {
-    return { error: 'その組み合わせだと、既存の別のトークルームとメンバーが完全に一致してしまいます。招待できません。' }
+    return { error: t('その組み合わせだと、既存の別のトークルームとメンバーが完全に一致してしまいます。招待できません。') }
   }
 
   for (const { ocId, userId } of ownerIds) {

@@ -7,6 +7,7 @@ import SceneTransitionButton from './SceneTransitionButton'
 import DeleteRoomButton from './DeleteRoomButton'
 import OocPanel from './OocPanel'
 import useTypingChannel from '@/lib/useTypingChannel'
+import { useT } from '@/lib/i18n/client'
 
 function ClearOnDone({ inputRef, onClear }) {
   const { pending } = useFormStatus()
@@ -28,6 +29,7 @@ export default function MessageForm({
   sceneProps, deleteLabel, deleteAction, transcript, hasUnreadFrog, hasUnreadScene,
   showGachaTutorial, markGachaTutorialSeenAction, logAction, showLogTutorial, markLogTutorialSeenAction,
 }) {
+  const t = useT()
   const inputRef = useRef(null)
   const lastSentRef = useRef(0)
   const [cooldown, setCooldown] = useState(false)
@@ -93,7 +95,7 @@ export default function MessageForm({
           background: '#f4eee0', borderTop: '1px solid #211d17', borderBottom: '1px solid #211d17',
           padding: 14, maxHeight: 260, overflowY: 'auto',
         }}>
-          <div style={{ fontSize: 11, color: '#6b6250', fontWeight: 700, marginBottom: 8, letterSpacing: '.05em' }}>あなたのOC</div>
+          <div style={{ fontSize: 11, color: '#6b6250', fontWeight: 700, marginBottom: 8, letterSpacing: '.05em' }}>{t('あなたのOC')}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
             {myOcs.map((oc) => (
               <button
@@ -115,7 +117,7 @@ export default function MessageForm({
           <div style={{ fontSize: 11, color: '#6b6250', fontWeight: 700, marginBottom: 8, letterSpacing: '.05em' }}>NPC</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
             {npcs.length === 0 && (
-              <p style={{ fontSize: 12, color: '#8a8168', fontStyle: 'italic' }}>まだNPCがいません。</p>
+              <p style={{ fontSize: 12, color: '#8a8168', fontStyle: 'italic' }}>{t('まだNPCがいません。')}</p>
             )}
             {npcs.map((npc) => (
               <span
@@ -137,7 +139,7 @@ export default function MessageForm({
                   <form action={deleteNpcAction}>
                     <input type="hidden" name="room_id" value={roomId} />
                     <input type="hidden" name="npc_id" value={npc.id} />
-                    <button type="submit" style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#8a8168', fontSize: 13, padding: 0 }} aria-label="NPCを削除">
+                    <button type="submit" style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#8a8168', fontSize: 13, padding: 0 }} aria-label={t('NPCを削除')}>
                       ×
                     </button>
                   </form>
@@ -150,11 +152,11 @@ export default function MessageForm({
             <input type="hidden" name="room_id" value={roomId} />
             <input
               name="name"
-              placeholder="NPC名(例:マクゴナガル先生)"
+              placeholder={t('NPC名(例:マクゴナガル先生)')}
               style={{ flex: 1, padding: '8px 10px', fontSize: 13, border: '1px solid #8a8168', background: '#fff', color: '#211d17' }}
             />
             <button type="submit" style={{ border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', fontSize: 12.5, fontWeight: 700, padding: '0 14px', cursor: 'pointer' }}>
-              追加
+              {t('追加')}
             </button>
           </form>
         </div>
@@ -191,7 +193,7 @@ export default function MessageForm({
                 border: '1px solid #211d17', borderRadius: 4, padding: '0 14px', height: 36, cursor: 'pointer',
               }}
             >
-              中の人チャットへ
+              {t('中の人チャットへ')}
               {hasUnreadOoc && (
                 <span style={{
                   position: 'absolute', top: -2, right: -10,
@@ -219,7 +221,7 @@ export default function MessageForm({
           id="coach-speaker-btn"
           type="button"
           onClick={() => setOpen((v) => !v)}
-          aria-label="話し手を切り替え"
+          aria-label={t('話し手を切り替え')}
           style={{
             flexShrink: 0, width: 36, height: 36, borderRadius: '50%',
             border: '1px solid #211d17', background: '#f4eee0', color: '#211d17',
@@ -232,7 +234,7 @@ export default function MessageForm({
           ref={inputRef}
           name="content"
           rows={1}
-          placeholder={`${speaker.name || ''}として発言`}
+          placeholder={t('{name}として発言', { name: speaker.name || '' })}
           onFocus={() => setExtrasOpen(false)}
           onInput={() => { autoResize(); sendTyping(speaker.name) }} 
           style={{
@@ -250,13 +252,13 @@ export default function MessageForm({
             marginBottom: 2, cursor: cooldown ? 'default' : 'pointer',
           }}
         >
-          送信
+          {t('送信')}
         </button>
         <button
           id="coach-menu-toggle-btn"
           type="button"
           onClick={() => setExtrasOpen((v) => !v)}
-          aria-label="メニューの開閉"
+          aria-label={t('メニューの開閉')}
           style={{
             position: 'relative', flexShrink: 0, width: 28, height: 36, border: 'none', background: 'none',
             color: '#6b6250', fontSize: 13, cursor: 'pointer', marginBottom: 2,

@@ -6,8 +6,10 @@ import EditOCForm from './EditOCForm'
 import IconUploader from './IconUploader'
 import DeleteOCButton from './DeleteOCButton'
 import Image from 'next/image'
+import { getT } from '@/lib/i18n/server'
 
 export default async function OCDetailPage({ params }) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -28,7 +30,7 @@ export default async function OCDetailPage({ params }) {
           {oc.name}
         </div>
         <div style={{ fontSize: 10.5, color: '#8a8168', marginTop: 8, fontStyle: 'italic' }}>
-          {oc.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{oc.house ? ` ・ ${oc.house}` : ''}
+          {oc.oc_type === 'dreamer' ? t('夢主') : t('創作キャラ')}{oc.house ? ` ・ ${t(oc.house)}` : ''}
         </div>
       </div>
 
@@ -47,12 +49,12 @@ export default async function OCDetailPage({ params }) {
       </div>
 
       <div style={{ fontSize: 11, letterSpacing: '.15em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 28 }}>
-        アイコン画像
+        {t('アイコン画像')}
       </div>
       <IconUploader ocId={oc.id} userId={user.id} />
 
       <div style={{ fontSize: 11, letterSpacing: '.15em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 28 }}>
-        編集
+        {t('編集')}
       </div>
       <EditOCForm oc={oc} action={updateOC} />
 
@@ -62,7 +64,7 @@ export default async function OCDetailPage({ params }) {
       </form>
 
       <Link href="/ocs" style={{ display: 'block', marginTop: 30, marginBottom: 10, padding: '10px 0', textAlign: 'center', fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>
-        ← OC一覧に戻る
+        {t('← OC一覧に戻る')}
       </Link>
     </div>
   )

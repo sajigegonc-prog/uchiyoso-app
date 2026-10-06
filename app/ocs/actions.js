@@ -2,7 +2,9 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
+import { getT } from '@/lib/i18n/server'
 export async function addOC(formData) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -14,7 +16,7 @@ export async function addOC(formData) {
   const eraFocus = formData.get('era_focus')?.toString() || 'student'
   const birthDate = formData.get('birth_date')?.toString()
   const description = formData.get('description')?.toString().trim()
-  if (!name) return { error: '名前を入力してください' }
+  if (!name) return { error: t('名前を入力してください') }
   const { data, error } = await supabase.from('ocs').insert({
     user_id: user.id,
     name,
@@ -26,7 +28,7 @@ export async function addOC(formData) {
     birth_date: birthDate || null,
     description: description || null,
   }).select('id').single()
-  if (error || !data) return { error: '登録に失敗しました' }
+  if (error || !data) return { error: t('登録に失敗しました') }
   return { id: data.id }
 }
 export async function addAvoidedPartner(formData) {

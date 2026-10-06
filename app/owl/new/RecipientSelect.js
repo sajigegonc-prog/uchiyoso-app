@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import SubmitButton from '@/components/SubmitButton'
+import { useT } from '@/lib/i18n/client'
 
 const labelStyle = { fontSize: 11, color: '#6b6250', display: 'block', marginBottom: 5, letterSpacing: '.05em' }
 const inputStyle = {
@@ -15,12 +16,13 @@ const btnStyle = {
 }
 
 export default function RecipientSelect({ action, myOcs, recipients, initialSenderOcId, initialRecipientOcId }) {
+  const t = useT()
   const [senderOcId, setSenderOcId] = useState(initialSenderOcId || myOcs[0]?.id || '')
 
   return (
     <form action={action} style={{ width: '100%', maxWidth: 360, marginTop: 16 }}>
       <div style={{ marginBottom: 14 }}>
-        <label style={labelStyle}>差出人(あなたのOC)</label>
+        <label style={labelStyle}>{t('差出人(あなたのOC)')}</label>
         <select name="sender_oc_id" style={inputStyle} value={senderOcId} onChange={(e) => setSenderOcId(e.target.value)}>
           {myOcs.map((oc) => (
             <option key={oc.id} value={oc.id}>{oc.name}</option>
@@ -28,13 +30,13 @@ export default function RecipientSelect({ action, myOcs, recipients, initialSend
         </select>
       </div>
       <div style={{ marginBottom: 14 }}>
-        <label style={labelStyle}>宛先</label>
+        <label style={labelStyle}>{t('宛先')}</label>
         {recipients.length === 0 && (
-          <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic' }}>送れる相手がいません。フレンドを追加するか、他のOCを登録してください。</p>
+          <p style={{ fontSize: 12.5, color: '#8a8168', fontStyle: 'italic' }}>{t('送れる相手がいません。フレンドを追加するか、他のOCを登録してください。')}</p>
         )}
         {recipients.length > 0 && (
           <select name="recipient_oc_id" style={inputStyle} defaultValue={initialRecipientOcId || ''}>
-            <option value="" disabled>選んでください</option>
+            <option value="" disabled>{t('選んでください')}</option>
             {recipients.map((group) => (
               <optgroup key={group.label} label={group.label}>
                 {group.ocs.map((oc) => (
@@ -46,10 +48,10 @@ export default function RecipientSelect({ action, myOcs, recipients, initialSend
         )}
       </div>
       <div style={{ marginBottom: 14 }}>
-        <label style={labelStyle}>本文</label>
+        <label style={labelStyle}>{t('本文')}</label>
         <textarea
           name="content"
-          placeholder="手紙の内容を書いてください"
+          placeholder={t('手紙の内容を書いてください')}
           style={{
             width: '100%', minHeight: 140, padding: 14, fontSize: 14, lineHeight: 1.8,
             background: 'linear-gradient(160deg, #f3e6c8 0%, #e8d6ac 55%, #ddc794 100%)',
@@ -58,7 +60,7 @@ export default function RecipientSelect({ action, myOcs, recipients, initialSend
           }}
         />
       </div>
-      <SubmitButton style={btnStyle} pendingText="送信中…">この内容で送る</SubmitButton>
+      <SubmitButton style={btnStyle} pendingText={t('送信中…')}>{t('この内容で送る')}</SubmitButton>
     </form>
   )
 }

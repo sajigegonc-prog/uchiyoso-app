@@ -1,9 +1,11 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useT } from '@/lib/i18n/client'
 
 export default function PullToRefresh() {
   const router = useRouter()
+  const t = useT()
   const startY = useRef(null)
   const [pulling, setPulling] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
@@ -42,7 +44,7 @@ export default function PullToRefresh() {
       height: pulling || refreshing ? 22 : 0, overflow: 'hidden', transition: 'height .2s',
       fontFamily: "'BIZ UDPGothic', sans-serif",
     }}>
-      {refreshing ? '更新しています…' : '離すと更新'}
+      {refreshing ? t('更新しています…') : t('離すと更新')}
     </div>
   )
 }

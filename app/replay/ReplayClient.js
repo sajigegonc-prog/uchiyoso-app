@@ -1,5 +1,6 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
+import { useT } from '@/lib/i18n/client'
 
 const LINES_PER_IMAGE = 7
 
@@ -96,6 +97,7 @@ function ChatLine({ line, oc, showName, iconDataUrl }) {
 }
 
 export default function ReplayClient({ myOcs, allKnownOcs }) {
+  const t = useT()
   const [raw, setRaw] = useState('')
   const [parsed, setParsed] = useState(null)
   const [imageModalOpen, setImageModalOpen] = useState(false)
@@ -175,7 +177,7 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
           <textarea
             value={raw}
             onChange={(e) => setRaw(e.target.value)}
-            placeholder={'ここにログを貼り付けてください\n例:\n★ミラ・トウドウ: おはよう\nアダリン・ロイド: おはようございます'}
+            placeholder={t('ここにログを貼り付けてください\n例:\n★ミラ・トウドウ: おはよう\nアダリン・ロイド: おはようございます')}
             style={{
               width: '100%', minHeight: 220, padding: 14, fontSize: 13, lineHeight: 1.8,
               border: '1px solid #211d17', background: '#fff', color: '#211d17',
@@ -192,7 +194,7 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
               fontWeight: 700, fontSize: 14, letterSpacing: '.05em', cursor: 'pointer',
             }}
           >
-            再現する
+            {t('再現する')}
           </button>
         </>
       ) : (
@@ -203,7 +205,7 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
               onClick={handleReset}
               style={{ fontSize: 11, color: '#6b6250', background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer' }}
             >
-              クリアして貼り直す
+              {t('クリアして貼り直す')}
             </button>
           </div>
 
@@ -212,7 +214,7 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
             display: 'flex', flexDirection: 'column', gap: 12,
           }}>
             {parsed.length === 0 && (
-              <p style={{ fontSize: 12.5, color: '#8a8168', textAlign: 'center', fontStyle: 'italic' }}>内容が読み取れませんでした。</p>
+              <p style={{ fontSize: 12.5, color: '#8a8168', textAlign: 'center', fontStyle: 'italic' }}>{t('内容が読み取れませんでした。')}</p>
             )}
             {parsed.map((line, i) => {
               const prevLine = parsed[i - 1]
@@ -231,7 +233,7 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
                 fontWeight: 700, fontSize: 14, letterSpacing: '.05em', cursor: 'pointer',
               }}
             >
-              画像として保存
+              {t('画像として保存')}
             </button>
           )}
 
@@ -266,7 +268,7 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
             >
               <div onClick={(e) => e.stopPropagation()}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <span style={{ color: '#f4eee0', fontSize: 12, letterSpacing: '.1em' }}>画像プレビュー（全{chunks.length}枚）</span>
+                  <span style={{ color: '#f4eee0', fontSize: 12, letterSpacing: '.1em' }}>{t('画像プレビュー（全{count}枚）', { count: chunks.length })}</span>
                   <button type="button" onClick={() => setImageModalOpen(false)} style={{ background: 'none', border: 'none', color: '#cbb98a', fontSize: 18, cursor: 'pointer' }}>×</button>
                 </div>
                 {chunks.length > 1 && (
@@ -283,19 +285,19 @@ export default function ReplayClient({ myOcs, allKnownOcs }) {
                           color: activePage === i ? '#211d17' : '#cbb98a',
                         }}
                       >
-                        {i + 1}枚目
+                        {t('{n}枚目', { n: i + 1 })}
                       </button>
                     ))}
                   </div>
                 )}
                 {generatedImages[activePage] ? (
-                  <img src={generatedImages[activePage]} alt={`${activePage + 1}枚目`} style={{ width: '100%', border: '1px solid #211d17' }} />
+                  <img src={generatedImages[activePage]} alt={t('{n}枚目', { n: activePage + 1 })} style={{ width: '100%', border: '1px solid #211d17' }} />
                 ) : (
-                  <p style={{ color: '#cbb98a', fontSize: 12, textAlign: 'center', padding: 30 }}>{generating || !iconsReady ? '生成中…' : '準備しています…'}</p>
+                  <p style={{ color: '#cbb98a', fontSize: 12, textAlign: 'center', padding: 30 }}>{generating || !iconsReady ? t('生成中…') : t('準備しています…')}</p>
                 )}
                 <p style={{ textAlign: 'center', fontSize: 10, color: '#cbb98a', marginTop: 14, lineHeight: 1.8 }}>
-                  画像を<b style={{ color: '#f4eee0' }}>長押し</b>して「写真に保存」を選んでください<br />
-                  （自動保存は行われません）
+                  {t('画像を')}<b style={{ color: '#f4eee0' }}>{t('長押し')}</b>{t('して「写真に保存」を選んでください')}<br />
+                  {t('（自動保存は行われません）')}
                 </p>
               </div>
             </div>

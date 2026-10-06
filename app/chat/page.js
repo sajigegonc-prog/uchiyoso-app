@@ -8,8 +8,10 @@ import RealtimeRefresh from '@/components/AutoRefresh'
 import CoachMark from '@/components/CoachMark'
 import { markUpdate1TutorialSeen } from '../tutorialActions'
 import Image from 'next/image'
+import { getT } from '@/lib/i18n/server'
 
 export default async function ChatListPage() {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -188,7 +190,7 @@ export default async function ChatListPage() {
       {showUpdate1Tutorial && (
         <CoachMark
           steps={[
-            { targetId: 'coach-random-btn', text: '友達の中からランダムでお相手が決まる新機能です。まだ話したことのない友達と、シチュエーション付きでお話を始められます。' },
+            { targetId: 'coach-random-btn', text: t('友達の中からランダムでお相手が決まる新機能です。まだ話したことのない友達と、シチュエーション付きでお話を始められます。') },
           ]}
           onFinish={markUpdate1TutorialSeen}
         />
@@ -196,7 +198,7 @@ export default async function ChatListPage() {
       <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
         <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO CLUB</div>
         <div style={{ fontSize: 26, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>
-          おしゃべりする
+          {t('おしゃべりする')}
         </div>
       </div>
 
@@ -208,7 +210,7 @@ export default async function ChatListPage() {
           padding: 13, textDecoration: 'none', letterSpacing: '.05em',
         }}
       >
-        + 誰かとおしゃべりする！
+        {t('+ 誰かとおしゃべりする！')}
       </Link>
       <Link
         id="coach-random-btn"
@@ -219,13 +221,13 @@ export default async function ChatListPage() {
           padding: 8, letterSpacing: '.05em', textDecoration: 'none',
         }}
       >
-        話したことない友達とおしゃべりしてみる
+        {t('話したことない友達とおしゃべりしてみる')}
       </Link>
 
       {invitations && invitations.length > 0 && (
         <>
           <div style={{ fontSize: 11, letterSpacing: '.15em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 24 }}>
-            招待されています
+            {t('招待されています')}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 10 }}>
             {invitations.map((inv) => (
@@ -238,7 +240,7 @@ export default async function ChatListPage() {
       <div style={{ marginTop: 22 }}>
         {rooms.length === 0 && (
           <p style={{ fontSize: 13, color: '#8a8168', marginTop: 20, fontStyle: 'italic', textAlign: 'center' }}>
-            まだ部屋がありません。
+            {t('まだ部屋がありません。')}
           </p>
         )}
                 {rooms.map((room) => (
@@ -309,24 +311,24 @@ export default async function ChatListPage() {
                   {room.customTitle ? (
                     room.customTitle
                   ) : room.joinedNames.length === 0 && room.pendingNames.length === 0 ? (
-                    '名前未設定'
+                    t('名前未設定')
                   ) : (
                     [...room.joinedNames.map((n) => ({ n, pending: false })), ...room.pendingNames.map((n) => ({ n, pending: true }))]
                       .map((item, i, arr) => (
                         <span key={i} style={{ color: item.pending ? '#b3a98f' : '#211d17' }}>
-                          {item.n}{i < arr.length - 1 ? '、' : ''}
+                          {item.n}{i < arr.length - 1 ? t('、') : ''}
                         </span>
                       ))
                   )}
                 </span>
                 {room.pending && (
                   <span style={{ fontSize: 9, color: '#8a8168', border: '1px solid #8a8168', padding: '1px 6px', fontFamily: "'BIZ UDPGothic', sans-serif", fontWeight: 700, flexShrink: 0 }}>
-                    承諾待ち
+                    {t('承諾待ち')}
                   </span>
                 )}
                 {room.unreadOoc && (
                   <span style={{ fontSize: 9, color: '#4a5580', border: '1px solid #4a5580', padding: '1px 6px', fontFamily: "'BIZ UDPGothic', sans-serif", fontWeight: 700, flexShrink: 0 }}>
-                    中の人
+                    {t('中の人')}
                   </span>
                 )}
               </div>
@@ -334,7 +336,7 @@ export default async function ChatListPage() {
                 fontSize: 12, color: room.unread ? '#211d17' : '#8a8168', fontStyle: 'italic', marginTop: 3,
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
               }}>
-                {lastMessages[room.id] || 'まだメッセージがありません'}
+                {lastMessages[room.id] || t('まだメッセージがありません')}
                             </div>
             </div>
           </Link>

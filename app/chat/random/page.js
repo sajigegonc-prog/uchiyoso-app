@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { confirmRandomMatch } from './matchActions'
 import RandomMatchOcIcon from './RandomMatchOcIcon'
 import SituationPicker from './SituationPicker'
+import { getT } from '@/lib/i18n/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -192,7 +193,7 @@ const BOOKS = [
   '『イギリスにおけるマグルの家庭生活と社会的習慣』',
 ]
 
-function resolveRandomTokens(item) {
+function resolveRandomTokens(item, t) {
   const floor = String(1 + Math.floor(Math.random() * 7))
   const time3 = pickRandom(['朝', '昼', '夜'])
   const timeLunchDinner = pickRandom(['昼休み', '夕食前'])
@@ -200,13 +201,9 @@ function resolveRandomTokens(item) {
   const drug = pickRandom(DRUGS)
   const book = pickRandom(BOOKS)
   return {
-    place: item.place
-      .replace('{floor}', floor),
-    time: item.time
-      .replace('{time3}', time3)
-      .replace('{time_lunch_dinner}', timeLunchDinner)
-      .replace('{time_noon_night}', timeNoonNight),
-    text: item.text.replace('{drug}', drug).replace('{book}', book),
+    place: t(item.place, { floor }),
+    time: t(item.time, { time3: t(time3), time_lunch_dinner: t(timeLunchDinner), time_noon_night: t(timeNoonNight) }),
+    text: t(item.text, { drug: t(drug), book: t(book) }),
     excludeIf: item.excludeIf,
   }
 }
@@ -216,12 +213,12 @@ function yearGroup(birthDate) {
   const d = new Date(birthDate)
   return d.getMonth() + 1 >= 9 ? d.getFullYear() : d.getFullYear() - 1
 }
-function ageLabel(myBirth, otherBirth) {
-  if (!myBirth || !otherBirth) return '年齢は不明です'
+function ageLabel(myBirth, otherBirth, t) {
+  if (!myBirth || !otherBirth) return t('年齢は不明です')
   const diff = (new Date(myBirth) - new Date(otherBirth)) / (365.25 * 24 * 60 * 60 * 1000)
   const rounded = Math.round(Math.abs(diff))
-  if (rounded === 0) return '同い年です'
-  return diff > 0 ? `あなたより${rounded}歳年上です` : `あなたより${rounded}歳年下です`
+  if (rounded === 0) return t('同い年です')
+  return diff > 0 ? t('あなたより{n}歳年上です', { n: rounded }) : t('あなたより{n}歳年下です', { n: rounded })
 }
 
 const NOTE_EXAMPLES = [
@@ -230,6 +227,7 @@ const NOTE_EXAMPLES = [
 ]
 
 export default async function RandomMatchPage() {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -258,9 +256,9 @@ export default async function RandomMatchPage() {
     return (
       <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px', textAlign: 'center' }}>
         <p style={{ fontSize: 13, color: '#8a8168', marginTop: 40, fontStyle: 'italic' }}>
-          今マッチングできるお相手がいません。（すでに全員と1:1のお部屋があるか、OCが未登録です）
+          {t('今マッチングできるお相手がいません。（すでに全員と1:1のお部屋があるか、OCが未登録です）')}
         </p>
-        <Link href="/chat" style={{ display: 'block', marginTop: 20, fontSize: 12, color: '#6b6250' }}>← 一覧に戻る</Link>
+        <Link href="/chat" style={{ display: 'block', marginTop: 20, fontSize: 12, color: '#6b6250' }}>{t('← 一覧に戻る')}</Link>
       </div>
     )
   }
@@ -302,26 +300,26 @@ export default async function RandomMatchPage() {
   if (pool.length === 0) pool = COMMON_POOL
 
   const picked = pickRandom(pool)
-  const pick = resolveRandomTokens(picked)
+  const pick = resolveRandomTokens(picked, t)
   const situationText = pick.text.replace(/〇〇（あなた）/g, myOc.name).replace(/〇〇（お相手）/g, friendOc.name)
   const gachaPick = { place: pick.place, time: pick.time, text: situationText }
-  const ageDiffLabel = ageLabel(myOc.birth_date, friendOc.birth_date)
+  const ageDiffLabel = ageLabel(myOc.birth_date, friendOc.birth_date, t)
 
   return (
     <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px 60px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div style={{ width: '100%', maxWidth: 360, textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
         <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO GAZETTE</div>
-        <div style={{ fontSize: 24, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>ランダムマッチング</div>
+        <div style={{ fontSize: 24, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{t('ランダムマッチング')}</div>
       </div>
 
       <div style={{ width: '100%', maxWidth: 360, border: '4px double #211d17', padding: 18, textAlign: 'center', marginTop: 20, background: '#fff' }}>
-        <div style={{ fontSize: 9, color: '#8a8168', letterSpacing: '.1em', marginBottom: 8 }}>🔒 お相手はランダムで決定済み・固定</div>
+        <div style={{ fontSize: 9, color: '#8a8168', letterSpacing: '.1em', marginBottom: 8 }}>{t('🔒 お相手はランダムで決定済み・固定')}</div>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-          <RandomMatchOcIcon name={myOc.name} iconUrl={myOc.icon_url} house={myOc.house} career={myOc.career} ageDiffLabel="あなたです" />
+          <RandomMatchOcIcon name={myOc.name} iconUrl={myOc.icon_url} house={myOc.house} career={myOc.career} ageDiffLabel={t('あなたです')} />
           <span style={{ fontSize: 11, color: '#8a8168' }}>×</span>
           <RandomMatchOcIcon name={friendOc.name} iconUrl={friendOc.icon_url} house={friendOc.house} career={friendOc.career} ageDiffLabel={ageDiffLabel} />
         </div>
-        <div style={{ fontSize: 9.5, color: '#8a8168', marginBottom: 4 }}>アイコンをタップして、お相手の詳細をご確認ください。</div>
+        <div style={{ fontSize: 9.5, color: '#8a8168', marginBottom: 4 }}>{t('アイコンをタップして、お相手の詳細をご確認ください。')}</div>
         <div style={{ fontSize: 15, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{myOc.name} × {friendOc.name}</div>
       </div>
 
@@ -334,9 +332,9 @@ export default async function RandomMatchPage() {
       />
 
       <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 14, textAlign: 'center', fontStyle: 'italic', lineHeight: 1.8 }}>
-        別の友達を探したい場合は、画面を上にスワイプして更新してください
+        {t('別の友達を探したい場合は、画面を上にスワイプして更新してください')}
       </p>
-      <Link href="/chat" style={{ display: 'block', marginTop: 20, marginBottom: 30, fontSize: 11.5, color: '#6b6250' }}>やっぱりやめる</Link>
+      <Link href="/chat" style={{ display: 'block', marginTop: 20, marginBottom: 30, fontSize: 11.5, color: '#6b6250' }}>{t('やっぱりやめる')}</Link>
     </div>
   )
 }

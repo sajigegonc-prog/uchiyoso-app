@@ -6,8 +6,10 @@ import Link from 'next/link'
 import CopyLinkButton from './CopyLinkButton'
 import MarkFriendsReadOnMount from './MarkFriendsReadOnMount'
 import RealtimeRefresh from '@/components/AutoRefresh'
+import { getT } from '@/lib/i18n/server'
 
 export default async function FriendsPage() {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -31,17 +33,17 @@ export default async function FriendsPage() {
 
       <div style={{ textAlign: 'center', paddingBottom: 16, borderBottom: '4px double #211d17' }}>
         <div style={{ fontSize: 10, letterSpacing: '.35em', color: '#6b6250' }}>THE UCHIYOSO CLUB</div>
-        <div style={{ fontSize: 26, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>友達</div>
+        <div style={{ fontSize: 26, color: '#211d17', marginTop: 8, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{t('友達')}</div>
       </div>
 
       <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 20 }}>
-        あなたのプロフィールリンク
+        {t('あなたのプロフィールリンク')}
       </div>
       <div style={{ fontSize: 11, color: '#211d17', background: '#fff', border: '1px solid #211d17', padding: 10, marginTop: 8, wordBreak: 'break-all', fontFamily: "'Courier New', monospace" }}>
         {profileUrl}
       </div>
       <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 6, fontStyle: 'italic' }}>
-        このリンクをSNS等で共有できます。相手がここから申請を送り、あなたが承認すると友達になります。
+        {t('このリンクをSNS等で共有できます。相手がここから申請を送り、あなたが承認すると友達になります。')}
       </p>
       <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
         <Link
@@ -51,7 +53,7 @@ export default async function FriendsPage() {
             color: '#6b6250', fontSize: 11.5, textDecoration: 'none',
           }}
         >
-          プロフィールを見る
+          {t('プロフィールを見る')}
         </Link>
         <CopyLinkButton text={profileUrl} />
       </div>
@@ -59,21 +61,21 @@ export default async function FriendsPage() {
       {incoming && incoming.length > 0 && (
         <>
           <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 26 }}>
-            届いている申請
+            {t('届いている申請')}
           </div>
           {incoming.map((req) => (
             <div key={req.friendship_id} style={{ padding: '12px 2px', borderBottom: '1px solid #211d17', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 13.5, fontWeight: 700, color: '#211d17' }}>{req.requester_name || '名前未設定'}</span>
+              <span style={{ fontSize: 13.5, fontWeight: 700, color: '#211d17' }}>{req.requester_name || t('名前未設定')}</span>
               <div style={{ display: 'flex', gap: 6 }}>
                 <form action={respondToFriendRequest}>
                   <input type="hidden" name="friendship_id" value={req.friendship_id} />
                   <input type="hidden" name="decision" value="accepted" />
-                  <button type="submit" style={{ border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', fontSize: 11.5, fontWeight: 700, padding: '5px 12px', cursor: 'pointer' }}>承認</button>
+                  <button type="submit" style={{ border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', fontSize: 11.5, fontWeight: 700, padding: '5px 12px', cursor: 'pointer' }}>{t('承認')}</button>
                 </form>
                 <form action={respondToFriendRequest}>
                   <input type="hidden" name="friendship_id" value={req.friendship_id} />
                   <input type="hidden" name="decision" value="declined" />
-                  <button type="submit" style={{ border: '1px solid #8a8168', background: '#fff', color: '#6b6250', fontSize: 11.5, fontWeight: 700, padding: '5px 12px', cursor: 'pointer' }}>断る</button>
+                  <button type="submit" style={{ border: '1px solid #8a8168', background: '#fff', color: '#6b6250', fontSize: 11.5, fontWeight: 700, padding: '5px 12px', cursor: 'pointer' }}>{t('断る')}</button>
                 </form>
               </div>
             </div>
@@ -82,10 +84,10 @@ export default async function FriendsPage() {
       )}
 
       <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 26 }}>
-        友達 ({friends?.length ?? 0})
+        {t('友達 ({count})', { count: friends?.length ?? 0 })}
       </div>
       {(!friends || friends.length === 0) && (
-        <p style={{ fontSize: 13, color: '#8a8168', marginTop: 12, fontStyle: 'italic' }}>まだ友達がいません。</p>
+        <p style={{ fontSize: 13, color: '#8a8168', marginTop: 12, fontStyle: 'italic' }}>{t('まだ友達がいません。')}</p>
       )}
       {friends && friends.map((f) => (
         <Link
@@ -94,7 +96,7 @@ export default async function FriendsPage() {
           style={{ display: 'block', padding: '12px 2px', borderBottom: '1px solid #211d17', textDecoration: 'none' }}
         >
           <div style={{ fontSize: 13.5, fontWeight: 700, color: '#211d17' }}>
-            {f.emoji ? `${f.emoji} ` : ''}{f.display_name || '名前未設定'}
+            {f.emoji ? `${f.emoji} ` : ''}{f.display_name || t('名前未設定')}
           </div>
           {f.bio && (
             <div style={{ fontSize: 11, color: '#8a8168', marginTop: 2, fontStyle: 'italic' }}>{f.bio}</div>
@@ -103,7 +105,7 @@ export default async function FriendsPage() {
       ))}
 
       <Link href="/home" style={{ display: 'block', marginTop: 30, marginBottom: 10, padding: '10px 0', textAlign: 'center', fontSize: 11.5, color: '#6b6250', textDecoration: 'none' }}>
-        ← ホームに戻る
+        {t('← ホームに戻る')}
       </Link>
     </div>
   )

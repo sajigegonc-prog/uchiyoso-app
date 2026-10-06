@@ -1,7 +1,9 @@
 'use client'
 import { useState } from 'react'
+import { useT } from '@/lib/i18n/client'
 
 export default function DeleteRoomButton({ roomId, label, action, transcript }) {
+  const t = useT()
   const [confirming, setConfirming] = useState(false)
   const [copied, setCopied] = useState(false)
 
@@ -18,7 +20,7 @@ export default function DeleteRoomButton({ roomId, label, action, transcript }) 
         onClick={() => setConfirming(true)}
         style={{ fontSize: 11, color: '#c9a876', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
       >
-        {label}
+        {t(label)}
       </button>
 
       {confirming && (
@@ -28,13 +30,13 @@ export default function DeleteRoomButton({ roomId, label, action, transcript }) 
         }}>
           <div style={{ background: '#f4eee0', border: '1px solid #211d17', padding: 20, maxWidth: 340, width: '90%', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: '#211d17', fontFamily: 'Georgia, serif' }}>
-              おしゃべりをやめますか？
+              {t('おしゃべりをやめますか？')}
             </div>
             <p style={{ fontSize: 11, color: '#8a2418', marginTop: 8, lineHeight: 1.7 }}>
-              このルームはこの後消去され、元に戻せません。ログはこの場でのみ表示され、保存されません。
+              {t('このルームはこの後消去され、元に戻せません。ログはこの場でのみ表示され、保存されません。')}
             </p>
             <p style={{ fontSize: 10.5, color: '#6b6250', marginTop: 6, lineHeight: 1.7, fontStyle: 'italic' }}>
-              下のログをコピーし、ホーム画面の「過去のおしゃべりを思い出す」に貼ると、後から見返せます。★の付いた発言があなたのキャラです。
+              {t('下のログをコピーし、ホーム画面の「過去のおしゃべりを思い出す」に貼ると、後から見返せます。★の付いた発言があなたのキャラです。')}
             </p>
             <textarea
               readOnly
@@ -46,7 +48,7 @@ export default function DeleteRoomButton({ roomId, label, action, transcript }) 
               onClick={handleCopy}
               style={{ marginTop: 10, padding: 9, border: '1px solid #211d17', background: '#fff', color: '#211d17', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}
             >
-              {copied ? 'コピーしました' : 'ログをコピーする'}
+              {copied ? t('コピーしました') : t('ログをコピーする')}
             </button>
             <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
               <button
@@ -54,7 +56,7 @@ export default function DeleteRoomButton({ roomId, label, action, transcript }) 
                 onClick={() => setConfirming(false)}
                 style={{ flex: 1, padding: 10, border: '1px solid #8a8168', background: '#fff', color: '#6b6250', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}
               >
-                キャンセル
+                {t('キャンセル')}
               </button>
               <form action={action} style={{ flex: 1 }}>
                 <input type="hidden" name="room_id" value={roomId} />
@@ -62,7 +64,7 @@ export default function DeleteRoomButton({ roomId, label, action, transcript }) 
                   type="submit"
                   style={{ width: '100%', padding: 10, border: '1px solid #8a2418', background: '#8a2418', color: '#f4eee0', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}
                 >
-                  はい、やめる
+                  {t('はい、やめる')}
                 </button>
               </form>
             </div>

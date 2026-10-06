@@ -3,8 +3,10 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
 import { fullyDeleteRoom } from './[roomId]/deleteActions'
+import { getT } from '@/lib/i18n/server'
 
 export async function createRoom(formData) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -16,12 +18,12 @@ export async function createRoom(formData) {
   const title = formData.get('title')?.toString().trim()
   const friendOcIds = formData.getAll('friend_oc_ids').map((v) => v.toString()).filter(Boolean)
   const extraOcIds = formData.getAll('extra_oc_ids').map((v) => v.toString()).filter(Boolean)
-  if (!ocId) return { error: '話すOCを選択してください' }
+  if (!ocId) return { error: t('話すOCを選択してください') }
 
   if (roomType === 'friend_group') {
-    if (friendOcIds.length < 2) return { error: 'グループチャットは3人以上(自分+友達2人以上)が必要です' }
-    if (friendOcIds.length + 1 > 10) return { error: 'グループチャットの参加人数は10人までです' }
-    if (friendOcIds.length < 2) return { error: 'グループチャットは3人以上(自分+友達2人以上)が必要です' }
+    if (friendOcIds.length < 2) return { error: t('グループチャットは3人以上(自分+友達2人以上)が必要です') }
+    if (friendOcIds.length + 1 > 10) return { error: t('グループチャットの参加人数は10人までです') }
+    if (friendOcIds.length < 2) return { error: t('グループチャットは3人以上(自分+友達2人以上)が必要です') }
     const ownerIds = []
     for (const fid of friendOcIds) {
       const { data: oc } = await supabase.from('ocs').select('user_id').eq('id', fid).maybeSingle()
@@ -30,21 +32,21 @@ export async function createRoom(formData) {
     const participantIds = [...new Set([user.id, ...ownerIds])]
     const { data: allFriends, error: checkErr } = await supabase.rpc('check_all_mutual_friends', { user_ids: participantIds })
     if (checkErr || !allFriends) {
-      return { error: '参加者全員が友達同士である必要があります。' }
+      return { error: t('参加者全員が友達同士である必要があります。') }
     }
     const ocIdsForCheck = [ocId, ...friendOcIds]
     const { data: dup } = await supabase.rpc('room_with_exact_members_exists', { _oc_ids: ocIdsForCheck, _room_type: 'friend_group' })
     if (dup) {
-      return { error: '同じメンバー構成のトークルームがすでに存在します。' }
+      return { error: t('同じメンバー構成のトークルームがすでに存在します。') }
     }
   }
   if (roomType === 'friend_1on1') {
-  if (friendOcIds.length !== 1) return { error: 'お相手を1人選んでください' }
+  if (friendOcIds.length !== 1) return { error: t('お相手を1人選んでください') }
   const ocIdsForCheck = [ocId, friendOcIds[0]]
   const { data: dup } = await supabase.rpc('room_with_exact_members_exists', {
     _oc_ids: ocIdsForCheck, _room_type: 'friend_1on1' })
     if (dup) {
-      return { error: '同じメンバー構成のトークルームがすでに存在します。' }
+      return { error: t('同じメンバー構成のトークルームがすでに存在します。') }
     }
   }
 
@@ -62,7 +64,7 @@ export async function createRoom(formData) {
     .single()
   if (error || !room) {
     console.error('部屋作成エラー:', error)
-    return { error: '部屋の作成に失敗しました' }
+    return { error: t('部屋の作成に失敗しました') }
   }
   await supabase.from('chat_room_members').insert({ room_id: room.id, oc_id: ocId, user_id: user.id })
 
@@ -70,7 +72,7 @@ export async function createRoom(formData) {
     room_id: room.id,
     user_id: user.id,
     is_system: true,
-    content: '「/状況 ○○」と打つことで「(NPC)が去る」などの状況をログに残せます',
+    content: t('「/状況 ○○」と打つことで「(NPC)が去る」などの状況をログに残せます'),
   })
 
   if (roomType === 'self') {
@@ -93,6 +95,7 @@ export async function createRoom(formData) {
 }
 
 export async function respondToChatInvitation(formData) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
@@ -106,14 +109,14 @@ export async function respondToChatInvitation(formData) {
     const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).maybeSingle()
     await supabase.from('room_ooc_messages').insert({
       room_id: roomId, user_id: user.id, is_system: true, log_type: 'member_join',
-      content: `${profile?.display_name || '名前未設定'}さんが入室しました`,
+      content: t('{name}さんが入室しました', { name: profile?.display_name || t('名前未設定') }),
     })
     redirect(`/chat/${roomId}?welcome=1`)
   } else if (decision === 'declined') {
     await supabase.from('chat_room_invitations').update({ status: 'declined' }).eq('id', invitationId).eq('invitee_id', user.id)
 
     const { data: declinedOc } = await supabase.from('ocs').select('name').eq('id', ocId).maybeSingle()
-    const reasonText = `${declinedOc?.name || '相手'}は急いでいたようで立ち去ってしまいました`
+    const reasonText = t('{name}は急いでいたようで立ち去ってしまいました', { name: declinedOc?.name || t('相手') })
     const { data: roomInfo } = await supabase.from('chat_rooms').select('room_type').eq('id', roomId).maybeSingle()
 
     if (roomInfo?.room_type === 'friend_1on1') {
@@ -151,12 +154,13 @@ export async function respondToChatInvitation(formData) {
 
 
 export async function cancelInvitation(formData) {
+  const t = getT()
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/')
   const invitationId = formData.get('invitation_id')?.toString()
   const roomId = formData.get('room_id')?.toString()
-  if (!invitationId || !roomId) return { error: '情報が不足しています' }
+  if (!invitationId || !roomId) return { error: t('情報が不足しています') }
 
   const { data: invitation } = await supabase
     .from('chat_room_invitations')
@@ -164,7 +168,7 @@ export async function cancelInvitation(formData) {
     .eq('id', invitationId)
     .eq('inviter_id', user.id)
     .maybeSingle()
-  if (!invitation) return { error: '取り消す権限がありません' }
+  if (!invitation) return { error: t('取り消す権限がありません') }
 
   await supabase.from('chat_room_invitations').delete().eq('id', invitationId).eq('inviter_id', user.id)
 

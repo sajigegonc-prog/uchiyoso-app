@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useT } from '@/lib/i18n/client'
 
 const NAV_ITEMS = [
   { href: '/home', label: 'ホーム', match: (p) => p === '/home', badgeKey: null },
@@ -13,6 +14,7 @@ const NAV_ITEMS = [
 const HIDDEN_PREFIXES = ['/onboarding', '/dev']
 export default function BottomNav({ notifications = {} }) {
   const pathname = usePathname()
+  const t = useT()
   const isRoomDetail = /^\/chat\/[^/]+$/.test(pathname) && !['/chat/new', '/chat/random'].includes(pathname)
   const hidden = pathname === '/' || isRoomDetail || HIDDEN_PREFIXES.some((p) => pathname.startsWith(p))
   if (hidden) return null
@@ -45,7 +47,7 @@ export default function BottomNav({ notifications = {} }) {
               fontFamily: active ? 'Georgia, serif' : "'BIZ UDPGothic', sans-serif",
               position: 'relative',
             }}>
-              {item.label}
+              {t(item.label)}
               {showBadge && (
                 <span style={{
                   position: 'absolute', top: -6, right: -8,

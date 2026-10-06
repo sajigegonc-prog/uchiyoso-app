@@ -1,7 +1,9 @@
 'use client'
 import { useState } from 'react'
+import { useT } from '@/lib/i18n/client'
 
 export default function AddMemberButton({ roomId, action, friendOcs }) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   const [slots, setSlots] = useState([{ friendUserId: '', ocId: '' }])
   const [pending, setPending] = useState(false)
@@ -14,7 +16,7 @@ export default function AddMemberButton({ roomId, action, friendOcs }) {
   for (const f of friendOcs) {
     if (!seen.has(f.friend_user_id)) {
       seen.add(f.friend_user_id)
-      friendList.push({ userId: f.friend_user_id, label: f.friend_display_name || '名前未設定' })
+      friendList.push({ userId: f.friend_user_id, label: f.friend_display_name || t('名前未設定') })
     }
   }
   function ocsOfFriend(userId) {
@@ -58,12 +60,12 @@ export default function AddMemberButton({ roomId, action, friendOcs }) {
         onClick={() => setOpen(true)}
         style={{ fontSize: 11, color: '#6b6250', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
       >
-        +メンバー招待
+        {t('+メンバー招待')}
       </button>
       {open && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(33,29,23,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110 }}>
           <div style={{ background: '#f4eee0', border: '1px solid #211d17', padding: 20, maxWidth: 320, width: '90%', maxHeight: '75vh', overflowY: 'auto' }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#211d17', marginBottom: 10, fontFamily: 'Georgia, serif' }}>招待するメンバーを選ぶ</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#211d17', marginBottom: 10, fontFamily: 'Georgia, serif' }}>{t('招待するメンバーを選ぶ')}</div>
             {slots.map((slot, index) => (
               <div key={index} style={{ marginTop: 10, padding: 10, border: '1px solid #8a8168', background: '#fff' }}>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -72,7 +74,7 @@ export default function AddMemberButton({ roomId, action, friendOcs }) {
                     onChange={(e) => updateSlotFriend(index, e.target.value)}
                     style={{ flex: 1, padding: '8px 10px', fontSize: 13, border: '1px solid #211d17', background: '#fff', color: '#211d17' }}
                   >
-                    <option value="">中の人を選んでください</option>
+                    <option value="">{t('中の人を選んでください')}</option>
                     {friendList.map((f) => (
                       <option key={f.userId} value={f.userId}>{f.label}</option>
                     ))}
@@ -102,15 +104,15 @@ export default function AddMemberButton({ roomId, action, friendOcs }) {
               onClick={addSlot}
               style={{ display: 'block', width: '100%', textAlign: 'center', marginTop: 10, padding: 9, border: '1px dashed #6b6250', background: 'none', color: '#3d2717', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
             >
-              + 友達を追加
+              {t('+ 友達を追加')}
             </button>
             {error && <p style={{ fontSize: 11.5, color: '#8a2418', marginTop: 10, lineHeight: 1.7 }}>{error}</p>}
             <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
               <button type="button" onClick={() => setOpen(false)} style={{ flex: 1, padding: 9, border: '1px solid #8a8168', background: '#fff', color: '#6b6250', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
-                キャンセル
+                {t('キャンセル')}
               </button>
               <button type="button" onClick={handleSubmit} disabled={pending} style={{ flex: 1, padding: 9, border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
-                {pending ? '招待中…' : '招待する'}
+                {pending ? t('招待中…') : t('招待する')}
               </button>
             </div>
           </div>

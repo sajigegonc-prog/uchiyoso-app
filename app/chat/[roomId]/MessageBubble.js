@@ -2,6 +2,7 @@
 import { useState, useTransition } from 'react'
 import OcInfoModal from '@/components/OcInfoModal'
 import { getOcDetailForRoom } from './ocPreviewActions'
+import { useT } from '@/lib/i18n/client'
 
 function renderWithBold(text) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g)
@@ -13,6 +14,7 @@ function renderWithBold(text) {
   })
 }
 export default function MessageBubble({ msg, mine, isOwner, speakerName, speakerIcon, roomId, editAction, deleteAction, reorderAction, showSpeakerName = true }) {
+  const t = useT()
   const [menuOpen, setMenuOpen] = useState(false)
   const [editing, setEditing] = useState(false)
   const [detail, setDetail] = useState(null)
@@ -69,9 +71,9 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
           try {
             const result = await getOcDetailForRoom(msg.sender_oc_id, roomId)
             if (result?.oc) setDetail(result.oc)
-            else setDetail({ error: result?.error || '取得に失敗しました' })
+            else setDetail({ error: result?.error || t('取得に失敗しました') })
           } catch (e) {
-            setDetail({ error: '通信エラーが発生しました' })
+            setDetail({ error: t('通信エラーが発生しました') })
           }
         }}
         style={{
@@ -87,34 +89,34 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
       {showModal && (
         <OcInfoModal onClose={() => { setShowModal(false); setDetail(null) }}>
           {!detail ? (
-            <p style={{ fontSize: 12.5, color: '#8a8168' }}>読み込み中…</p>
+            <p style={{ fontSize: 12.5, color: '#8a8168' }}>{t('読み込み中…')}</p>
           ) : detail.error ? (
-            <p style={{ fontSize: 12.5, color: '#8a2418' }}>エラー: {detail.error}</p>
+            <p style={{ fontSize: 12.5, color: '#8a2418' }}>{t('エラー: {message}', { message: detail.error })}</p>
           ) : (
             <>
               <div style={{ fontSize: 17, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{detail.name}</div>
-              <div style={{ fontSize: 11, color: '#8a8168', marginTop: 4 }}>{detail.oc_type === 'dreamer' ? '夢主' : '創作キャラ'}{detail.house ? ` ・ ${detail.house}` : ''}</div>
+              <div style={{ fontSize: 11, color: '#8a8168', marginTop: 4 }}>{detail.oc_type === 'dreamer' ? t('夢主') : t('創作キャラ')}{detail.house ? ` ・ ${t(detail.house)}` : ''}</div>
               {detail.oc_type === 'dreamer' && detail.paired_character && (
                 <div style={{ marginTop: 12 }}>
-                  <div style={{ fontSize: 10, color: '#6b6250' }}>お相手</div>
+                  <div style={{ fontSize: 10, color: '#6b6250' }}>{t('お相手')}</div>
                   <div style={{ fontSize: 13, marginTop: 2 }}>{detail.paired_character}</div>
                 </div>
               )}
                 {detail.career && (
                 <div style={{ marginTop: 10 }}>
-                  <div style={{ fontSize: 10, color: '#6b6250' }}>卒業後の進路</div>
+                  <div style={{ fontSize: 10, color: '#6b6250' }}>{t('卒業後の進路')}</div>
                   <div style={{ fontSize: 13, marginTop: 2 }}>{detail.career}</div>
                 </div>
               )}
               {detail.birth_date && (
                 <div style={{ marginTop: 10 }}>
-                  <div style={{ fontSize: 10, color: '#6b6250' }}>生年月日</div>
-                  <div style={{ fontSize: 13, marginTop: 2 }}>{new Date(detail.birth_date).getFullYear()}年{new Date(detail.birth_date).getMonth() + 1}月{new Date(detail.birth_date).getDate()}日</div>
+                  <div style={{ fontSize: 10, color: '#6b6250' }}>{t('生年月日')}</div>
+                  <div style={{ fontSize: 13, marginTop: 2 }}>{t('{y}年{m}月{d}日', { y: new Date(detail.birth_date).getFullYear(), m: new Date(detail.birth_date).getMonth() + 1, d: new Date(detail.birth_date).getDate() })}</div>
                 </div>
               )}
               {detail.description && (
                 <div style={{ marginTop: 10 }}>
-                  <div style={{ fontSize: 10, color: '#6b6250' }}>設定・紹介文</div>
+                  <div style={{ fontSize: 10, color: '#6b6250' }}>{t('設定・紹介文')}</div>
                   <p style={{ fontSize: 12.5, marginTop: 4, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{detail.description}</p>
                 </div>
               )}
@@ -139,9 +141,9 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
             />
             {error && <p style={{ fontSize: 11, color: '#8a2418' }}>{error}</p>}
             <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-              <button type="button" onClick={() => { setEditing(false); setError(null) }} style={{ fontSize: 11, padding: '4px 10px', border: '1px solid #8a8168', background: '#fff', color: '#6b6250', cursor: 'pointer' }}>キャンセル</button>
+              <button type="button" onClick={() => { setEditing(false); setError(null) }} style={{ fontSize: 11, padding: '4px 10px', border: '1px solid #8a8168', background: '#fff', color: '#6b6250', cursor: 'pointer' }}>{t('キャンセル')}</button>
               <button type="submit" disabled={isPending} style={{ fontSize: 11, padding: '4px 10px', border: '1px solid #211d17', background: '#211d17', color: '#f4eee0', cursor: 'pointer' }}>
-                {isPending ? '保存中…' : '保存'}
+                {isPending ? t('保存中…') : t('保存')}
               </button>
             </div>
           </form>
@@ -160,10 +162,10 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
         {isOwner && menuOpen && !editing && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: mine ? 'flex-end' : 'flex-start', gap: 4, marginTop: 4 }}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <button type="button" onClick={() => setEditing(true)} style={{ fontSize: 10.5, color: '#6b6250', background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer' }}>編集</button>
+              <button type="button" onClick={() => setEditing(true)} style={{ fontSize: 10.5, color: '#6b6250', background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer' }}>{t('編集')}</button>
               <form
                 action={(formData) => {
-                  if (confirm('このメッセージを削除しますか？')) handleDelete(formData)
+                  if (confirm(t('このメッセージを削除しますか？'))) handleDelete(formData)
                 }}
               >
                 <input type="hidden" name="message_id" value={msg.id} />
@@ -173,7 +175,7 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
                   disabled={isPending}
                   style={{ fontSize: 10.5, color: '#8a2418', background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer' }}
                 >
-                  {isPending ? '削除中…' : '削除'}
+                  {isPending ? t('削除中…') : t('削除')}
                 </button>
               </form>
               <div style={{ width: 1, height: 11, background: '#b3a98f' }} />
@@ -182,14 +184,14 @@ export default function MessageBubble({ msg, mine, isOwner, speakerName, speaker
                   type="button"
                   disabled={isPending}
                   onClick={() => handleReorder('up')}
-                  title="1つ前の発言と入れ替え"
+                  title={t('1つ前の発言と入れ替え')}
                   style={{ width: 15, height: 15, border: 'none', background: 'none', color: '#8a8168', fontSize: 10, padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >▲</button>
                 <button
                   type="button"
                   disabled={isPending}
                   onClick={() => handleReorder('down')}
-                  title="1つ後の発言と入れ替え"
+                  title={t('1つ後の発言と入れ替え')}
                   style={{ width: 15, height: 15, border: 'none', background: 'none', color: '#8a8168', fontSize: 10, padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >▼</button>
               </div>

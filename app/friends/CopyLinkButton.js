@@ -1,7 +1,9 @@
 'use client'
 import { useState } from 'react'
+import { useT } from '@/lib/i18n/client'
 
 export default function CopyLinkButton({ text }) {
+  const t = useT()
   const [copied, setCopied] = useState(false)
   return (
     <button
@@ -16,7 +18,7 @@ export default function CopyLinkButton({ text }) {
         background: copied ? '#3b6b4a' : '#211d17', color: '#f4eee0',
       }}
     >
-      {copied ? 'コピーしました' : 'リンクをコピー'}
+      {copied ? t('コピーしました') : t('リンクをコピー')}
     </button>
   )
 }
