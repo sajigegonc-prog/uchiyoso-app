@@ -194,7 +194,7 @@ export default async function OCsPage() {
             ))}
           </div>
         )}
-        <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>{t('各種配慮などにお使いください。ここに登録した名前が、相手の「お相手」設定と重なるアカウントとは、知らない人とのランダムマッチで出会いません。')}</p>
+        <p style={{ fontSize: 10.5, color: '#8a8168', marginTop: 10, fontStyle: 'italic' }}>{t('お相手が被っている場合はマッチングしませんが、各一配慮で必要な方はお使いください。（複数可能）')}</p>
 
         <div style={{ fontSize: 11, letterSpacing: '.12em', color: '#6b6250', borderBottom: '1px solid #211d17', paddingBottom: 6, marginTop: 22 }}>
           {t('知らない人とのマッチング設定')}
