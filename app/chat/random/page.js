@@ -5,7 +5,7 @@ import { confirmRandomMatch } from './matchActions'
 import RandomMatchOcIcon from './RandomMatchOcIcon'
 import SituationPicker from './SituationPicker'
 import { getT } from '@/lib/i18n/server'
-import { generationOf } from '@/lib/generation'
+import { generationsCompatible } from '@/lib/generation'
 
 export const dynamic = 'force-dynamic'
 
@@ -278,8 +278,7 @@ export default async function RandomMatchPage({ searchParams }) {
   // 知らない人とのマッチは、同じ世代のOC同士だけ（生年月日が未入力のOCは、未入力同士だけ）
   let usableMyOcs = myOcs || []
   if (strangerMode) {
-    const candidateGens = new Set(eligibleFriendOcs.map((c) => generationOf(c.birth_date)))
-    usableMyOcs = usableMyOcs.filter((oc) => candidateGens.has(generationOf(oc.birth_date)))
+    usableMyOcs = usableMyOcs.filter((oc) => eligibleFriendOcs.some((c) => generationsCompatible(oc.birth_date, c.birth_date)))
   }
 
   if (usableMyOcs.length === 0 || eligibleFriendOcs.length === 0) {
@@ -301,7 +300,7 @@ export default async function RandomMatchPage({ searchParams }) {
 
   const myOc = usableMyOcs[Math.floor(Math.random() * usableMyOcs.length)]
   const sameGenOcs = strangerMode
-    ? eligibleFriendOcs.filter((f) => generationOf(f.birth_date) === generationOf(myOc.birth_date))
+    ? eligibleFriendOcs.filter((f) => generationsCompatible(myOc.birth_date, f.birth_date))
     : eligibleFriendOcs
   const plausibleFriendOcs = sameGenOcs.filter(
     (f) => ageGapYears(myOc.birth_date, f.birth_date) <= MAX_PLAUSIBLE_AGE_GAP
@@ -346,7 +345,7 @@ export default async function RandomMatchPage({ searchParams }) {
       </div>
       {strangerMode && (
         <div style={{ width: '100%', maxWidth: 360, background: '#fff', border: '1px dashed #8a8168', padding: '9px 12px', marginTop: 14, fontSize: 10.5, color: '#6b6250', lineHeight: 1.8 }}>
-          {t('お相手は、同じ世代（生年月日から判定）のOCから選ばれます。表示名などは、友達になるまで分かりません。中の人チャットで、すり合わせをしてからお話を始められます。')}
+          {t('お相手は、同じ世代（生年月日から判定。世代の境目の前後3年は、隣の世代も含みます）のOCから選ばれます。表示名などは、友達になるまで分かりません。中の人チャットで、すり合わせをしてからお話を始められます。')}
         </div>
       )}
 
