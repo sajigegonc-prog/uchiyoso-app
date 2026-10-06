@@ -91,7 +91,7 @@ export async function createRoom(formData) {
       room_id: room.id,
       user_id: user.id,
       is_system: true,
-      content: t('このお部屋は、お互いが友達になるまで、中の人チャットでの発言ができません（蛙チョコなどのログは表示されます）。中の人チャットの「友達申請」から、申請できます。'),
+      content: t('このお部屋では、お互いが友達になるまで、表示名は相手に表示されません。中の人チャットの「友達申請」から、申請できます。'),
     })
   }
 

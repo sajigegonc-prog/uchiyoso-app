@@ -52,7 +52,7 @@ export async function sendRoomFriendRequest(roomId) {
     via_room_id: roomId,
   })
   if (error) return { error: t('友達申請に失敗しました') }
-  await postSystem(supabase, roomId, user.id, t('友達申請が送られました。承認されると、中の人チャットで発言できるようになります。'))
+  await postSystem(supabase, roomId, user.id, t('友達申請が送られました。承認されると、お互いの表示名が分かるようになります。'))
   revalidatePath(`/chat/${roomId}`)
   return { ok: true }
 }
@@ -93,7 +93,7 @@ export async function respondRoomFriendRequest(roomId, decision) {
     .eq('id', req.id)
     .eq('addressee_id', user.id)
   if (decision === 'accepted') {
-    await postSystem(supabase, roomId, user.id, t('友達になりました。中の人チャットで発言できます。'))
+    await postSystem(supabase, roomId, user.id, t('友達になりました。お互いの表示名が分かるようになりました。'))
   } else {
     await postSystem(supabase, roomId, user.id, t('友達申請は見送られました。'))
   }

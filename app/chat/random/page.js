@@ -335,7 +335,7 @@ export default async function RandomMatchPage({ searchParams }) {
       </div>
       {strangerMode && (
         <div style={{ width: '100%', maxWidth: 360, background: '#fff', border: '1px dashed #8a8168', padding: '9px 12px', marginTop: 14, fontSize: 10.5, color: '#6b6250', lineHeight: 1.8 }}>
-          {t('お相手の名前などは、友達になるまで分かりません。友達になるまでは、中の人チャットでの発言はできません（ログのみ表示されます）。')}
+          {t('お相手の表示名などは、友達になるまで分かりません。中の人チャットで、すり合わせをしてからお話を始められます。')}
         </div>
       )}
 

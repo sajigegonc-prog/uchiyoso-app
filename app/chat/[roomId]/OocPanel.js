@@ -347,7 +347,7 @@ export default function OocPanel({
             }}
             aria-label={t('シチュエーションを自由記入')}
           >✏️</button>
-          {!locked && <button
+          <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             style={{
@@ -355,7 +355,7 @@ export default function OocPanel({
               border: 'none', background: '#2f3a5c', color: '#e8eaf5', fontSize: 15, cursor: 'pointer',
             }}
             aria-label={t('画像を添付')}
-          >📎</button>}
+          >📎</button>
           <button
             id="coach-ooc-log-btn"
             type="button"
@@ -376,7 +376,7 @@ export default function OocPanel({
           paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
         }}>
           <p style={{ margin: 0, fontSize: 11, color: '#8a92b5', lineHeight: 1.7 }}>
-            {t('友達になるまで、中の人チャットでは発言できません。友達申請を送り、承認されると発言できるようになります。')}
+            {t('友達になるまでは、お互いの表示名は分かりません。友達申請を送り、承認されると、表示名が分かるようになります。')}
           </p>
           {friendError && <p style={{ margin: 0, fontSize: 11, color: '#e08a80' }}>{friendError}</p>}
           {strangerProps.friendRequestState === 'none' && (
@@ -426,7 +426,7 @@ export default function OocPanel({
         </div>
       )}
 
-      {!locked && <form id="ooc-input-row" action={sendAction} onSubmit={handleFormSubmit} style={{
+      <form id="ooc-input-row" action={sendAction} onSubmit={handleFormSubmit} style={{
         flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 6, padding: '12px 16px',
         background: '#12151f', borderTop: '1px solid #3a4360',
         paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
@@ -470,7 +470,7 @@ export default function OocPanel({
             ▼
           </button>
         </div>
-      </form>}
+      </form>
 
       {situationOpen && (
         <div onClick={() => setSituationOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 110 }}>
