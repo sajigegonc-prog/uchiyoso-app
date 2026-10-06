@@ -28,6 +28,8 @@ export default async function RootLayout({ children }) {
     <html lang={locale}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content" />
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-387RF2Z3TL"></script>
+        <script dangerouslySetInnerHTML={{ __html: "window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-387RF2Z3TL');" }} />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
         <style>{`
           *, *::before, *::after { box-sizing: border-box; }
