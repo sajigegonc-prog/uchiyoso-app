@@ -5,6 +5,7 @@ import { confirmRandomMatch } from './matchActions'
 import RandomMatchOcIcon from './RandomMatchOcIcon'
 import SituationPicker from './SituationPicker'
 import { getT } from '@/lib/i18n/server'
+import { generationOf } from '@/lib/generation'
 
 export const dynamic = 'force-dynamic'
 
@@ -274,11 +275,18 @@ export default async function RandomMatchPage({ searchParams }) {
     eligibleFriendOcs = (friendOcDetails || []).filter((f) => !excludedOcIds.has(f.id))
   }
 
-  if (!myOcs || myOcs.length === 0 || eligibleFriendOcs.length === 0) {
+  // 知らない人とのマッチは、同じ世代のOC同士だけ（生年月日が未入力のOCは、未入力同士だけ）
+  let usableMyOcs = myOcs || []
+  if (strangerMode) {
+    const candidateGens = new Set(eligibleFriendOcs.map((c) => generationOf(c.birth_date)))
+    usableMyOcs = usableMyOcs.filter((oc) => candidateGens.has(generationOf(oc.birth_date)))
+  }
+
+  if (usableMyOcs.length === 0 || eligibleFriendOcs.length === 0) {
     return (
       <div style={{ fontFamily: "'BIZ UDPGothic', sans-serif", background: '#f4eee0', minHeight: '100vh', padding: '24px 20px', textAlign: 'center' }}>
         <p style={{ fontSize: 13, color: '#8a8168', marginTop: 40, fontStyle: 'italic' }}>
-          {strangerMode ? t('今マッチングできるお相手がいません。（条件の合う方がいないか、OCが未登録です）') : t('今マッチングできるお相手がいません。（すでに全員と1:1のお部屋があるか、OCが未登録です）')}
+          {strangerMode ? t('今マッチングできるお相手がいません。（条件の合う方がいないか、OCが未登録です。お相手は同じ世代のOCから選ばれます）') : t('今マッチングできるお相手がいません。（すでに全員と1:1のお部屋があるか、OCが未登録です）')}
         </p>
         <Link href="/chat" style={{ display: 'block', marginTop: 20, fontSize: 12, color: '#6b6250' }}>{t('← 一覧に戻る')}</Link>
       </div>
@@ -291,11 +299,14 @@ export default async function RandomMatchPage({ searchParams }) {
     return Math.abs((new Date(a) - new Date(b)) / (365.25 * 24 * 60 * 60 * 1000))
   }
 
-  const myOc = myOcs[Math.floor(Math.random() * myOcs.length)]
-  const plausibleFriendOcs = eligibleFriendOcs.filter(
+  const myOc = usableMyOcs[Math.floor(Math.random() * usableMyOcs.length)]
+  const sameGenOcs = strangerMode
+    ? eligibleFriendOcs.filter((f) => generationOf(f.birth_date) === generationOf(myOc.birth_date))
+    : eligibleFriendOcs
+  const plausibleFriendOcs = sameGenOcs.filter(
     (f) => ageGapYears(myOc.birth_date, f.birth_date) <= MAX_PLAUSIBLE_AGE_GAP
   )
-  const candidatePool = plausibleFriendOcs.length > 0 ? plausibleFriendOcs : eligibleFriendOcs
+  const candidatePool = plausibleFriendOcs.length > 0 ? plausibleFriendOcs : sameGenOcs
   const friendOc = candidatePool[Math.floor(Math.random() * candidatePool.length)]
 
   const isStudent = (oc) => DORMS.includes(oc?.house)
@@ -335,7 +346,7 @@ export default async function RandomMatchPage({ searchParams }) {
       </div>
       {strangerMode && (
         <div style={{ width: '100%', maxWidth: 360, background: '#fff', border: '1px dashed #8a8168', padding: '9px 12px', marginTop: 14, fontSize: 10.5, color: '#6b6250', lineHeight: 1.8 }}>
-          {t('お相手の表示名などは、友達になるまで分かりません。中の人チャットで、すり合わせをしてからお話を始められます。')}
+          {t('お相手は、同じ世代（生年月日から判定）のOCから選ばれます。表示名などは、友達になるまで分かりません。中の人チャットで、すり合わせをしてからお話を始められます。')}
         </div>
       )}
 
