@@ -223,28 +223,3 @@ export async function cancelInvitation(formData) {
   revalidatePath('/chat')
   return { success: true, deleted }
 }
-
-
-export async function declineAndBlock(formData) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/')
-  const invitationId = formData.get('invitation_id')?.toString()
-  const label = formData.get('inviter_oc_name')?.toString() || null
-  if (invitationId) {
-    const { data: invitation } = await supabase
-      .from('chat_room_invitations')
-      .select('inviter_id')
-      .eq('id', invitationId)
-      .eq('invitee_id', user.id)
-      .maybeSingle()
-    if (invitation?.inviter_id) {
-      await supabase.from('user_blocks').upsert(
-        { blocker_id: user.id, blocked_id: invitation.inviter_id, blocked_label: label },
-        { onConflict: 'blocker_id,blocked_id' }
-      )
-    }
-  }
-  formData.set('decision', 'declined')
-  return respondToChatInvitation(formData)
-}
