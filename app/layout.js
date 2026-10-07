@@ -4,6 +4,7 @@ import BottomNav from '@/components/BottomNav'
 import PullToRefresh from '@/components/PullToRefresh'
 import { getT } from '@/lib/i18n/server'
 import { I18nProvider } from '@/lib/i18n/client'
+import { Analytics } from '@vercel/analytics/next'
 
 export function generateMetadata() {
   const t = getT()
@@ -77,6 +78,7 @@ export default async function RootLayout({ children }) {
             </div>
           </div>
         )}
+        <Analytics />
       </body>
     </html>
   )
