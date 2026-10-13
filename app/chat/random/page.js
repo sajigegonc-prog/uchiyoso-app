@@ -307,6 +307,11 @@ export default async function RandomMatchPage({ searchParams }) {
   )
   const candidatePool = plausibleFriendOcs.length > 0 ? plausibleFriendOcs : sameGenOcs
   const friendOc = candidatePool[Math.floor(Math.random() * candidatePool.length)]
+  let friendPartners = ''
+  if (strangerMode) {
+    const { data: partnerText } = await supabase.rpc('stranger_partner_names', { _oc_id: friendOc.id })
+    friendPartners = partnerText || ''
+  }
 
   const isStudent = (oc) => DORMS.includes(oc?.house)
   const g1 = yearGroup(myOc.birth_date)
@@ -358,6 +363,13 @@ export default async function RandomMatchPage({ searchParams }) {
         </div>
         <div style={{ fontSize: 9.5, color: '#8a8168', marginBottom: 4 }}>{t('アイコンをタップして、お相手の詳細をご確認ください。')}</div>
         <div style={{ fontSize: 15, fontWeight: 700, fontFamily: 'Georgia, serif' }}>{myOc.name} × {friendOc.name}</div>
+        {strangerMode && (
+          <div style={{ marginTop: 10, background: '#f4eee0', border: '1px dashed #8a8168', padding: '7px 10px', fontSize: 11, color: '#6b6250', lineHeight: 1.7 }}>
+            <div style={{ fontSize: 9.5, color: '#8a8168' }}>{t('お相手のOCのお相手／夢相手')}</div>
+            <div style={{ color: '#211d17', fontWeight: 700 }}>{friendPartners || t('登録なし')}</div>
+            <div style={{ fontSize: 9.5, color: '#8a8168', marginTop: 3 }}>{t('ご自身のお相手と被っている場合は、画面を更新して別のお相手を探してください')}</div>
+          </div>
+        )}
       </div>
 
       <SituationPicker
