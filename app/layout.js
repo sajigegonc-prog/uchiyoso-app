@@ -34,6 +34,11 @@ export default async function RootLayout({ children }) {
           *, *::before, *::after { box-sizing: border-box; }
           html, body { max-width: 100%; overflow-x: hidden; overscroll-behavior-x: none; }
           input, select, textarea { max-width: 100%; width: 100%; }
+          /* スマホで入力欄をタップしたとき、勝手にズームされないように（16px未満だとズームされる） */
+          @media (hover: none) and (pointer: coarse) {
+            input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="submit"]):not([type="button"]):not([type="hidden"]),
+            select, textarea { font-size: 16px !important; }
+          }
           .chat-room-height {
             height: 100vh;
             height: 100dvh;
