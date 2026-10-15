@@ -237,6 +237,37 @@ const STRANGER_POOL = [
     text: "同じ棚の同じ本に、〇〇（あなた）と〇〇（お相手）が同時に手を伸ばした。それは、最後の1冊だった。" },
 ]
 
+const FROG_POOL = [
+  { place: "ダイアゴン横丁", time: "休日の昼",
+    text: "買ったばかりの蛙チョコの箱を開けた瞬間、蛙が〇〇（あなた）の手から飛び出した。跳ねた先で、通りがかった〇〇（お相手）の肩にぴたりと着地した。（蛙チョコ機能をお使いください）" },
+  { place: "漏れ鍋", time: "夕方",
+    text: "〇〇（あなた）が蛙チョコのカードを裏返すと、見る見るうちに〇〇（お相手）の姿に変わっていった。隣の席で、本人も目を丸くしている。（蛙チョコ機能をお使いください）" },
+  { place: "魔法界の街角", time: "午後",
+    text: "屋台で蛙チョコを買った〇〇（あなた）。同じ屋台で最後のひと箱を買ったのは〇〇（お相手）で、二人はお互いの箱を見比べることになった。（蛙チョコ機能をお使いください）" },
+  { place: "魔法界の公園", time: "昼下がり",
+    text: "〇〇（あなた）が蛙チョコを開けた拍子に蛙が逃げ出し、芝生の上で追いかけっこになった。蛙を捕まえてくれたのは、近くのベンチにいた〇〇（お相手）だった。（蛙チョコ機能をお使いください）" },
+  { place: "ふくろう便の配達所", time: "午後",
+    text: "届いた小包を開けると、中身は蛙チョコの詰め合わせ。差出人は不明だった。たまたま隣で受け取っていた〇〇（お相手）も、全く同じ小包を受け取っていた。（蛙チョコ機能をお使いください）" },
+  { place: "魔法界のカフェ", time: "休日の午後",
+    text: "〇〇（あなた）と〇〇（お相手）のテーブルに、頼んでいないはずの蛙チョコがひとつ置かれていた。店員は「あちらのお客様から」と言うが、誰のことなのかは分からない。（蛙チョコ機能をお使いください）" },
+]
+const FROG_STUDENT_POOL = [
+  { place: "ホグワーツの図書室", time: "午後",
+    text: "マダム・ピンスの目を盗んで蛙チョコを開けた〇〇（あなた）。蛙が書架の間に逃げ込み、追いかけていった先で、同じように蛙を追っていた〇〇（お相手）と鉢合わせた。（蛙チョコ機能をお使いください）" },
+  { place: "大広間", time: "朝食どき",
+    text: "テーブルの下でこっそり蛙チョコを開けていた〇〇（あなた）。逃げ出した蛙は、〇〇（お相手）の皿のトーストの上へ見事に着地した。（蛙チョコ機能をお使いください）" },
+  { place: "ホグワーツの空き教室", time: "放課後",
+    text: "カード集めに夢中の〇〇（あなた）。ダンブルドアが3枚続いた末に、ようやく見たことのないカードを引き当てたところへ、〇〇（お相手）が「それ、探してたんだ」と声をかけてきた。（蛙チョコ機能をお使いください）" },
+]
+const FROG_STRANGER_POOL = [
+  { place: "駅のホーム", time: "朝",
+    text: "蛙チョコを開けようとした〇〇（あなた）の手から、蛙がホームへ飛び出した。蛙は、ちょうど列車を待っていた〇〇（お相手）の足元で止まった。（蛙チョコ機能をお使いください）" },
+  { place: "魔法界の街角", time: "夕方",
+    text: "同じ魔法使いのカードばかり何枚も引いてしまった〇〇（あなた）。交換相手を探して声をかけたのが、〇〇（お相手）だった。（蛙チョコ機能をお使いください）" },
+  { place: "漏れ鍋", time: "夜",
+    text: "蛙チョコを開けたら、カードが2枚入っていた。1枚余ってしまい、隣の席の〇〇（お相手）におすそ分けしようか迷っている。（蛙チョコ機能をお使いください）" },
+]
+
 const DRUGS = ['スリークイージーの直毛薬', '元気爆発薬', '戯言薬', 'ふくれ薬', '髪を逆立てる薬', 'しゃっくり咳薬']
 const BOOKS = [
   '『魔法薬調合法』(アージニウス・ジガー著)',
@@ -379,15 +410,15 @@ export default async function RandomMatchPage({ searchParams }) {
   const bothNonStudents = !isStudent(myOc) && !isStudent(friendOc)
   const exactlyOneTeacher = isTeacher(myOc) !== isTeacher(friendOc)
 
-  let pool = contemporaneous ? [...COMMON_POOL] : []
+  let pool = contemporaneous ? [...COMMON_POOL, ...FROG_POOL] : []
   if (sameHouse && contemporaneous) {
     pool = pool.concat(HOUSE_POOL)
     pool = pool.concat(HOUSE_SPECIFIC_POOL.filter((item) => item.house === myOc.house))
   }
   if (sameGrade) pool = pool.concat(GRADE_POOL)
-  if (bothStudents && gap <= 6) pool = pool.concat(AGE_POOL, STUDENT_POOL)
+  if (bothStudents && gap <= 6) pool = pool.concat(AGE_POOL, STUDENT_POOL, FROG_STUDENT_POOL)
   if (bothNonStudents) pool = pool.concat(TEACHER_POOL, ADULT_POOL)
-  if (strangerMode) pool = pool.concat(STRANGER_POOL)
+  if (strangerMode) pool = pool.concat(STRANGER_POOL, FROG_STRANGER_POOL)
   if ((bothStudents && gap <= 6) || exactlyOneTeacher) pool = pool.concat(AGE_OR_TEACHER_POOL)
   pool = pool.filter((item) => !item.excludeIf || !item.excludeIf(myOc, friendOc))
   if (pool.length === 0) pool = COMMON_POOL
