@@ -367,7 +367,7 @@ export default async function RandomMatchPage({ searchParams }) {
           <div style={{ marginTop: 10, background: '#f4eee0', border: '1px dashed #8a8168', padding: '7px 10px', fontSize: 11, color: '#6b6250', lineHeight: 1.7 }}>
             <div style={{ fontSize: 9.5, color: '#8a8168' }}>{t('お相手のOCのお相手／夢相手')}</div>
             <div style={{ color: '#211d17', fontWeight: 700 }}>{friendPartners || t('登録なし')}</div>
-            <div style={{ fontSize: 9.5, color: '#8a8168', marginTop: 3 }}>{t('ご自身のお相手と被っている場合は、画面を更新して別のお相手を探してください')}</div>
+            <div style={{ fontSize: 9.5, color: '#8a8168', marginTop: 3 }}>{t('文字の相違や言語の違いによって、避けたい相手とマッチングしてしまう可能性があります。被っている場合は、画面を更新して別のお相手を探してください')}</div>
           </div>
         )}
       </div>

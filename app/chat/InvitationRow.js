@@ -19,7 +19,7 @@ export default function InvitationRow({ invitation, action }) {
       {invitation.is_stranger && invitation.inviter_partners && (
         <div style={{ fontSize: 11, color: '#6b6250', marginTop: 6, lineHeight: 1.7 }}>
           {t('お相手のOCのお相手／夢相手')}：<b style={{ color: '#211d17' }}>{invitation.inviter_partners}</b>
-          <div style={{ fontSize: 9.5, color: '#8a8168' }}>{t('ご自身のお相手と被っている場合は、断ることもできます')}</div>
+          <div style={{ fontSize: 9.5, color: '#8a8168' }}>{t('文字の相違や言語の違いによって、避けたい相手とマッチングしてしまう可能性があります。被っている場合は、断ることもできます')}</div>
         </div>
       )}
       {(invitation.location || invitation.time_period || invitation.situation) && (
